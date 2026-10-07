@@ -37,10 +37,25 @@ Command: `.venv/bin/python scripts/audit_diversity_level.py` (duration_pct, 847 
 - **Tolerating repeats adds 6.4% under the looser setting** (free − strict = 0.725) **and 4.7% under the primary setting** (0.531).
 
 ## What the check measures, and what it does not
-It measures headroom: for an oracle that already knows each user's category affinities, the value of knowing how soon a category can be revisited and how many repeats are tolerated. It does not show that a policy learns these from the session-ended signal. That remains to be measured with learned policies (see also OPEN_QUESTIONS D1).
+It measures headroom: for an oracle that already knows each user's category affinities, the value of knowing how soon a category can be revisited and how many repeats are tolerated. It does not show that a policy learns these from the session-ended signal. That remains to be measured with learned policies. D1 below measures the cost of a wrongly carried-over tolerance.
 
-## Implementation status (text-only change, by instruction)
-`scripts/audit_diversity_level.py` still computes its `decision` field under the window reading (`runs/audit_v1/diversity_level.json`, `runs/audit_v1/diversity_level.md`). `scripts/audit_report.py` prints that field as the report's outcome. This decision was recorded without code changes, so the claim-2 text in `docs/AUDIT.md` (sections 1, 3 and 9) was edited by hand. Running `scripts/audit_report.py` again would restore the window-reading wording until those two scripts adopt the full-cycle baseline.
+## How the outcome is computed
+`scripts/audit_diversity_level.py:decide()` uses the full-cycle baseline. It writes the baseline, the reason, both readings and the split into the `decision` field of `runs/audit_v1/diversity_level.json`, and the readings are printed side by side. `scripts/audit_report.py` prints that field in `docs/AUDIT.md`. `tests/test_reporting.py` checks the decision logic.
+
+## Evidence for the second half of claim 2: D1, a mismatched repeat tolerance
+Command: `.venv/bin/python scripts/audit_diversity_level.py`, tighter profile. The free affinity oracle built for primary, which tolerates one repeat within the window, is run in the tighter environment. It is compared with the same oracle built for tighter, paired over the 847 search users, seeds 0-9:
+
+| Oracle, run under tighter | Cumulative reward per session | Session length | Boredom-quit rate |
+|---|---|---|---|
+| free, built for tighter | 17.472 | 30.00 | 0.000 |
+| free, built for primary | 1.995 | 2.89 | 1.000 |
+| full cycle (baseline) | 16.008 | 30.00 | 0.000 |
+
+- **Loss per session: 15.477 [15.327, 15.627], or 140.0% [138.6%, 141.3%] of the tighter personalization gap (11.059).**
+- The primary-tuned oracle ends every session by boredom, after 2.89 steps on average.
+- It scores 14.013 [13.866, 14.161] *below* the full-cycle baseline, the policy that has learned nothing.
+
+A repeat tolerance carried over from the wrong setting is therefore worse than not having learned one. This supports the second half of claim 2: how many repeats are tolerated has to be learned, from the session-ended signal. As with the main check, this is an oracle measurement. It shows the cost of a wrong tolerance; it does not show that a policy learns the right one.
 
 ## Side observation
 The strict affinity oracle (17.472) beats the non-personalized video-level oracle (17.202 under primary). Knowing a user's categories, while picking videos at random inside them, is worth more than the best fixed choice of individual videos. The full-cycle oracle (16.008) sits barely above rotation-random (15.880), because it visits every category whatever the affinities.

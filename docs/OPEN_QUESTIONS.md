@@ -1,8 +1,8 @@
 # Open questions
 
-## D. For Phase 2: open
+## D. For Phase 2
 
-- **D1. What does a policy tuned to the primary setting lose when it runs under the tighter setting?** Claim 2 says the system learns how soon a category can be revisited and how many repeats are tolerated (ADR-0028). This item measures the cost of having learned the wrong tolerance. It can be measured with the frozen code: build the `free` category-affinity oracle with the primary configuration and run it in a tighter-profile environment. Compare it with the same oracle built for tighter and with the full-cycle baseline.
+- **D1. What does a policy tuned to the primary setting lose under the tighter setting?** **Measured with the oracle (2026-10-06).** The free category-affinity oracle built for primary, run under tighter, loses 15.477 [15.327, 15.627] per session against the same oracle built for tighter. That is 140.0% of the tighter personalization gap. It ends every session by boredom, after 2.89 steps on average, and scores 14.013 below the full-cycle baseline (ADR-0028; `docs/AUDIT.md` section 3.1; `scripts/audit_diversity_level.py`). Phase 2 should repeat the measurement with learned policies.
 
 ## C. After the evaluator-v1 freeze: resolved
 

@@ -2,23 +2,46 @@
 
 Command: `.venv/bin/python scripts/audit_diversity_level.py `
 
-| Profile | N, n_Q | Affinity strict | Affinity free | Free - strict [95%] | Share of gap [95%] | Gap P - NP [95%] | Free - full cycle (share) |
-|---|---|---|---|---|---|---|---|
-| looser | 9, 2 | 17.472 | 18.197 | 0.725 [0.689, 0.763] | 6.4% [6.0%, 6.7%] | 11.414 [11.214, 11.611] | 2.190 (19.2%) |
-| primary | 9, 1 | 17.472 | 18.003 | 0.531 [0.498, 0.565] | 4.7% [4.4%, 5.0%] | 11.346 [11.146, 11.545] | 1.996 (17.6%) |
-| tighter | 9, 0 | 17.472 | 17.472 | 0.000 [0.000, 0.000] | 0.0% [0.0%, 0.0%] | 11.059 [10.862, 11.255] | 1.464 (13.2%) |
+| Profile | N, n_Q | Full cycle | Strict | Free | Gap P - NP [95%] |
+|---|---|---|---|---|---|
+| looser | 9, 2 | 16.008 | 17.472 | 18.197 | 11.414 [11.214, 11.611] |
+| primary | 9, 1 | 16.008 | 17.472 | 18.003 | 11.346 [11.146, 11.545] |
+| tighter | 9, 0 | 16.008 | 17.472 | 17.472 | 11.059 [10.862, 11.255] |
 
-Decomposition of free minus full cycle (cumulative reward, share of gap):
+Both readings side by side (free minus the reading; cumulative reward [95%], share of gap [95%]):
 
-| Profile | Concentrating on favourite categories: strict - full cycle | Tolerating repeats: free - strict |
+| Profile | Free - full cycle (baseline) | Free - strict (window reading) |
+|---|---|---|
+| looser | 2.190 [2.128, 2.252] (19.2% [18.6%, 19.7%]) | 0.725 [0.689, 0.763] (6.4% [6.0%, 6.7%]) |
+| primary | 1.996 [1.938, 2.055] (17.6% [17.1%, 18.1%]) | 0.531 [0.498, 0.565] (4.7% [4.4%, 5.0%]) |
+| tighter | 1.464 [1.416, 1.515] (13.2% [12.8%, 13.7%]) | 0.000 [0.000, 0.000] (0.0% [0.0%, 0.0%]) |
+
+Split of free minus full cycle:
+
+| Profile | Revisiting after the window: strict - full cycle | Tolerating repeats: free - strict |
 |---|---|---|
 | looser | 1.464 [1.416, 1.515] (12.8%) | 0.725 [0.689, 0.763] (6.4%) |
 | primary | 1.464 [1.416, 1.515] (12.9%) | 0.531 [0.498, 0.565] (4.7%) |
 | tighter | 1.464 [1.416, 1.515] (13.2%) | 0.000 [0.000, 0.000] (0.0%) |
 
-**Decision (looser, strict reading, threshold 10%):** looser-setting difference is 6.4% of the personalization gap (< 10%): strict rotation is close to optimal everywhere; claim 2 returns to "a greedy personalized policy narrows and the diversity layer fixes it"; the three settings are robustness checks only.
+| Reading | Share under looser | Claim 2 under the 10% rule |
+|---|---|---|
+| full cycle: no category repeated until every rotation category has been shown (baseline) | 19.2% | stands |
+| window: no category repeated within the quit window | 6.4% | returns |
 
-**Flag:** the full-cycle reading of strict rotation gives 19.2% under looser, which lands on the other side of the threshold.
+**Decision:** Baseline: the full-cycle policy, because the quit parameters are hidden from policies, so a policy that has learned nothing cannot run window-based rotation; its only safe option is the full cycle through all 29 rotation categories. Under looser, free minus full cycle is 19.2% of the personalization gap (>= 10%): claim 2 stands, reworded: "from the session-ended signal alone, the system learns how soon a category can be revisited and how many repeats are tolerated, measured against the full-cycle policy". Split: 12.8% of the gap from revisiting after the window, 6.4% from tolerating repeats under the looser setting (4.7% under the primary setting).
+
+The 10% rule was set before the check; the choice of reading was made after the check (decision C1, 2026-10-06).
+
+#### D1: the free oracle built for primary, run under tighter
+
+| Oracle (run under tighter) | Cum reward / session | Session length | Boredom-quit rate |
+|---|---|---|---|
+| free, built for tighter | 17.472 | 30.00 | 0.000 |
+| free, built for primary | 1.995 | 2.89 | 1.000 |
+| full cycle (baseline) | 16.008 | 30.00 | 0.000 |
+
+Loss per session (built for tighter minus built for primary): 15.477 [15.327, 15.627], 140.0% [138.6%, 141.3%] of the tighter gap. Built for primary minus full cycle: -14.013 [-14.161, -13.866] (-126.7%).
 
 #### Ladder under `looser` (N=9, n_Q=2)
 
@@ -30,8 +53,8 @@ Decomposition of free minus full cycle (cumulative reward, share of gap):
 | probe: longest first [permanent] | 9.757 {9.638, 9.881} | 0.5423 | 17.99 | 1.000 |
 | (c) probe: category rotation, shortest pick [permanent] | 15.881 {15.683, 16.070} | 0.5294 | 30.00 | 0.000 |
 | probe: category rotation, longest pick [permanent] | 16.087 {15.913, 16.264} | 0.5362 | 30.00 | 0.000 |
-| oracle: category affinity, strict | 17.472 {17.300, 17.645} [17.452, 17.492] | 0.5824 | 30.00 | 0.000 |
-| oracle: category affinity, full cycle | 16.008 {15.840, 16.174} [15.979, 16.036] | 0.5336 | 30.00 | 0.000 |
+| oracle: category affinity, full cycle (baseline reading) | 16.008 {15.840, 16.174} [15.979, 16.036] | 0.5336 | 30.00 | 0.000 |
+| oracle: category affinity, strict (window reading) | 17.472 {17.300, 17.645} [17.452, 17.492] | 0.5824 | 30.00 | 0.000 |
 | oracle: category affinity, free | 18.197 {18.024, 18.373} [18.182, 18.213] | 0.6066 | 30.00 | 0.000 |
 | oracle: non-personalized (common values, greedy) | 17.204 {17.008, 17.402} | 0.5735 | 30.00 | 0.000 |
 | oracle: personalized greedy | 28.618 {28.501, 28.734} | 0.9539 | 30.00 | 0.000 |
@@ -46,8 +69,8 @@ Decomposition of free minus full cycle (cumulative reward, share of gap):
 | probe: longest first [permanent] | 2.707 {2.661, 2.756} | 0.5379 | 5.03 | 1.000 |
 | (c) probe: category rotation, shortest pick [permanent] | 15.881 {15.683, 16.070} | 0.5294 | 30.00 | 0.000 |
 | probe: category rotation, longest pick [permanent] | 16.087 {15.913, 16.264} | 0.5362 | 30.00 | 0.000 |
-| oracle: category affinity, strict | 17.472 {17.300, 17.645} [17.452, 17.492] | 0.5824 | 30.00 | 0.000 |
-| oracle: category affinity, full cycle | 16.008 {15.840, 16.174} [15.979, 16.036] | 0.5336 | 30.00 | 0.000 |
+| oracle: category affinity, full cycle (baseline reading) | 16.008 {15.840, 16.174} [15.979, 16.036] | 0.5336 | 30.00 | 0.000 |
+| oracle: category affinity, strict (window reading) | 17.472 {17.300, 17.645} [17.452, 17.492] | 0.5824 | 30.00 | 0.000 |
 | oracle: category affinity, free | 18.003 {17.828, 18.179} [17.978, 18.029] | 0.6001 | 30.00 | 0.000 |
 | oracle: non-personalized (common values, greedy) | 17.202 {17.002, 17.402} | 0.5734 | 30.00 | 0.000 |
 | oracle: personalized greedy | 28.548 {28.426, 28.668} | 0.9516 | 30.00 | 0.000 |
@@ -62,9 +85,11 @@ Decomposition of free minus full cycle (cumulative reward, share of gap):
 | probe: longest first [permanent] | 1.073 {1.049, 1.097} | 0.5361 | 2.00 | 1.000 |
 | (c) probe: category rotation, shortest pick [permanent] | 15.881 {15.683, 16.070} | 0.5294 | 30.00 | 0.000 |
 | probe: category rotation, longest pick [permanent] | 16.087 {15.913, 16.264} | 0.5362 | 30.00 | 0.000 |
-| oracle: category affinity, strict | 17.472 {17.300, 17.645} [17.452, 17.492] | 0.5824 | 30.00 | 0.000 |
-| oracle: category affinity, full cycle | 16.008 {15.840, 16.174} [15.979, 16.036] | 0.5336 | 30.00 | 0.000 |
+| oracle: category affinity, full cycle (baseline reading) | 16.008 {15.840, 16.174} [15.979, 16.036] | 0.5336 | 30.00 | 0.000 |
+| oracle: category affinity, strict (window reading) | 17.472 {17.300, 17.645} [17.452, 17.492] | 0.5824 | 30.00 | 0.000 |
 | oracle: category affinity, free | 17.472 {17.300, 17.645} [17.452, 17.492] | 0.5824 | 30.00 | 0.000 |
+| oracle: category affinity, free, built for primary (D1) | 1.995 {1.946, 2.043} [1.990, 2.000] | 0.6908 | 2.89 | 1.000 |
 | oracle: non-personalized (common values, greedy) | 17.152 {16.961, 17.339} | 0.5717 | 30.00 | 0.000 |
 | oracle: personalized greedy | 28.210 {28.074, 28.338} | 0.9403 | 30.00 | 0.000 |
 
+exit=0

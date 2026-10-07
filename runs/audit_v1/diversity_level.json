@@ -2,11 +2,46 @@
   "command": ".venv/bin/python scripts/audit_diversity_level.py ",
   "decision": {
     "threshold": 0.1,
-    "share_looser_strict": 0.06354956036658642,
-    "share_full_cycle": 0.1918474075331894,
-    "claim2_stands": false,
-    "text": "looser-setting difference is 6.4% of the personalization gap (< 10%): strict rotation is close to optimal everywhere; claim 2 returns to \"a greedy personalized policy narrows and the diversity layer fixes it\"; the three settings are robustness checks only.",
-    "readings_disagree": true
+    "threshold_set": "before the check",
+    "baseline": "full_cycle",
+    "baseline_reason": "the quit parameters are hidden from policies, so a policy that has learned nothing cannot run window-based rotation; its only safe option is the full cycle through all 29 rotation categories",
+    "reading_chosen": "after the check (decision C1, 2026-10-06)",
+    "readings": {
+      "full_cycle": {
+        "description": "full cycle: no category repeated until every rotation category has been shown",
+        "share_of_gap": {
+          "looser": 0.1918474075331894,
+          "primary": 0.1758999034244672,
+          "tighter": 0.13241867249140107
+        },
+        "claim2_stands_under_rule": true
+      },
+      "strict": {
+        "description": "window: no category repeated within the quit window",
+        "share_of_gap": {
+          "looser": 0.06354956036658642,
+          "primary": 0.046831974272241735,
+          "tighter": 0.0
+        },
+        "claim2_stands_under_rule": false
+      }
+    },
+    "split": {
+      "looser": {
+        "revisit_after_window": 0.12829784716660295,
+        "tolerate_repeats": 0.06354956036658642
+      },
+      "primary": {
+        "revisit_after_window": 0.12906792915222545,
+        "tolerate_repeats": 0.046831974272241735
+      },
+      "tighter": {
+        "revisit_after_window": 0.13241867249140107,
+        "tolerate_repeats": 0.0
+      }
+    },
+    "claim2_stands": true,
+    "text": "Baseline: the full-cycle policy, because the quit parameters are hidden from policies, so a policy that has learned nothing cannot run window-based rotation; its only safe option is the full cycle through all 29 rotation categories. Under looser, free minus full cycle is 19.2% of the personalization gap (>= 10%): claim 2 stands, reworded: \"from the session-ended signal alone, the system learns how soon a category can be revisited and how many repeats are tolerated, measured against the full-cycle policy\". Split: 12.8% of the gap from revisiting after the window, 6.4% from tolerating repeats under the looser setting (4.7% under the primary setting)."
   },
   "profiles": {
     "looser": {
@@ -34,6 +69,7 @@
         "n_users": 847,
         "resamples": 10000
       },
+      "n_rotation_categories": 29,
       "labels": {
         "random": "random",
         "rotation_random": "(b) category rotation, random pick [permanent]",
@@ -41,8 +77,8 @@
         "longest_first": "probe: longest first [permanent]",
         "rotation_shortest": "(c) probe: category rotation, shortest pick [permanent]",
         "rotation_longest": "probe: category rotation, longest pick [permanent]",
-        "oracle_affinity_strict": "oracle: category affinity, strict",
-        "oracle_affinity_full_cycle": "oracle: category affinity, full cycle",
+        "oracle_affinity_full_cycle": "oracle: category affinity, full cycle (baseline reading)",
+        "oracle_affinity_strict": "oracle: category affinity, strict (window reading)",
         "oracle_affinity_free": "oracle: category affinity, free",
         "oracle_nonpersonalized": "oracle: non-personalized (common values, greedy)",
         "oracle_personalized": "oracle: personalized greedy"
@@ -396,84 +432,6 @@
             }
           }
         },
-        "oracle_affinity_strict": {
-          "stochastic": true,
-          "seeds": [
-            0,
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8,
-            9
-          ],
-          "summary": {
-            "mean_reward": {
-              "mean": 0.5824000944898868,
-              "ci_seeds": [
-                0.5817492758817708,
-                0.5830509130980028
-              ],
-              "ci_users": [
-                0.576653632156299,
-                0.5881599146748953
-              ]
-            },
-            "cum_reward": {
-              "mean": 17.472002834696603,
-              "ci_seeds": [
-                17.452478276453125,
-                17.491527392940082
-              ],
-              "ci_users": [
-                17.299608964688968,
-                17.64479744024685
-              ]
-            },
-            "session_length": {
-              "mean": 30.0,
-              "ci_seeds": [
-                30.0,
-                30.0
-              ],
-              "ci_users": [
-                30.0,
-                30.0
-              ]
-            },
-            "top_category_share": {
-              "mean": 0.05316804407713498,
-              "ci_seeds": [
-                0.05316804407713497,
-                0.053168044077134984
-              ]
-            },
-            "catalog_coverage": {
-              "mean": 0.5892996693718064,
-              "ci_seeds": [
-                0.5874774553153752,
-                0.5911218834282377
-              ]
-            },
-            "boredom_quit_rate": {
-              "mean": 0.0,
-              "ci_seeds": [
-                0.0,
-                0.0
-              ]
-            },
-            "max_turn_rate": {
-              "mean": 1.0,
-              "ci_seeds": [
-                1.0,
-                1.0
-              ]
-            }
-          }
-        },
         "oracle_affinity_full_cycle": {
           "stochastic": true,
           "seeds": [
@@ -534,6 +492,84 @@
               "ci_seeds": [
                 0.6301123118108682,
                 0.6323463596649357
+              ]
+            },
+            "boredom_quit_rate": {
+              "mean": 0.0,
+              "ci_seeds": [
+                0.0,
+                0.0
+              ]
+            },
+            "max_turn_rate": {
+              "mean": 1.0,
+              "ci_seeds": [
+                1.0,
+                1.0
+              ]
+            }
+          }
+        },
+        "oracle_affinity_strict": {
+          "stochastic": true,
+          "seeds": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          "summary": {
+            "mean_reward": {
+              "mean": 0.5824000944898868,
+              "ci_seeds": [
+                0.5817492758817708,
+                0.5830509130980028
+              ],
+              "ci_users": [
+                0.576653632156299,
+                0.5881599146748953
+              ]
+            },
+            "cum_reward": {
+              "mean": 17.472002834696603,
+              "ci_seeds": [
+                17.452478276453125,
+                17.491527392940082
+              ],
+              "ci_users": [
+                17.299608964688968,
+                17.64479744024685
+              ]
+            },
+            "session_length": {
+              "mean": 30.0,
+              "ci_seeds": [
+                30.0,
+                30.0
+              ],
+              "ci_users": [
+                30.0,
+                30.0
+              ]
+            },
+            "top_category_share": {
+              "mean": 0.05316804407713498,
+              "ci_seeds": [
+                0.05316804407713497,
+                0.053168044077134984
+              ]
+            },
+            "catalog_coverage": {
+              "mean": 0.5892996693718064,
+              "ci_seeds": [
+                0.5874774553153752,
+                0.5911218834282377
               ]
             },
             "boredom_quit_rate": {
@@ -804,6 +840,7 @@
         "n_users": 847,
         "resamples": 10000
       },
+      "n_rotation_categories": 29,
       "labels": {
         "random": "random",
         "rotation_random": "(b) category rotation, random pick [permanent]",
@@ -811,8 +848,8 @@
         "longest_first": "probe: longest first [permanent]",
         "rotation_shortest": "(c) probe: category rotation, shortest pick [permanent]",
         "rotation_longest": "probe: category rotation, longest pick [permanent]",
-        "oracle_affinity_strict": "oracle: category affinity, strict",
-        "oracle_affinity_full_cycle": "oracle: category affinity, full cycle",
+        "oracle_affinity_full_cycle": "oracle: category affinity, full cycle (baseline reading)",
+        "oracle_affinity_strict": "oracle: category affinity, strict (window reading)",
         "oracle_affinity_free": "oracle: category affinity, free",
         "oracle_nonpersonalized": "oracle: non-personalized (common values, greedy)",
         "oracle_personalized": "oracle: personalized greedy"
@@ -1166,84 +1203,6 @@
             }
           }
         },
-        "oracle_affinity_strict": {
-          "stochastic": true,
-          "seeds": [
-            0,
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8,
-            9
-          ],
-          "summary": {
-            "mean_reward": {
-              "mean": 0.5824000944898868,
-              "ci_seeds": [
-                0.5817492758817708,
-                0.5830509130980028
-              ],
-              "ci_users": [
-                0.576653632156299,
-                0.5881599146748953
-              ]
-            },
-            "cum_reward": {
-              "mean": 17.472002834696603,
-              "ci_seeds": [
-                17.452478276453125,
-                17.491527392940082
-              ],
-              "ci_users": [
-                17.299608964688968,
-                17.64479744024685
-              ]
-            },
-            "session_length": {
-              "mean": 30.0,
-              "ci_seeds": [
-                30.0,
-                30.0
-              ],
-              "ci_users": [
-                30.0,
-                30.0
-              ]
-            },
-            "top_category_share": {
-              "mean": 0.05316804407713498,
-              "ci_seeds": [
-                0.05316804407713497,
-                0.053168044077134984
-              ]
-            },
-            "catalog_coverage": {
-              "mean": 0.5892996693718064,
-              "ci_seeds": [
-                0.5874774553153752,
-                0.5911218834282377
-              ]
-            },
-            "boredom_quit_rate": {
-              "mean": 0.0,
-              "ci_seeds": [
-                0.0,
-                0.0
-              ]
-            },
-            "max_turn_rate": {
-              "mean": 1.0,
-              "ci_seeds": [
-                1.0,
-                1.0
-              ]
-            }
-          }
-        },
         "oracle_affinity_full_cycle": {
           "stochastic": true,
           "seeds": [
@@ -1304,6 +1263,84 @@
               "ci_seeds": [
                 0.6301123118108682,
                 0.6323463596649357
+              ]
+            },
+            "boredom_quit_rate": {
+              "mean": 0.0,
+              "ci_seeds": [
+                0.0,
+                0.0
+              ]
+            },
+            "max_turn_rate": {
+              "mean": 1.0,
+              "ci_seeds": [
+                1.0,
+                1.0
+              ]
+            }
+          }
+        },
+        "oracle_affinity_strict": {
+          "stochastic": true,
+          "seeds": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          "summary": {
+            "mean_reward": {
+              "mean": 0.5824000944898868,
+              "ci_seeds": [
+                0.5817492758817708,
+                0.5830509130980028
+              ],
+              "ci_users": [
+                0.576653632156299,
+                0.5881599146748953
+              ]
+            },
+            "cum_reward": {
+              "mean": 17.472002834696603,
+              "ci_seeds": [
+                17.452478276453125,
+                17.491527392940082
+              ],
+              "ci_users": [
+                17.299608964688968,
+                17.64479744024685
+              ]
+            },
+            "session_length": {
+              "mean": 30.0,
+              "ci_seeds": [
+                30.0,
+                30.0
+              ],
+              "ci_users": [
+                30.0,
+                30.0
+              ]
+            },
+            "top_category_share": {
+              "mean": 0.05316804407713498,
+              "ci_seeds": [
+                0.05316804407713497,
+                0.053168044077134984
+              ]
+            },
+            "catalog_coverage": {
+              "mean": 0.5892996693718064,
+              "ci_seeds": [
+                0.5874774553153752,
+                0.5911218834282377
               ]
             },
             "boredom_quit_rate": {
@@ -1574,6 +1611,7 @@
         "n_users": 847,
         "resamples": 10000
       },
+      "n_rotation_categories": 29,
       "labels": {
         "random": "random",
         "rotation_random": "(b) category rotation, random pick [permanent]",
@@ -1581,9 +1619,10 @@
         "longest_first": "probe: longest first [permanent]",
         "rotation_shortest": "(c) probe: category rotation, shortest pick [permanent]",
         "rotation_longest": "probe: category rotation, longest pick [permanent]",
-        "oracle_affinity_strict": "oracle: category affinity, strict",
-        "oracle_affinity_full_cycle": "oracle: category affinity, full cycle",
+        "oracle_affinity_full_cycle": "oracle: category affinity, full cycle (baseline reading)",
+        "oracle_affinity_strict": "oracle: category affinity, strict (window reading)",
         "oracle_affinity_free": "oracle: category affinity, free",
+        "oracle_affinity_free_built_for_primary": "oracle: category affinity, free, built for primary (D1)",
         "oracle_nonpersonalized": "oracle: non-personalized (common values, greedy)",
         "oracle_personalized": "oracle: personalized greedy"
       },
@@ -1936,84 +1975,6 @@
             }
           }
         },
-        "oracle_affinity_strict": {
-          "stochastic": true,
-          "seeds": [
-            0,
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8,
-            9
-          ],
-          "summary": {
-            "mean_reward": {
-              "mean": 0.5824000944898868,
-              "ci_seeds": [
-                0.5817492758817708,
-                0.5830509130980028
-              ],
-              "ci_users": [
-                0.576653632156299,
-                0.5881599146748953
-              ]
-            },
-            "cum_reward": {
-              "mean": 17.472002834696603,
-              "ci_seeds": [
-                17.452478276453125,
-                17.491527392940082
-              ],
-              "ci_users": [
-                17.299608964688968,
-                17.64479744024685
-              ]
-            },
-            "session_length": {
-              "mean": 30.0,
-              "ci_seeds": [
-                30.0,
-                30.0
-              ],
-              "ci_users": [
-                30.0,
-                30.0
-              ]
-            },
-            "top_category_share": {
-              "mean": 0.05316804407713498,
-              "ci_seeds": [
-                0.05316804407713497,
-                0.053168044077134984
-              ]
-            },
-            "catalog_coverage": {
-              "mean": 0.5892996693718064,
-              "ci_seeds": [
-                0.5874774553153752,
-                0.5911218834282377
-              ]
-            },
-            "boredom_quit_rate": {
-              "mean": 0.0,
-              "ci_seeds": [
-                0.0,
-                0.0
-              ]
-            },
-            "max_turn_rate": {
-              "mean": 1.0,
-              "ci_seeds": [
-                1.0,
-                1.0
-              ]
-            }
-          }
-        },
         "oracle_affinity_full_cycle": {
           "stochastic": true,
           "seeds": [
@@ -2074,6 +2035,84 @@
               "ci_seeds": [
                 0.6301123118108682,
                 0.6323463596649357
+              ]
+            },
+            "boredom_quit_rate": {
+              "mean": 0.0,
+              "ci_seeds": [
+                0.0,
+                0.0
+              ]
+            },
+            "max_turn_rate": {
+              "mean": 1.0,
+              "ci_seeds": [
+                1.0,
+                1.0
+              ]
+            }
+          }
+        },
+        "oracle_affinity_strict": {
+          "stochastic": true,
+          "seeds": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          "summary": {
+            "mean_reward": {
+              "mean": 0.5824000944898868,
+              "ci_seeds": [
+                0.5817492758817708,
+                0.5830509130980028
+              ],
+              "ci_users": [
+                0.576653632156299,
+                0.5881599146748953
+              ]
+            },
+            "cum_reward": {
+              "mean": 17.472002834696603,
+              "ci_seeds": [
+                17.452478276453125,
+                17.491527392940082
+              ],
+              "ci_users": [
+                17.299608964688968,
+                17.64479744024685
+              ]
+            },
+            "session_length": {
+              "mean": 30.0,
+              "ci_seeds": [
+                30.0,
+                30.0
+              ],
+              "ci_users": [
+                30.0,
+                30.0
+              ]
+            },
+            "top_category_share": {
+              "mean": 0.05316804407713498,
+              "ci_seeds": [
+                0.05316804407713497,
+                0.053168044077134984
+              ]
+            },
+            "catalog_coverage": {
+              "mean": 0.5892996693718064,
+              "ci_seeds": [
+                0.5874774553153752,
+                0.5911218834282377
               ]
             },
             "boredom_quit_rate": {
@@ -2166,6 +2205,84 @@
               "ci_seeds": [
                 1.0,
                 1.0
+              ]
+            }
+          }
+        },
+        "oracle_affinity_free_built_for_primary": {
+          "stochastic": true,
+          "seeds": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          "summary": {
+            "mean_reward": {
+              "mean": 0.6908075267996469,
+              "ci_seeds": [
+                0.6890497711053188,
+                0.6925652824939749
+              ],
+              "ci_users": [
+                0.6836536047442043,
+                0.6980340250554765
+              ]
+            },
+            "cum_reward": {
+              "mean": 1.9949412167083072,
+              "ci_seeds": [
+                1.9898651005001295,
+                2.0000173329164848
+              ],
+              "ci_users": [
+                1.946163474035416,
+                2.0432227048915474
+              ]
+            },
+            "session_length": {
+              "mean": 2.887839433293979,
+              "ci_seeds": [
+                2.887839433293979,
+                2.887839433293979
+              ],
+              "ci_users": [
+                2.8276269185360094,
+                2.948051948051948
+              ]
+            },
+            "top_category_share": {
+              "mean": 0.11283728536385935,
+              "ci_seeds": [
+                0.11283728536385934,
+                0.11283728536385937
+              ]
+            },
+            "catalog_coverage": {
+              "mean": 0.0639014126840998,
+              "ci_seeds": [
+                0.06274929995960805,
+                0.06505352540859154
+              ]
+            },
+            "boredom_quit_rate": {
+              "mean": 1.0,
+              "ci_seeds": [
+                1.0,
+                1.0
+              ]
+            },
+            "max_turn_rate": {
+              "mean": 0.0,
+              "ci_seeds": [
+                0.0,
+                0.0
               ]
             }
           }
@@ -2317,6 +2434,56 @@
           0.12800372916002487,
           0.13697868926037926
         ]
+      },
+      "d1_tolerance_mismatch": {
+        "built_for": "primary",
+        "run_under": "tighter",
+        "loss": {
+          "a": "oracle_affinity_free",
+          "b": "oracle_affinity_free_built_for_primary",
+          "metric": "cum_reward",
+          "mean": 15.477061617988298,
+          "ci": [
+            15.326668934951922,
+            15.627416830971914
+          ],
+          "n_users": 847,
+          "resamples": 10000,
+          "share_of_gap": 1.3995352849554725,
+          "ci_share_of_gap": [
+            1.3859358129301171,
+            1.4131313686980735
+          ]
+        },
+        "session_length_loss": {
+          "a": "oracle_affinity_free",
+          "b": "oracle_affinity_free_built_for_primary",
+          "metric": "session_length",
+          "mean": 27.11216056670602,
+          "ci": [
+            27.0543093270366,
+            27.17119244391972
+          ],
+          "n_users": 847,
+          "resamples": 10000
+        },
+        "mismatched_minus_full_cycle": {
+          "a": "oracle_affinity_free_built_for_primary",
+          "b": "oracle_affinity_full_cycle",
+          "metric": "cum_reward",
+          "mean": -14.012681280062889,
+          "ci": [
+            -14.161187502285085,
+            -13.86646088055706
+          ],
+          "n_users": 847,
+          "resamples": 10000,
+          "share_of_gap": -1.2671166124640714,
+          "ci_share_of_gap": [
+            -1.2805454985902234,
+            -1.2538944251044986
+          ]
+        }
       }
     }
   }

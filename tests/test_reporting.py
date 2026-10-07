@@ -66,3 +66,26 @@ def test_acceptance_needs_both_probe_intervals_inside_the_margin():
     no_gap = ar.acceptance(_fake_cmp({**base, "oracle_personalized": (0.2, -0.1, 0.5),
                                       "rotation_shortest": (0.0, -0.001, 0.001), "rotation_longest": (0.0, -0.001, 0.001)}))
     assert not no_gap["T2_personalized_beats_nonpersonalized"]["pass"] and not no_gap["both_pass"]
+
+
+def _profile(free_cycle: float, free_strict: float, strict_cycle: float) -> dict:
+    mk = lambda share: {"share_of_gap": share}  # noqa: E731
+    return {"free_minus_full_cycle": mk(free_cycle), "free_minus_strict": mk(free_strict),
+            "strict_minus_full_cycle": mk(strict_cycle), "n_rotation_categories": 29}
+
+
+def test_claim2_decision_uses_the_full_cycle_baseline_and_keeps_both_readings():
+    dv = _load("audit_diversity_level")
+    results = {"looser": _profile(0.192, 0.064, 0.128), "primary": _profile(0.176, 0.047, 0.129),
+               "tighter": _profile(0.132, 0.0, 0.132)}
+    d = dv.decide(results)
+    assert d["baseline"] == "full_cycle" and "hidden from policies" in d["baseline_reason"]
+    assert "29 rotation categories" in d["baseline_reason"]
+    assert set(d["readings"]) == {"full_cycle", "strict"}
+    assert d["readings"]["full_cycle"]["claim2_stands_under_rule"] and not d["readings"]["strict"]["claim2_stands_under_rule"]
+    assert d["claim2_stands"] and "claim 2 stands" in d["text"] and "full-cycle policy" in d["text"]
+    assert d["threshold_set"] == "before the check" and d["reading_chosen"].startswith("after the check")
+    # below the threshold on the baseline reading, the decision follows the baseline, not the window reading
+    low = dv.decide({p: _profile(0.05, 0.12, -0.07) for p in ("looser", "primary", "tighter")})
+    assert not low["claim2_stands"] and "returns to" in low["text"]
+

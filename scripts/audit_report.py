@@ -29,9 +29,9 @@ LADDER = [("random", "random"), ("rotation_random", "rotation-random"),
           ("rotation_longest", "duration probe: rotation, longest pick"),
           ("shortest_first", "duration probe: shortest first (plain)"),
           ("longest_first", "duration probe: longest first (plain)"),
-          ("oracle_affinity_strict", "category-affinity oracle, strict rotation"),
+          ("oracle_affinity_full_cycle", "category-affinity oracle, full cycle (baseline reading, C1)"),
+          ("oracle_affinity_strict", "category-affinity oracle, strict rotation (window reading)"),
           ("oracle_affinity_free", "category-affinity oracle, free within the quit rule"),
-          ("oracle_affinity_full_cycle", "category-affinity oracle, full cycle (alternative reading)"),
           ("oracle_nonpersonalized", "non-personalized oracle"), ("oracle_personalized", "personalized oracle")]
 
 
@@ -67,6 +67,7 @@ def main():
     gap = dp["acceptance"]["T2_personalized_beats_nonpersonalized"]
     p_val = pol["oracle_personalized"]["summary"]["cum_reward"]["mean"]
     dec = div["decision"]
+    d1_key = next(p for p, r in div["profiles"].items() if "d1_tolerance_mismatch" in r)
     L = []
     w = L.append
 
@@ -112,32 +113,69 @@ def main():
 
     w("## 3. Does tolerating repetition pay? (ADR-0028)\n")
     w("The category-affinity oracle knows each search user's mean reward per category and shows a random available "
-      "single-tag video of the chosen category. Its **free** mode repeats a category as often as the setting allows; "
-      "**strict** never repeats one within the 9-item window. The share of gap uses that profile's own gap.\n")
-    w("| Profile | N, n_Q | Strict | Free | Free - strict [95%] | Share of gap [95%] | Gap [95%] | Free - full cycle (share) |")
-    w("|---|---|---|---|---|---|---|---|")
+      "single-tag video of the chosen category. Its **full cycle** mode shows every rotation category once before any "
+      "repeat; **strict** revisits a category as soon as it leaves the 9-item window; **free** repeats a category as "
+      f"often as the setting allows. **Baseline (decision field):** the full-cycle policy, because {dec['baseline_reason']}. "
+      "The share of gap uses that profile's own gap.\n")
+    w("| Profile | N, n_Q | Full cycle | Strict | Free | Gap [95%] |")
+    w("|---|---|---|---|---|---|")
     for p, r in div["profiles"].items():
         s = r["summaries"]
-        d, c, g = r["free_minus_strict"], r["free_minus_full_cycle"], r["gap"]
+        g = r["gap"]
         w(f"| {p} | {r['env_config']['quit_window']}, {r['env_config']['quit_threshold']} | "
+          f"{f(s['oracle_affinity_full_cycle']['summary']['cum_reward']['mean'])} | "
           f"{f(s['oracle_affinity_strict']['summary']['cum_reward']['mean'])} | "
-          f"{f(s['oracle_affinity_free']['summary']['cum_reward']['mean'])} | {f(d['mean'])} {ci(d['ci'])} | "
-          f"{d['share_of_gap']:.1%} [{d['ci_share_of_gap'][0]:.1%}, {d['ci_share_of_gap'][1]:.1%}] | "
-          f"{f(g['mean'])} {ci(g['ci'])} | {f(c['mean'])} ({c['share_of_gap']:.1%}) |")
+          f"{f(s['oracle_affinity_free']['summary']['cum_reward']['mean'])} | {f(g['mean'])} {ci(g['ci'])} |")
+    w("\nBoth readings side by side (free minus the reading; cumulative reward [95%], share of gap [95%]):\n")
+    w("| Profile | Free - full cycle (baseline reading) | Free - strict (window reading) |")
+    w("|---|---|---|")
+    for p, r in div["profiles"].items():
+        cells = []
+        for key in ("free_minus_full_cycle", "free_minus_strict"):
+            d = r[key]
+            cells.append(f"{f(d['mean'])} {ci(d['ci'])} ({d['share_of_gap']:.1%} "
+                         f"[{d['ci_share_of_gap'][0]:.1%}, {d['ci_share_of_gap'][1]:.1%}])")
+        w(f"| {p} | " + " | ".join(cells) + " |")
     w("\nHow free minus full cycle splits (cumulative reward, share of that profile's gap):\n")
-    w("| Profile | Concentrating on favourite categories: strict - full cycle | Tolerating repeats: free - strict |")
+    w("| Profile | Revisiting after the window: strict - full cycle | Tolerating repeats: free - strict |")
     w("|---|---|---|")
     for p, r in div["profiles"].items():
         c, d = r["strict_minus_full_cycle"], r["free_minus_strict"]
         w(f"| {p} | {f(c['mean'])} {ci(c['ci'])} ({c['share_of_gap']:.1%}) | {f(d['mean'])} {ci(d['ci'])} ({d['share_of_gap']:.1%}) |")
+    w("\n| Reading | Share of gap under looser | Claim 2 under the 10% rule |")
+    w("|---|---|---|")
+    for name, rd in dec["readings"].items():
+        tag = " (baseline)" if name == dec["baseline"] else ""
+        w(f"| {rd['description']}{tag} | {rd['share_of_gap']['looser']:.1%} | "
+          f"{'stands' if rd['claim2_stands_under_rule'] else 'returns'} |")
     w(f"\n**Recorded outcome:** {dec['text']}")
-    if dec["readings_disagree"]:
-        w(f"\n**Flag:** under the alternative reading of strict rotation (a full cycle through all categories) the share "
-          f"is {dec['share_full_cycle']:.1%}, which falls on the other side of the {dec['threshold']:.0%} threshold. "
-          "Only the recorded text depends on the reading; both are computed (ADR-0028, OPEN_QUESTIONS C1).")
-    else:
-        w(f"\nThe alternative reading of strict rotation (a full cycle through all categories, {dec['share_full_cycle']:.1%} "
-          "under looser) leads to the same outcome.")
+    w(f"\nThe {dec['threshold']:.0%} rule was set {dec['threshold_set']}; the choice of reading was made "
+      f"{dec['reading_chosen']}. What the check measures is headroom: for an oracle that already knows each user's "
+      "category affinities, the value of knowing how soon a category can be revisited and how many repeats are tolerated. "
+      "Whether a policy learns this from the session-ended signal is still to be measured.\n")
+    d1 = div["profiles"][d1_key]["d1_tolerance_mismatch"]
+    s1 = div["profiles"][d1_key]["summaries"]
+    w(f"### 3.1 Diagnostic D1: a tolerance learned for {d1['built_for']}, used under {d1['run_under']}\n")
+    w(f"The free category-affinity oracle built for the {d1['built_for']} setting is run in the {d1['run_under']} "
+      f"environment and compared with the same oracle built for {d1['run_under']}. This is evidence for the second half "
+      "of claim 2: the repeat tolerance has to be learned, because carrying over the wrong one is costly.\n")
+    w("| Oracle, run under tighter | Cum reward / session {95% users} [95% seeds] | Session length | Boredom-quit rate |")
+    w("|---|---|---|---|")
+    for key, label in (("oracle_affinity_free", "free, built for tighter"),
+                       ("oracle_affinity_free_built_for_primary", "free, built for primary"),
+                       ("oracle_affinity_full_cycle", "full cycle (baseline)")):
+        sm = s1[key]["summary"]
+        cr = sm["cum_reward"]
+        w(f"| {label} | {f(cr['mean'])} {{{f(cr['ci_users'][0])}, {f(cr['ci_users'][1])}}} "
+          f"[{f(cr['ci_seeds'][0])}, {f(cr['ci_seeds'][1])}] | {f(sm['session_length']['mean'], 2)} | "
+          f"{f(sm['boredom_quit_rate']['mean'], 3)} |")
+    lo, sl, mb = d1["loss"], d1["session_length_loss"], d1["mismatched_minus_full_cycle"]
+    gap_t = div["profiles"][d1_key]["gap"]
+    w(f"\n**Loss per session** (built for tighter minus built for primary, paired over users): {f(lo['mean'])} "
+      f"{ci(lo['ci'])}, which is **{lo['share_of_gap']:.1%}** [{lo['ci_share_of_gap'][0]:.1%}, {lo['ci_share_of_gap'][1]:.1%}] "
+      f"of the tighter personalization gap ({f(gap_t['mean'])}). Sessions are {f(sl['mean'], 2)} {ci(sl['ci'], 2)} steps "
+      f"shorter. Against the full-cycle baseline, the primary-tuned oracle scores {f(mb['mean'])} {ci(mb['ci'])} "
+      f"({mb['share_of_gap']:.1%} of the gap).")
     w("\nThe per-profile ladders are in `runs/audit_v1/diversity_level.md`.\n")
 
     w("## 4. Results per reward candidate (v1, primary profile)\n")
@@ -201,6 +239,8 @@ def main():
       "the audit numbers. The old T1 remains as a secondary line (ADR-0027).")
     w("- A2: the quit profiles are N=9 with thresholds 2, 1 and 0 (ADR-0019).")
     w("- Added before the freeze: the category-affinity oracle and the diversity-level check (ADR-0028).")
+    w("- After the freeze, C1: the full-cycle policy is the baseline for claim 2, and both readings are kept side by side "
+      "(ADR-0028). D1, the cost of carrying the primary tolerance into the tighter setting, is measured in section 3.1.")
     (ROOT / "docs" / "AUDIT.md").write_text("\n".join(L) + "\n")
     print(f"wrote docs/AUDIT.md ({len(L)} lines)")
 
