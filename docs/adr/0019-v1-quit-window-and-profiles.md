@@ -1,6 +1,6 @@
 # ADR-0019: Quit window and quit profiles (evaluator v1)
 
-Status: **proposed** (docs/proposals/evaluator-v1.patch)
+Status: accepted (evaluator v1)
 
 ## Decision
 - The intended window is primary. `window_mode = "easyrl4rec_slice"` stays in `EnvConfig` for `scripts/differential.py`, but `harness.run` refuses it.
@@ -16,3 +16,6 @@ Status: **proposed** (docs/proposals/evaluator-v1.patch)
 | n_Q = 2 (looser) | 13 (1.62×) | 15.01 (1.82×) | 0.0929 |
 
 The N-axis looser setting (3, 1) is the documented alternative (OPEN_QUESTIONS A2).
+
+## Decision on A2 (evaluator v1 approval, 2026-10-06)
+Approved: N = 9 with thresholds 2 (looser), 1 (primary) and 0 (tighter). The N-axis alternative (3, 1) is not used. After the diversity-level check (ADR-0028), the three profiles are recorded as robustness checks.

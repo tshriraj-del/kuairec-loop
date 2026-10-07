@@ -1,4 +1,4 @@
-"""KuaiRec closed-loop environment answering from the fully observed small matrix.
+"""KuaiRec closed-loop environment answering from the fully observed small matrix (v1).
 
 Quit rule implemented (the "feel bored then quit" exit of CIRS, arXiv 2204.01266,
 Sec 5.1.2 and Fig. 6, as coded in EasyRL4Rec commit 95d0acf,
@@ -15,6 +15,7 @@ src/core/envs/BaseEnv.py::step):
          window_mode = "easyrl4rec_slice": W_t = seq[t-N:t] evaluated on the Python
              list seq = [a_0..a_{t-1}], so for 0 < t < N the negative start t-N
              counts from the end of the list and W_t can drop early items.
+             Accepted only by scripts/differential.py; harness.run refuses it.
     3. count(c) = number of occurrences of category c across C(w) for w in W_t
        (multiset union, as collections.Counter over the chained tuples).
     4. The user quits at step t iff there is a category c in C(a_t) with
@@ -22,23 +23,19 @@ src/core/envs/BaseEnv.py::step):
     5. Independently, the session ends at step t iff t >= max_turn - 1, so a
        session has at most max_turn recommendations.
     6. The reward of a_t is returned and counted even when step t is the quitting
-       step: the quit takes effect after a_t is shown (EasyRL4Rec computes
-       `terminated` first, then still returns mat[user, a_t]).
+       step: the quit takes effect after a_t is shown.
 
-    N = config.quit_window, n_Q = config.quit_threshold, max_turn = config.max_turn.
+    (N, n_Q) = config/evaluator.toml [quit_profiles][quit_profile]; max_turn = [env].
 
-The CIRS text says "more than n_Q items in the N items have at least one attribute
-of the current recommended target" and reports N = 1, n_Q = 1 for KuaiEnv, which can
-never trigger as written. The code's per-category count above is what we implement;
-see ADR-0002.
+Reward = config/evaluator.toml [env] reward, one of kuairec_eval.rewards.REWARDS.
 
-Deviations from EasyRL4Rec's KuaiEnv, all deliberate and listed in ADR-0003/0004/0005:
-  * reward is the raw recorded watch_ratio (EasyRL4Rec caps it at 5);
-  * repeat recommendations raise RepeatRecommendationError (EasyRL4Rec allows them);
-  * window_mode defaults to "intended" rather than reproducing the slice quirk.
+Action set (ADR-0020): for user u, the 3,327 small-matrix videos minus the pairs absent
+from small_matrix.csv (12.6 per search user on average). reset(u) returns that excluded
+set; step() raises UnavailableActionError for an excluded video and
+RepeatRecommendationError for a repeat.
 
-Rewards are reachable only through step(): the matrix lives in a closure and is
-never stored on the instance (ADR-0007).
+Rewards are reachable only through step(): the matrix lives in a closure and is never
+stored on the instance (ADR-0007).
 """
 from __future__ import annotations
 
@@ -53,6 +50,7 @@ import numpy as np
 
 from kuairec_eval import _integrity
 from kuairec_eval.data import REPO_ROOT, load_item_categories, load_small_matrix
+from kuairec_eval.rewards import RewardConfig, reward_matrix
 
 CONFIG_PATH = REPO_ROOT / "config" / "evaluator.toml"
 WINDOW_MODES = ("intended", "easyrl4rec_slice")
@@ -62,45 +60,60 @@ class RepeatRecommendationError(ValueError):
     pass
 
 
+class UnavailableActionError(ValueError):
+    pass
+
+
 class SessionClosedError(RuntimeError):
     pass
 
 
 @dataclass(frozen=True)
 class EnvConfig:
+    quit_profile: str
     quit_window: int
     quit_threshold: int
     max_turn: int
-    window_mode: str = "intended"
-    missing_pair_reward: float = 0.0
+    window_mode: str
+    reward: str
+    reward_cap: float
+    duration_buckets: int
 
     def __post_init__(self):
         if self.window_mode not in WINDOW_MODES:
             raise ValueError(f"window_mode must be one of {WINDOW_MODES}")
         if self.quit_window < 1 or self.max_turn < 1 or self.quit_threshold < 0:
             raise ValueError("quit_window, max_turn must be >= 1 and quit_threshold >= 0")
+        self.reward_config()  # validates the reward name
+
+    def reward_config(self) -> RewardConfig:
+        return RewardConfig(active=self.reward, cap=self.reward_cap, duration_buckets=self.duration_buckets)
 
     @classmethod
-    def from_toml(cls, path: Path = CONFIG_PATH) -> "EnvConfig":
+    def from_toml(cls, path: Path = CONFIG_PATH, **overrides) -> "EnvConfig":
+        """overrides: quit_profile, window_mode, reward, max_turn (for sensitivity runs and the
+        differential check; harness.run still refuses window_mode != "intended")."""
         with open(path, "rb") as f:
-            return cls(**tomllib.load(f)["env"])
+            cfg = tomllib.load(f)
+        env = {**cfg["env"], **overrides}
+        profile = cfg["quit_profiles"][env["quit_profile"]]
+        return cls(quit_profile=env["quit_profile"], quit_window=profile["quit_window"],
+                   quit_threshold=profile["quit_threshold"], max_turn=env["max_turn"],
+                   window_mode=env["window_mode"], reward=env["reward"], reward_cap=cfg["reward"]["cap"],
+                   duration_buckets=cfg["reward"]["duration_buckets"])
 
 
 @dataclass(frozen=True)
 class StepResult:
     reward: float
     done: bool
-    observed: bool            # False if the pair is absent from small_matrix.csv
     quit_reason: str | None   # "boredom", "max_turn" or None
     t: int                    # index of the recommendation just made
 
 
-def _build_oracle(user_ids: np.ndarray, video_ids: np.ndarray, rewards: np.ndarray,
-                  users: np.ndarray, videos: np.ndarray) -> Callable[[int, int], float]:
+def _build_oracle(mat: np.ndarray, users: np.ndarray, videos: np.ndarray) -> Callable[[int, int], float]:
     uidx = {int(u): i for i, u in enumerate(users)}
     vidx = {int(v): j for j, v in enumerate(videos)}
-    mat = np.full((len(users), len(videos)), np.nan, dtype=np.float64)
-    mat[[uidx[int(u)] for u in user_ids], [vidx[int(v)] for v in video_ids]] = rewards
 
     def lookup(user: int, video: int) -> float:
         return float(mat[uidx[user], vidx[video]])
@@ -126,14 +139,17 @@ class KuaiEnv:
         small = load_small_matrix()
         users = np.sort(small["user_id"].unique())
         videos = np.sort(small["video_id"].unique())
-        self._lookup = _build_oracle(small["user_id"].to_numpy(), small["video_id"].to_numpy(),
-                                     small["watch_ratio"].to_numpy(), users, videos)
+        mat = reward_matrix(self.config.reward_config(), users, videos, small=small)
         del small
+        self._lookup = _build_oracle(mat, users, videos)
+        missing = np.isnan(mat)
+        self._excluded: dict[int, frozenset[int]] = {
+            int(u): frozenset(int(v) for v in videos[missing[i]]) for i, u in enumerate(users)}
+        del mat, missing
         self.users: tuple[int, ...] = tuple(int(u) for u in users)
         self.catalog: tuple[int, ...] = tuple(int(v) for v in videos)
         cats = load_item_categories()
         self.categories: Mapping[int, tuple[int, ...]] = {v: cats[v] for v in self.catalog}
-        self._user_set = frozenset(self.users)
         self._catalog_set = frozenset(self.catalog)
         self._user: int | None = None
         self._seq: list[int] = []
@@ -141,10 +157,10 @@ class KuaiEnv:
         self._done = True
 
     def reset(self, user: int) -> dict:
-        if user not in self._user_set:
+        if user not in self._excluded:
             raise KeyError(f"user {user} is not in the small matrix")
         self._user, self._seq, self._shown, self._done = int(user), [], set(), False
-        return {"user": self._user, "t": 0}
+        return {"user": self._user, "t": 0, "excluded": self._excluded[self._user]}
 
     def step(self, video: int) -> StepResult:
         if self._done:
@@ -152,21 +168,20 @@ class KuaiEnv:
         video = int(video)
         if video not in self._catalog_set:
             raise KeyError(f"video {video} is not in the small-matrix catalog")
+        if video in self._excluded[self._user]:
+            raise UnavailableActionError(f"video {video} has no record for user {self._user}")
         if video in self._shown:
             raise RepeatRecommendationError(f"video {video} already shown to user {self._user}")
         c = self.config
         t = len(self._seq)
-        bored = boredom_quit(self._seq, video, self.categories, c.quit_window,
-                             c.quit_threshold, c.window_mode)
+        bored = boredom_quit(self._seq, video, self.categories, c.quit_window, c.quit_threshold, c.window_mode)
         at_cap = t >= c.max_turn - 1
         self._seq.append(video)
         self._shown.add(video)
-        value = self._lookup(self._user, video)
-        observed = not np.isnan(value)
-        reward = value if observed else float(c.missing_pair_reward)
+        reward = self._lookup(self._user, video)
         self._done = bored or at_cap
         reason = "boredom" if bored else ("max_turn" if at_cap else None)
-        return StepResult(reward=reward, done=self._done, observed=observed, quit_reason=reason, t=t)
+        return StepResult(reward=reward, done=self._done, quit_reason=reason, t=t)
 
     @property
     def history(self) -> tuple[int, ...]:

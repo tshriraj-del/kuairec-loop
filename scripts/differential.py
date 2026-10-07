@@ -117,7 +117,9 @@ def run_ref(ref, uidx: int, seq_idx: list[int]):
 
 
 def build_sequences(users, catalog, cats, small_lookup, cfg, rng):
-    pop = list(GlobalPopularity(types.SimpleNamespace(catalog=catalog), 0).ranking[: cfg.max_turn])
+    """Every sequence stays inside the user's action set: since evaluator v1 our environment
+    rejects unrecorded pairs (ADR-0020), while EasyRL4Rec would answer them with 0."""
+    pop_all = list(GlobalPopularity(types.SimpleNamespace(catalog=catalog), 0).ranking)
     by_cat: dict[int, list[int]] = {}
     for v in catalog:
         for c in cats[v]:
@@ -125,11 +127,12 @@ def build_sequences(users, catalog, cats, small_lookup, cfg, rng):
     big_cats = [c for c, vs in by_cat.items() if len(vs) >= cfg.max_turn]
     arr = np.asarray(catalog)
     for u in users:
+        ok = lambda vs: [v for v in vs if (u, v) in small_lookup]  # noqa: E731
         for k in range(3):
-            yield "random", u, rng.permutation(arr)[: cfg.max_turn].tolist()
-        yield "popularity", u, pop
+            yield "random", u, ok(rng.permutation(arr).tolist())[: cfg.max_turn]
+        yield "popularity", u, ok(pop_all)[: cfg.max_turn]
         seq, banned_hist = [], []
-        for v in rng.permutation(arr).tolist():
+        for v in ok(rng.permutation(arr).tolist()):
             recent = set().union(*banned_hist[-cfg.quit_window:]) if banned_hist else set()
             if not recent & set(cats[v]):
                 seq.append(v)
@@ -138,9 +141,10 @@ def build_sequences(users, catalog, cats, small_lookup, cfg, rng):
                 break
         yield "diverse", u, seq
         c = big_cats[int(rng.integers(len(big_cats)))]
-        yield "stress", u, rng.permutation(np.asarray(by_cat[c]))[: cfg.max_turn].tolist()
+        yield "stress", u, ok(rng.permutation(np.asarray(by_cat[c])).tolist())[: cfg.max_turn]
         high = [v for v in catalog if small_lookup.get((u, v), 0) > 5]
-        rest = [v for v in rng.permutation(arr).tolist() if v not in set(high)]
+        high_set = set(high)
+        rest = [v for v in ok(rng.permutation(arr).tolist()) if v not in high_set]
         yield "capped", u, (high + rest)[: cfg.max_turn]
 
 
@@ -152,7 +156,7 @@ def main():
     args = ap.parse_args()
     command = ".venv/bin/python scripts/differential.py " + shlex.join(sys.argv[1:])
 
-    base = EnvConfig.from_toml()
+    base = EnvConfig.from_toml(reward="raw")  # EasyRL4Rec returns (capped) watch_ratio
     ours = {m: KuaiEnv(EnvConfig(**{**base.__dict__, "window_mode": m})) for m in ("intended", "easyrl4rec_slice")}
     ref, lbe_user, lbe_item = load_reference(base)
     env0 = ours["intended"]

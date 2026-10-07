@@ -1,6 +1,6 @@
 # ADR-0018: Acceptance test procedure and reward recommendation
 
-Status: procedure accepted (audit); recommendation **proposed**, pending your approval of evaluator v1
+Status: accepted (evaluator v1): recommendation adopted; **T1 superseded by ADR-0027** (kept in reports as a secondary line)
 
 ## Procedure (what the brief left open)
 - **Score:** cumulative reward per session. Per user, it is averaged over seeds for stochastic policies and is the single session for deterministic ones.

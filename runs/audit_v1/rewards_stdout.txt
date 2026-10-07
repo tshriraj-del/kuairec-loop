@@ -1,0 +1,137 @@
+### Reward: `raw` (evaluator v1, primary quit profile)
+
+Command: `.venv/bin/python scripts/audit_rewards.py `  
+Manifest digest `dbd9cc3dc5d4cc33`. Per-video Spearman(mean reward over search users, canonical duration) = -0.9848
+
+Cum reward: mean per session over 847 search users {95% user bootstrap} [95% seed t-interval, stochastic policies only].
+
+| Policy | Cum reward / session | Mean reward / rec | Session length | Top-category share | Coverage | Boredom-quit rate |
+|---|---|---|---|---|---|---|
+| random | 7.608 {7.456, 7.767} [7.509, 7.707] | 0.9174 | 8.29 | 0.254 | 0.8811 | 1.000 |
+| popularity (big-matrix distinct users) | 3.862 {3.766, 3.965} | 0.7723 | 5.00 | 0.600 | 0.0018 | 1.000 |
+| (b) category rotation, random pick [permanent] | 23.018 {22.688, 23.370} [22.909, 23.127] | 0.7673 | 30.00 | 0.035 | 0.6341 | 0.000 |
+| (a) probe: shortest first [permanent] | 20.422 {19.985, 20.893} | 2.5794 | 7.92 | 0.379 | 0.0036 | 1.000 |
+| probe: longest first [permanent] | 0.203 {0.190, 0.216} | 0.0403 | 5.03 | 0.596 | 0.0039 | 1.000 |
+| (c) probe: category rotation, shortest pick [permanent] | 48.994 {48.097, 50.009} | 1.6331 | 30.00 | 0.067 | 0.0117 | 0.000 |
+| probe: category rotation, longest pick [permanent] | 6.187 {6.053, 6.316} | 0.2062 | 30.00 | 0.067 | 0.0123 | 0.000 |
+| (d) big-matrix mean watch_ratio, >=100 rows | 15.691 {15.283, 16.121} | 2.6327 | 5.96 | 0.503 | 0.0021 | 1.000 |
+| oracle: category affinity, strict | 31.347 {30.824, 31.879} [31.122, 31.572] | 1.0449 | 30.00 | 0.100 | 0.5727 | 0.000 |
+| oracle: category affinity, full cycle | 23.508 {23.126, 23.902} [23.336, 23.681] | 0.7836 | 30.00 | 0.043 | 0.6378 | 0.000 |
+| oracle: category affinity, free | 33.903 {33.272, 34.562} [33.721, 34.086] | 1.1301 | 30.00 | 0.185 | 0.5566 | 0.000 |
+| oracle: non-personalized (common values, greedy) | 67.893 {66.508, 69.494} | 2.2631 | 30.00 | 0.168 | 0.0108 | 0.000 |
+| oracle: personalized greedy | 200.734 {190.375, 212.365} | 6.6911 | 30.00 | 0.192 | 0.9068 | 0.000 |
+
+Quit-free versions: personalized bound 204.393, non-personalized 68.242.
+
+**Acceptance: FAIL.** Personalization gap 132.840; T1 margin = 5% of the gap = +/-6.642.
+
+| Test (paired bootstrap over users) | Mean | 95% interval | Share of gap | Result |
+|---|---|---|---|---|
+| T1 rotation_shortest - rotation_random (cum reward) | 25.9758 | [25.2164, 26.8187] | +19.6% [+19.0%, +20.2%] | FAIL |
+| T1 rotation_longest - rotation_random (cum reward) | -16.8316 | [-17.1150, -16.5560] | -12.7% [-12.9%, -12.5%] | FAIL |
+| T2 personalized - non-personalized oracle (cum reward) | 132.8401 | [122.6019, 143.3911] | 100% | pass |
+| secondary: legacy T1 shortest_first - random (cum reward) | 12.8141 | [12.3916, 13.2523] | +9.6% | fail (not in verdict) |
+
+| Other paired comparisons (A - B) | Metric | Mean | 95% interval |
+|---|---|---|---|
+| shortest_first - random | mean_reward | 1.6609 | [1.6092, 1.7144] |
+| longest_first - random | cum_reward | -7.4053 | [-7.5602, -7.2557] |
+| rotation_shortest - rotation_random | mean_reward | 0.8659 | [0.8405, 0.8940] |
+| rotation_longest - rotation_random | mean_reward | -0.5611 | [-0.5705, -0.5519] |
+| oracle_personalized - oracle_nonpersonalized | mean_reward | 4.4280 | [4.0867, 4.7797] |
+| oracle_affinity_free - oracle_affinity_strict | cum_reward | 2.5566 | [2.2553, 2.8716] |
+| rotation_random - random | cum_reward | 15.4099 | [15.1463, 15.6801] |
+
+### Reward: `capped5` (evaluator v1, primary quit profile)
+
+Command: `.venv/bin/python scripts/audit_rewards.py `  
+Manifest digest `dbd9cc3dc5d4cc33`. Per-video Spearman(mean reward over search users, canonical duration) = -0.9931
+
+Cum reward: mean per session over 847 search users {95% user bootstrap} [95% seed t-interval, stochastic policies only].
+
+| Policy | Cum reward / session | Mean reward / rec | Session length | Top-category share | Coverage | Boredom-quit rate |
+|---|---|---|---|---|---|---|
+| random | 7.288 {7.173, 7.399} [7.209, 7.366] | 0.8787 | 8.29 | 0.254 | 0.8811 | 1.000 |
+| popularity (big-matrix distinct users) | 3.810 {3.733, 3.898} | 0.7620 | 5.00 | 0.600 | 0.0018 | 1.000 |
+| (b) category rotation, random pick [permanent] | 22.305 {22.029, 22.578} [22.275, 22.334] | 0.7435 | 30.00 | 0.035 | 0.6341 | 0.000 |
+| (a) probe: shortest first [permanent] | 19.277 {19.006, 19.543} | 2.4347 | 7.92 | 0.379 | 0.0036 | 1.000 |
+| probe: longest first [permanent] | 0.203 {0.190, 0.216} | 0.0403 | 5.03 | 0.596 | 0.0039 | 1.000 |
+| (c) probe: category rotation, shortest pick [permanent] | 46.820 {46.245, 47.405} | 1.5607 | 30.00 | 0.067 | 0.0117 | 0.000 |
+| probe: category rotation, longest pick [permanent] | 6.108 {6.002, 6.212} | 0.2036 | 30.00 | 0.067 | 0.0123 | 0.000 |
+| (d) big-matrix mean watch_ratio, >=100 rows | 14.694 {14.470, 14.923} | 2.4654 | 5.96 | 0.503 | 0.0021 | 1.000 |
+| (e) big-matrix mean capped5 label, >=100 rows | 19.497 {19.232, 19.774} | 2.4622 | 7.92 | 0.379 | 0.0033 | 1.000 |
+| oracle: category affinity, strict | 29.696 {29.323, 30.062} [29.641, 29.750] | 0.9899 | 30.00 | 0.100 | 0.5375 | 0.000 |
+| oracle: category affinity, full cycle | 22.664 {22.374, 22.947} [22.574, 22.754] | 0.7555 | 30.00 | 0.045 | 0.6387 | 0.000 |
+| oracle: category affinity, free | 31.412 {31.027, 31.793} [31.331, 31.492] | 1.0471 | 30.00 | 0.190 | 0.4904 | 0.000 |
+| oracle: non-personalized (common values, greedy) | 63.752 {63.041, 64.486} | 2.1251 | 30.00 | 0.197 | 0.0099 | 0.000 |
+| oracle: personalized greedy | 110.193 {108.389, 111.997} | 3.6731 | 30.00 | 0.193 | 0.9005 | 0.000 |
+
+Quit-free versions: personalized bound 111.998, non-personalized 63.957.
+
+**Acceptance: FAIL.** Personalization gap 46.440; T1 margin = 5% of the gap = +/-2.322.
+
+| Test (paired bootstrap over users) | Mean | 95% interval | Share of gap | Result |
+|---|---|---|---|---|
+| T1 rotation_shortest - rotation_random (cum reward) | 24.5148 | [24.1188, 24.9001] | +52.8% [+51.9%, +53.6%] | FAIL |
+| T1 rotation_longest - rotation_random (cum reward) | -16.1965 | [-16.4075, -15.9902] | -34.9% [-35.3%, -34.4%] | FAIL |
+| T2 personalized - non-personalized oracle (cum reward) | 46.4405 | [44.6904, 48.1667] | 100% | pass |
+| secondary: legacy T1 shortest_first - random (cum reward) | 11.9891 | [11.7463, 12.2375] | +25.8% | fail (not in verdict) |
+
+| Other paired comparisons (A - B) | Metric | Mean | 95% interval |
+|---|---|---|---|
+| shortest_first - random | mean_reward | 1.5551 | [1.5254, 1.5848] |
+| longest_first - random | cum_reward | -7.0848 | [-7.1978, -6.9725] |
+| rotation_shortest - rotation_random | mean_reward | 0.8172 | [0.8040, 0.8300] |
+| rotation_longest - rotation_random | mean_reward | -0.5399 | [-0.5469, -0.5330] |
+| oracle_personalized - oracle_nonpersonalized | mean_reward | 1.5480 | [1.4897, 1.6056] |
+| oracle_affinity_free - oracle_affinity_strict | cum_reward | 1.7160 | [1.6008, 1.8314] |
+| rotation_random - random | cum_reward | 15.0171 | [14.8142, 15.2204] |
+
+### Reward: `duration_pct` (evaluator v1, primary quit profile)
+
+Command: `.venv/bin/python scripts/audit_rewards.py `  
+Manifest digest `dbd9cc3dc5d4cc33`. Per-video Spearman(mean reward over search users, canonical duration) = +0.2262
+
+Cum reward: mean per session over 847 search users {95% user bootstrap} [95% seed t-interval, stochastic policies only].
+
+| Policy | Cum reward / session | Mean reward / rec | Session length | Top-category share | Coverage | Boredom-quit rate |
+|---|---|---|---|---|---|---|
+| random | 4.381 {4.322, 4.441} [4.340, 4.421] | 0.5282 | 8.29 | 0.254 | 0.8811 | 1.000 |
+| popularity (big-matrix distinct users) | 2.616 {2.572, 2.660} | 0.5231 | 5.00 | 0.600 | 0.0018 | 1.000 |
+| (b) category rotation, random pick [permanent] | 15.880 {15.713, 16.046} [15.854, 15.905] | 0.5293 | 30.00 | 0.035 | 0.6341 | 0.000 |
+| (a) probe: shortest first [permanent] | 4.163 {4.098, 4.227} | 0.5258 | 7.92 | 0.379 | 0.0036 | 1.000 |
+| probe: longest first [permanent] | 2.707 {2.661, 2.756} | 0.5379 | 5.03 | 0.596 | 0.0039 | 1.000 |
+| (c) probe: category rotation, shortest pick [permanent] | 15.881 {15.683, 16.070} | 0.5294 | 30.00 | 0.067 | 0.0117 | 0.000 |
+| probe: category rotation, longest pick [permanent] | 16.087 {15.913, 16.264} | 0.5362 | 30.00 | 0.067 | 0.0123 | 0.000 |
+| (d) big-matrix mean watch_ratio, >=100 rows | 3.145 {3.093, 3.199} | 0.5277 | 5.96 | 0.503 | 0.0021 | 1.000 |
+| (e) big-matrix mean duration_pct label, >=100 rows | 3.287 {3.238, 3.333} | 0.5480 | 6.00 | 0.500 | 0.0018 | 1.000 |
+| oracle: category affinity, strict | 17.472 {17.300, 17.645} [17.452, 17.492] | 0.5824 | 30.00 | 0.053 | 0.5893 | 0.000 |
+| oracle: category affinity, full cycle | 16.008 {15.840, 16.174} [15.979, 16.036] | 0.5336 | 30.00 | 0.039 | 0.6312 | 0.000 |
+| oracle: category affinity, free | 18.003 {17.828, 18.179} [17.978, 18.029] | 0.6001 | 30.00 | 0.080 | 0.4924 | 0.000 |
+| oracle: non-personalized (common values, greedy) | 17.202 {17.002, 17.402} | 0.5734 | 30.00 | 0.200 | 0.0105 | 0.000 |
+| oracle: personalized greedy | 28.548 {28.426, 28.668} | 0.9516 | 30.00 | 0.194 | 0.9940 | 0.000 |
+
+Quit-free versions: personalized bound 28.642, non-personalized 17.205.
+
+**Acceptance: PASS.** Personalization gap 11.346; T1 margin = 5% of the gap = +/-0.567.
+
+| Test (paired bootstrap over users) | Mean | 95% interval | Share of gap | Result |
+|---|---|---|---|---|
+| T1 rotation_shortest - rotation_random (cum reward) | 0.0018 | [-0.0862, 0.0893] | +0.0% [-0.8%, +0.8%] | pass |
+| T1 rotation_longest - rotation_random (cum reward) | 0.2075 | [0.1267, 0.2884] | +1.8% [+1.1%, +2.5%] | pass |
+| T2 personalized - non-personalized oracle (cum reward) | 11.3458 | [11.1462, 11.5453] | 100% | pass |
+| secondary: legacy T1 shortest_first - random (cum reward) | -0.2178 | [-0.2814, -0.1524] | -1.9% | pass (not in verdict) |
+
+| Other paired comparisons (A - B) | Metric | Mean | 95% interval |
+|---|---|---|---|
+| shortest_first - random | mean_reward | -0.0026 | [-0.0091, 0.0038] |
+| longest_first - random | cum_reward | -1.6734 | [-1.7330, -1.6128] |
+| rotation_shortest - rotation_random | mean_reward | 0.0001 | [-0.0029, 0.0030] |
+| rotation_longest - rotation_random | mean_reward | 0.0069 | [0.0042, 0.0096] |
+| oracle_personalized - oracle_nonpersonalized | mean_reward | 0.3782 | [0.3715, 0.3848] |
+| oracle_affinity_free - oracle_affinity_strict | cum_reward | 0.5313 | [0.4979, 0.5650] |
+| rotation_random - random | cum_reward | 11.4988 | [11.3697, 11.6288] |
+
+raw            T1 FAIL  T2 PASS  verdict FAIL   (legacy T1 fail)
+capped5        T1 FAIL  T2 PASS  verdict FAIL   (legacy T1 fail)
+duration_pct   T1 PASS  T2 PASS  verdict PASS   (legacy T1 pass)

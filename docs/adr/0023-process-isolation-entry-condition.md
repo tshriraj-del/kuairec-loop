@@ -1,6 +1,6 @@
 # ADR-0023: Process isolation is deferred; it is an entry condition for the agent-loop phase
 
-Status: **proposed** (your decision: not now)
+Status: accepted (evaluator v1)
 
 ## Decision
 Phase 1 keeps the in-process protections of ADR-0007 and ADR-0015. Before the first evaluation of a policy that can execute arbitrary code or tools, which is the agent-loop phase, the following must hold:

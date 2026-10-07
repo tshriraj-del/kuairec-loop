@@ -2,7 +2,7 @@
 
 Status: accepted (Phase 0)
 
-Pending: under the evaluator v1 proposal the differential check builds our environment with reward=raw and keeps sequences inside each user's action set.
+Amended (evaluator v1): the differential check builds our environment with reward=raw and keeps sequences inside each user's action set.
 
 ## Decision
 - **Reference:** EasyRL4Rec cloned at commit `95d0acfa55e2150d0775ebd41de0826272edcc94` into `third_party/` (gitignored). Its `preprocessing_kuairec.py`, `KuaiData.load_mat`, `KuaiData.load_category` and `KuaiEnv` run unmodified in `data/cache/easyrl4rec_ws/`.

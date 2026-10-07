@@ -2,7 +2,7 @@
 
 Status: accepted (Phase 0)
 
-Pending: the evaluator v1 proposal supersedes this; unrecorded pairs leave the action set (ADR-0020).
+Superseded by ADR-0020 (evaluator v1): unrecorded pairs leave the action set.
 
 ## Context
 The small matrix is 99.62% dense, so 1,411 × 3,327 − 4,676,570 = 17,827 (user, video) cells have no recorded watch_ratio (`scripts/data_report.py`). The brief says step() "returns the recorded watch_ratio for that pair" and is silent about cells with no record. EasyRL4Rec builds a dense matrix from a `csr_matrix`, so missing cells silently become 0.0.

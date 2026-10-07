@@ -26,7 +26,8 @@ from scipy import stats  # noqa: E402
 
 from kuairec_eval import labels, partitions  # noqa: E402
 from kuairec_eval.data import load_small_matrix  # noqa: E402
-from kuairec_eval.rewards import REWARDS, RewardConfig, row_rewards  # noqa: E402
+from kuairec_eval.env import EnvConfig  # noqa: E402
+from kuairec_eval.rewards import REWARDS, row_rewards  # noqa: E402
 
 BUCKETS_FOR_BUCKET_VERSION = 20
 
@@ -60,7 +61,7 @@ def main():
 
     series = {}
     for name in REWARDS:
-        cfg = RewardConfig.from_toml(active=name)
+        cfg = EnvConfig.from_toml(reward=name).reward_config()
         series[name] = row_rewards(cfg, s.video_id.to_numpy(), s.watch_ratio.to_numpy(), s.play_duration.to_numpy())
     series["play_duration_ms (extra, not a candidate)"] = s.play_duration.to_numpy().astype(float)
 
@@ -82,7 +83,7 @@ def main():
                                   "per_interaction": float(r_int), "buckets_spearman": float(r_bs),
                                   "buckets_pearson": float(r_bp), "n_videos": int(len(mean_v)),
                                   "n_interactions": int(len(y)), "n_buckets": int(len(bmean))}
-    # Diagnostic only (K stays as config/rewards.toml says; the rule in audit_bucket_choice.py
+    # Diagnostic only (K stays as config/evaluator.toml [reward] says; the rule in audit_bucket_choice.py
     # fixed it on big-matrix data): does the duration_pct correlation on search users depend on K?
     print("\nduration_pct sensitivity to K (diagnostic; not used to choose K):")
     print(f"  {'K':>4s} {'per-video mean (search, small rows)':>36s} {'per-interaction':>16s} {'per-video mean (big rows)':>26s}")

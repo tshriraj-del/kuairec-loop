@@ -31,8 +31,24 @@ def test_changed_data_fails(tmp_path):
     fake_data = tmp_path / "data"
     fake_data.mkdir()
     for rel in _integrity.FROZEN_DATA:
-        shutil.copy2(data_dir() / rel, fake_data / rel)
+        if rel == "item_categories.csv":
+            shutil.copy2(data_dir() / rel, fake_data / rel)
+        else:
+            (fake_data / rel).symlink_to(data_dir() / rel)
     with open(fake_data / "item_categories.csv", "a") as f:
         f.write("99999,[1]\n")
     with pytest.raises(_integrity.FrozenEvaluatorError, match="item_categories.csv"):
         _integrity.verify(REPO_ROOT, fake_data, _integrity.MANIFEST_PATH)
+
+
+def test_unlisted_module_inside_package_fails(tmp_path):
+    for rel in _integrity.FROZEN_CODE:
+        dst = tmp_path / rel
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(REPO_ROOT / rel, dst)
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text(_integrity.MANIFEST_PATH.read_text())
+    _integrity.verify(tmp_path, data_dir(), manifest)
+    (tmp_path / "kuairec_eval" / "sneaky.py").write_text("REWARD_SCALE = 2\n")
+    with pytest.raises(_integrity.FrozenEvaluatorError, match="sneaky.py"):
+        _integrity.verify(tmp_path, data_dir(), manifest)

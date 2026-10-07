@@ -1,6 +1,6 @@
 # ADR-0020: Unrecorded pairs leave the action set (evaluator v1)
 
-Status: **proposed**; supersedes ADR-0004 on approval
+Status: accepted (evaluator v1)
 
 ## Decision (your decision; the delivery mechanism is mine)
 - **Action set:** for user u, the 3,327 small-matrix videos minus u's unrecorded pairs. Search users have 12.56 on average and at most 32.

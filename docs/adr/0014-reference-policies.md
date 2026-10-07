@@ -15,3 +15,6 @@ The audit brief named four public-data reference policies. Their mechanics were 
 
 ## Consequences
 On search, (b) and (c) run 30 steps with 0 boredom quits (`scripts/audit_rewards.py`; `tests/test_audit.py`). Under v1 they stay quit-free under all three quit profiles (`tests/test_harness_v1.py` in the v1 patch).
+
+## Amendment (evaluator v1 approval, 2026-10-06)
+The four duration probes, plain and inside rotation, and rotation-random are permanent rows of every results table, and their code is frozen (ADR-0029). The probes are no longer "extra": they are the measuring sticks of the acceptance test (ADR-0027).

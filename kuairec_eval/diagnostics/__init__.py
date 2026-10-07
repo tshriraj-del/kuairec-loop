@@ -5,7 +5,7 @@ No policy may import or call anything in this package. Enforced three ways:
     because Python caches modules, hence the call-time guard below);
   * every factory and constructor re-checks the call stack (guard_against_policies);
   * tests/test_policy_isolation.py fails on any policies/ file that references it.
-Not in the v0 manifest; evaluator v1 (proposed) adds it.
+Frozen since evaluator v1 (kuairec_eval/_integrity.py FROZEN_CODE).
 """
 from __future__ import annotations
 

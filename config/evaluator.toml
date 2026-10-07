@@ -1,18 +1,30 @@
-# Frozen evaluator configuration. Hashed into kuairec_eval/FROZEN_MANIFEST.json.
+# Frozen evaluator configuration (v1). Hashed into kuairec_eval/FROZEN_MANIFEST.json.
 # Changing anything here fails every later run until scripts/freeze.py is re-run.
+# Policies never receive these values; they see only PolicyContext, the per-session
+# excluded set and each StepResult (ADR-0019).
 
 [env]
 # KuaiEnv "feel bored then quit" rule (CIRS, arXiv 2204.01266, Sec 5.1.2; EasyRL4Rec
-# src/core/envs/KuaiRec/KuaiEnv.py::_determine_whether_to_leave). See ADR-0002.
-quit_window = 9          # N   (EasyRL4Rec: num_leave_compute, KuaiEnv-v0 default 9)
-quit_threshold = 1       # n_Q (EasyRL4Rec: leave_threshold,   KuaiEnv-v0 default 1)
-max_turn = 30            # EasyRL4Rec KuaiEnv-v0 default 30
-# "intended": window = the last min(t, N) recommendations.
-# "easyrl4rec_slice": window = sequence[t-N:t] with Python's negative-index semantics,
-#                     which is what EasyRL4Rec actually executes for 0 < t < N. See ADR-0003.
+# KuaiEnv._determine_whether_to_leave). Exact definition: kuairec_eval/env.py docstring.
+quit_profile = "primary"   # primary | looser | tighter (looser/tighter are sensitivity settings)
+max_turn = 30
+# "intended": window = the last min(t, N) recommendations. "easyrl4rec_slice" reproduces
+# EasyRL4Rec's seq[t-N:t] and is accepted only by scripts/differential.py: harness.run
+# refuses it (ADR-0003, ADR-0019).
 window_mode = "intended"
-# Reward returned for the 17,827 (user, video) cells absent from small_matrix.csv. See ADR-0004.
-missing_pair_reward = 0.0
+# Reward candidate (ADR-0016, ADR-0018): raw | capped5 | duration_pct
+reward = "duration_pct"
+
+[quit_profiles]
+# From the random policy's survival curve (scripts/audit_survival.py, ADR-0019):
+# random median session length 8 / mean 8.26 under primary.
+primary = { quit_window = 9, quit_threshold = 1 }
+looser  = { quit_window = 9, quit_threshold = 2 }   # median 13, mean 15.01
+tighter = { quit_window = 9, quit_threshold = 0 }   # median 4,  mean 4.16
+
+[reward]
+cap = 5.0               # capped5: min(watch_ratio, cap), as in EasyRL4Rec KuaiData.load_mat
+duration_buckets = 5    # duration_pct: K from scripts/audit_bucket_choice.py (big matrix only)
 
 [partition]
 seed = 20261005
@@ -21,6 +33,8 @@ shadow = 0.2
 holdout = 0.2
 
 [harness]
-seeds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+seeds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]   # stochastic policies; deterministic ones run seeds[0] only
 confidence = 0.95
-user_bootstrap_resamples = 2000
+user_bootstrap_resamples = 2000          # descriptive per-policy interval
+paired_bootstrap_resamples = 10000       # comparisons (ADR-0021)
+paired_bootstrap_seed = 0

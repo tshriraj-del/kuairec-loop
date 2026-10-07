@@ -106,8 +106,8 @@ def main():
     print("\n== does the unrecorded-pair mask carry reward information? (search users; ADR-0020)")
     from scipy import stats
     from kuairec_eval import labels as L
-    from kuairec_eval.rewards import RewardConfig
-    k = RewardConfig.from_toml().duration_buckets
+    from kuairec_eval.env import EnvConfig
+    k = EnvConfig.from_toml().duration_buckets
     pct = L.duration_buckets(k).percentile(small_s.video_id.to_numpy(), small_s.play_duration.to_numpy())
     rec = small_s.assign(pct=pct)
     v_missing = (len(per_user) - rec.groupby("video_id").user_id.nunique()).reindex(catalog, fill_value=len(per_user))

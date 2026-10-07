@@ -18,3 +18,6 @@ Status: accepted (evaluator audit, 2026-10-06)
 
 ## Consequences
 On search users, duration_pct has a per-video Spearman of **+0.226** with duration. It stays between +0.22 and +0.23 for every K from 5 to 100, while big-matrix rows give about 0 for every K (`scripts/audit_duration_correlation.py`). So the lean isn't a bucketing artifact. Relative to big-matrix viewing of the same videos, small-matrix (forced-exposure) users give longer videos systematically higher play-time percentiles. OPEN_QUESTIONS A1.
+
+## Decision on A1 (evaluator v1 approval, 2026-10-06)
+The small long-video lean of duration_pct is accepted as it is. To keep it visible, the duration probes are permanent rows (ADR-0029), and the acceptance test is two-sided (ADR-0027).

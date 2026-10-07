@@ -1,0 +1,215 @@
+{
+  "raw": {
+    "T1_duration_probes_within_tolerance": {
+      "tolerance": 0.05,
+      "gap": 132.84006992504155,
+      "margin": 6.6420034962520775,
+      "rotation_shortest": {
+        "a": "rotation_shortest",
+        "b": "rotation_random",
+        "metric": "cum_reward",
+        "mean": 25.975793595015055,
+        "ci": [
+          25.216445531628345,
+          26.818723659238067
+        ],
+        "n_users": 847,
+        "resamples": 10000,
+        "share_of_gap": 0.19554185427388415,
+        "ci_share_of_gap": [
+          0.18982559664307147,
+          0.20188730459394688
+        ],
+        "pass": false
+      },
+      "rotation_longest": {
+        "a": "rotation_longest",
+        "b": "rotation_random",
+        "metric": "cum_reward",
+        "mean": -16.83155023273356,
+        "ci": [
+          -17.115027442035313,
+          -16.556002693813827
+        ],
+        "n_users": 847,
+        "resamples": 10000,
+        "share_of_gap": -0.12670537016602895,
+        "ci_share_of_gap": [
+          -0.12883934381917225,
+          -0.12463108987488475
+        ],
+        "pass": false
+      },
+      "pass": false
+    },
+    "T2_personalized_beats_nonpersonalized": {
+      "a": "oracle_personalized",
+      "b": "oracle_nonpersonalized",
+      "metric": "cum_reward",
+      "mean": 132.84006992504155,
+      "ci": [
+        122.60187721846344,
+        143.3911238814515
+      ],
+      "n_users": 847,
+      "resamples": 10000,
+      "pass": true
+    },
+    "T1_legacy_shortest_not_above_random": {
+      "a": "shortest_first",
+      "b": "random",
+      "metric": "cum_reward",
+      "mean": 12.814102617998351,
+      "ci": [
+        12.391633998848281,
+        13.252283447951594
+      ],
+      "n_users": 847,
+      "resamples": 10000,
+      "pass": false
+    },
+    "both_pass": false
+  },
+  "capped5": {
+    "T1_duration_probes_within_tolerance": {
+      "tolerance": 0.05,
+      "gap": 46.44048148789191,
+      "margin": 2.3220240743945957,
+      "rotation_shortest": {
+        "a": "rotation_shortest",
+        "b": "rotation_random",
+        "metric": "cum_reward",
+        "mean": 24.514811747278767,
+        "ci": [
+          24.118756155857046,
+          24.9001109455713
+        ],
+        "n_users": 847,
+        "resamples": 10000,
+        "share_of_gap": 0.5278759169124966,
+        "ci_share_of_gap": [
+          0.5193476764909373,
+          0.5361725405896863
+        ],
+        "pass": false
+      },
+      "rotation_longest": {
+        "a": "rotation_longest",
+        "b": "rotation_random",
+        "metric": "cum_reward",
+        "mean": -16.19647534446108,
+        "ci": [
+          -16.40752867530781,
+          -15.990154800661
+        ],
+        "n_users": 847,
+        "resamples": 10000,
+        "share_of_gap": -0.34875769642233084,
+        "ci_share_of_gap": [
+          -0.3533022946712046,
+          -0.34431500898262646
+        ],
+        "pass": false
+      },
+      "pass": false
+    },
+    "T2_personalized_beats_nonpersonalized": {
+      "a": "oracle_personalized",
+      "b": "oracle_nonpersonalized",
+      "metric": "cum_reward",
+      "mean": 46.44048148789191,
+      "ci": [
+        44.69044291563897,
+        48.16670348158877
+      ],
+      "n_users": 847,
+      "resamples": 10000,
+      "pass": true
+    },
+    "T1_legacy_shortest_not_above_random": {
+      "a": "shortest_first",
+      "b": "random",
+      "metric": "cum_reward",
+      "mean": 11.989054318254967,
+      "ci": [
+        11.74626730327245,
+        12.237460053639731
+      ],
+      "n_users": 847,
+      "resamples": 10000,
+      "pass": false
+    },
+    "both_pass": false
+  },
+  "duration_pct": {
+    "T1_duration_probes_within_tolerance": {
+      "tolerance": 0.05,
+      "gap": 11.345811058905937,
+      "margin": 0.5672905529452968,
+      "rotation_shortest": {
+        "a": "rotation_shortest",
+        "b": "rotation_random",
+        "metric": "cum_reward",
+        "mean": 0.0018005632718197202,
+        "ci": [
+          -0.08617448850324685,
+          0.08928525101676268
+        ],
+        "n_users": 847,
+        "resamples": 10000,
+        "share_of_gap": 0.00015869850665337505,
+        "ci_share_of_gap": [
+          -0.007595269131121646,
+          0.0078694463139925
+        ],
+        "pass": true
+      },
+      "rotation_longest": {
+        "a": "rotation_longest",
+        "b": "rotation_random",
+        "metric": "cum_reward",
+        "mean": 0.20753394037366102,
+        "ci": [
+          0.12667934352702648,
+          0.2883963434718946
+        ],
+        "n_users": 847,
+        "resamples": 10000,
+        "share_of_gap": 0.018291679571973522,
+        "ci_share_of_gap": [
+          0.011165296413744617,
+          0.02541875075960451
+        ],
+        "pass": true
+      },
+      "pass": true
+    },
+    "T2_personalized_beats_nonpersonalized": {
+      "a": "oracle_personalized",
+      "b": "oracle_nonpersonalized",
+      "metric": "cum_reward",
+      "mean": 11.345811058905937,
+      "ci": [
+        11.146159692815536,
+        11.545264237688873
+      ],
+      "n_users": 847,
+      "resamples": 10000,
+      "pass": true
+    },
+    "T1_legacy_shortest_not_above_random": {
+      "a": "shortest_first",
+      "b": "random",
+      "metric": "cum_reward",
+      "mean": -0.21784672531915356,
+      "ci": [
+        -0.2814081211485143,
+        -0.1523639344559254
+      ],
+      "n_users": 847,
+      "resamples": 10000,
+      "pass": true
+    },
+    "both_pass": true
+  }
+}

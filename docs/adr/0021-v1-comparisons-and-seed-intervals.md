@@ -1,6 +1,6 @@
 # ADR-0021: Comparisons by paired bootstrap; seed intervals for stochastic policies only (evaluator v1)
 
-Status: **proposed**; supersedes ADR-0009's interval section on approval
+Status: accepted (evaluator v1)
 
 ## Decision
 - `harness.compare(a, b, metric)` gives the paired bootstrap over users of mean_u[a(u) − b(u)] for `cum_reward`, `session_length` or `mean_reward`. It uses 10,000 resamples, `paired_bootstrap_seed = 0` and the configured confidence. It refuses unequal user sets.

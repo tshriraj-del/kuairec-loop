@@ -2,7 +2,7 @@
 
 Status: accepted (Phase 0)
 
-Pending: the evaluator v1 proposal amends the frozen file list, adds big_matrix.csv and fails on unlisted modules (ADR-0025).
+Amended by ADR-0025 (evaluator v1): more frozen files, big_matrix.csv frozen, unlisted modules fail verification.
 
 ## Decision
 - `kuairec_eval/FROZEN_MANIFEST.json` stores sha256 hashes for `kuairec_eval/{__init__,_integrity,data,env,partitions,harness}.py`, `config/evaluator.toml`, the three partition files, and the data files `small_matrix.csv` and `item_categories.csv`.

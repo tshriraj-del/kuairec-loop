@@ -78,3 +78,13 @@ def test_runtime_guard_blocks_oracles_from_policy_code():
            "personalized_factory(np.zeros((1, 1)), np.array([0]), np.array([0]), None)\n")
     with pytest.raises(DiagnosticsAccessError):
         exec(compile(src, fake, "exec"), {})
+
+
+def test_runtime_guard_blocks_the_affinity_oracle_from_policy_code():
+    from kuairec_eval.diagnostics import DiagnosticsAccessError
+    fake = str(D.POLICIES_DIR / "evil_affinity_user.py")
+    src = ("import numpy as np\n"
+           "from kuairec_eval.diagnostics.oracles import category_affinity_factory\n"
+           "category_affinity_factory(np.zeros((1, 1)), np.array([0]), np.array([0]), {0: (0,)}, None, 'free')\n")
+    with pytest.raises(DiagnosticsAccessError):
+        exec(compile(src, fake, "exec"), {})

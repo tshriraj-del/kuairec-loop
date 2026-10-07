@@ -2,7 +2,7 @@
 
 Status: accepted (Phase 0)
 
-Pending: the evaluator v1 proposal amends the policy interface (stochastic declaration, begin_session(user, excluded)) and the seed rules (ADR-0021, ADR-0022).
+Amended by ADR-0021 and ADR-0022 (evaluator v1): checked stochastic declaration, begin_session(user, excluded), seed rules.
 
 ## Decision
 - **Policy interface:** `factory(context, seed) -> policy` with `begin_session(user)`, `act() -> video`, `observe(video, StepResult)`. `PolicyContext` holds only `catalog` (the 3,327 small-matrix video ids) and `categories`.

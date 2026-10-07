@@ -1,6 +1,6 @@
 # ADR-0015: Oracle ceilings
 
-Status: accepted (evaluator audit, 2026-10-06); v1 amendment proposed (ADR-0020)
+Status: accepted (evaluator audit, 2026-10-06); v1 amendment accepted
 
 ## Decision
 - **Location and isolation:** `kuairec_eval/diagnostics/`. Policies may not use it, enforced three ways: an import-time guard, a call-time guard in every factory and constructor (Python caches modules, so the import guard fires only once), and the AST scan in `tests/test_policy_isolation.py`. Each was checked by a test that plants a violation.
@@ -14,3 +14,6 @@ Status: accepted (evaluator audit, 2026-10-06); v1 amendment proposed (ADR-0020)
 
 ## Evidence
 Greedy is not proven optimal under the category constraint, but the slack is small. The personalized oracle reaches 200.73 of a 204.39 bound under raw and 28.548 of 28.642 under duration_pct (`scripts/audit_rewards.py`).
+
+## Amendment (evaluator v1 approval, 2026-10-06)
+The diagnostics module gains the category-affinity oracle (ADR-0028), with the same import-time and call-time guards and the same AST ban (`tests/test_policy_isolation.py`).

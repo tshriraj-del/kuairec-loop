@@ -25,9 +25,11 @@ def _walk(obj, seen, depth=0):
 
 
 def test_env_attributes_hold_no_reward_data(env):
-    for o in _walk(vars(env), set()):
+    config_floats = {v for v in vars(env.config).values() if isinstance(v, float)}
+    for o in _walk({k: v for k, v in vars(env).items() if k != "config"}, set()):
         assert not isinstance(o, (np.ndarray, pd.DataFrame, pd.Series)), type(o)
-        assert not isinstance(o, float) or o == env.config.missing_pair_reward
+        assert not isinstance(o, float), o
+    assert config_floats == {env.config.reward_cap}
 
 
 def test_public_surface_has_no_reward_accessor(env):
@@ -38,10 +40,11 @@ def test_public_surface_has_no_reward_accessor(env):
 
 def test_reset_and_step_reveal_only_the_requested_pair(env):
     obs = env.reset(env.users[0])
-    assert obs == {"user": env.users[0], "t": 0}
-    r = env.step(env.catalog[0])
+    assert set(obs) == {"user", "t", "excluded"} and obs["user"] == env.users[0] and obs["t"] == 0
+    assert all(isinstance(v, int) for v in obs["excluded"])
+    r = env.step(next(v for v in env.catalog if v not in obs["excluded"]))
     assert isinstance(r, StepResult)
-    assert set(vars(r)) == {"reward", "done", "observed", "quit_reason", "t"}
+    assert set(vars(r)) == {"reward", "done", "quit_reason", "t"}
     assert isinstance(r.reward, float)
 
 

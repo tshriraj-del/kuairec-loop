@@ -1,4 +1,5 @@
-"""Hash check for the frozen evaluator (environment, partitions, harness, config, data).
+"""Hash check for the frozen evaluator (environment, rewards, oracles, partitions, harness,
+config, data).
 
 `verify()` is called by Environment.__init__, partitions.load and harness.run, so
 any run fails if a frozen file changed since `scripts/freeze.py` last wrote the
@@ -19,15 +20,24 @@ FROZEN_CODE = [
     "kuairec_eval/_integrity.py",
     "kuairec_eval/data.py",
     "kuairec_eval/env.py",
+    "kuairec_eval/labels.py",
+    "kuairec_eval/rewards.py",
     "kuairec_eval/partitions.py",
     "kuairec_eval/harness.py",
+    "kuairec_eval/diagnostics/__init__.py",
+    "kuairec_eval/diagnostics/oracles.py",
+    # Reference policies are measuring sticks: the acceptance test and every results table
+    # depend on their exact behaviour (ADR-0029).
+    "policies/baselines.py",
+    "policies/reference.py",
     "config/evaluator.toml",
     "data/partitions/search.json",
     "data/partitions/shadow.json",
     "data/partitions/holdout.json",
 ]
-# Relative to the KuaiRec data dir: the tables the environment answers from.
-FROZEN_DATA = ["small_matrix.csv", "item_categories.csv"]
+# Relative to the KuaiRec data dir. big_matrix.csv is evaluator input since v1: the
+# duration_pct reward takes its buckets and reference sets from it (ADR-0016, ADR-0025).
+FROZEN_DATA = ["small_matrix.csv", "item_categories.csv", "big_matrix.csv"]
 
 
 class FrozenEvaluatorError(RuntimeError):
@@ -75,6 +85,12 @@ def verify(repo_root: Path | None = None, data_dir: Path | None = None,
     else:
         actual_data = expected["data"]
     problems = []
+    # Any module inside the package must be frozen, so an unlisted file cannot change behaviour.
+    package = repo_root / "kuairec_eval"
+    for path in sorted(package.rglob("*.py")):
+        rel = path.relative_to(repo_root).as_posix()
+        if rel not in FROZEN_CODE:
+            problems.append(f"code:{rel} is inside kuairec_eval/ but not in the manifest")
     for section, actual in (("code", actual_code), ("data", actual_data)):
         want = expected.get(section, {})
         for p in sorted(set(want) | set(actual)):

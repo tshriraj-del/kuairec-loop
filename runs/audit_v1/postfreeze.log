@@ -1,0 +1,26 @@
+== pytest
+======================== 92 passed in 215.27s (0:03:35) ========================
+== differential
+  "users": 847,
+  "sequences": 5929,
+  "reference_steps": 64508,
+  "unexplained": 0
+== audit_rewards
+raw            T1 FAIL  T2 PASS  verdict FAIL   (legacy T1 fail)
+capped5        T1 FAIL  T2 PASS  verdict FAIL   (legacy T1 fail)
+duration_pct   T1 PASS  T2 PASS  verdict PASS   (legacy T1 pass)
+== diversity
+**Decision (looser, strict reading, threshold 10%):** looser-setting difference is 6.4% of the personalization gap (< 10%): strict rotation is close to optimal everywhere; claim 2 returns to "a greedy personalized policy narrows and the diversity layer fixes it"; the three settings are robustness checks only.
+== baselines
+ok
+== correlation
+ok
+== bucket
+ok
+== survival
+ok
+== data checks
+ok
+== report
+wrote docs/AUDIT.md (82 lines)
+exit=0

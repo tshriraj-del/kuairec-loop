@@ -2,7 +2,7 @@
 
 Status: accepted (Phase 0)
 
-Pending: the evaluator v1 proposal amends the parameters into quit profiles (ADR-0019).
+Amended by ADR-0019 (evaluator v1): the parameters became quit profiles; primary keeps N=9, n_Q=1, max_turn=30.
 
 ## Context
 The CIRS paper (arXiv 2204.01266, Sec 5.1.2) says: "for the most recent N recommended items, if there are more than n_Q items in the N items [that] have at least one attribute of the current recommended target, then the user ... ends the interaction". It reports N = 1, n_Q = 1 for KuaiEnv. As worded, that rule can never fire, because one window item cannot be "more than 1" items.

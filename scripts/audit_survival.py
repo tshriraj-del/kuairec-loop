@@ -86,7 +86,8 @@ def main():
     seeds = list(harness.harness_config()["seeds"])
     from kuairec_eval import partitions
     users = partitions.load("search")
-    sess = np.concatenate([harness.run_seed(env, UniformRandom, users, s).sess_len for s in seeds])
+    ctx = harness.context_for(env)
+    sess = np.concatenate([harness.run_seed(env, UniformRandom(ctx, s), users, s).sess_len for s in seeds])
     out = {"harness_primary": {"n_sessions": int(len(sess)), "mean": float(sess.mean()),
                                "median": float(np.median(sess)), "survival": survival(sess),
                                "reach_max_turn": float((sess == MAX_TURN).mean())}}

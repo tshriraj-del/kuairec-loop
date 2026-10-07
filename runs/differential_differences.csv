@@ -7,7 +7,7 @@ capped,14,intended,reward,2,839,7.478378378378379,5.0,cap_at_5
 capped,14,easyrl4rec_slice,reward,0,520,8.591904761904761,5.0,cap_at_5
 capped,14,easyrl4rec_slice,reward,1,646,7.523549107142857,5.0,cap_at_5
 capped,14,easyrl4rec_slice,reward,2,839,7.478378378378379,5.0,cap_at_5
-random,19,intended,quit_step,7,2335,7,10,negative_slice_window
+random,19,intended,quit_step,7,2335,7,9,negative_slice_window
 random,19,intended,quit_step,8,136,8,10,negative_slice_window
 capped,19,intended,reward,0,9828,5.691734227937751,5.0,cap_at_5
 capped,19,easyrl4rec_slice,reward,0,9828,5.691734227937751,5.0,cap_at_5
@@ -108,6 +108,7 @@ capped,136,easyrl4rec_slice,reward,5,8630,5.273,5.0,cap_at_5
 capped,136,easyrl4rec_slice,reward,6,9101,16.272715336134453,5.0,cap_at_5
 capped,136,easyrl4rec_slice,reward,7,10062,5.32389449185415,5.0,cap_at_5
 capped,136,easyrl4rec_slice,reward,8,10377,78.13150851581509,5.0,cap_at_5
+random,140,intended,quit_step,8,9706,8,10,negative_slice_window
 capped,140,intended,reward,0,4644,5.804356132976691,5.0,cap_at_5
 capped,140,easyrl4rec_slice,reward,0,4644,5.804356132976691,5.0,cap_at_5
 random,155,intended,quit_step,8,1879,8,12,negative_slice_window
@@ -297,7 +298,6 @@ capped,240,easyrl4rec_slice,reward,7,1445,15.134569377990433,5.0,cap_at_5
 capped,240,easyrl4rec_slice,reward,8,1643,9.357684842068114,5.0,cap_at_5
 capped,240,easyrl4rec_slice,reward,9,2586,5.5352279455299,5.0,cap_at_5
 random,242,intended,quit_step,6,5632,6,20,negative_slice_window
-random,242,intended,quit_step,5,599,5,13,negative_slice_window
 capped,242,intended,reward,0,4312,9.23665852807813,5.0,cap_at_5
 capped,242,intended,reward,1,4763,5.134978469691951,5.0,cap_at_5
 capped,242,intended,reward,2,7383,6.5764590805347245,5.0,cap_at_5
@@ -619,7 +619,7 @@ random,570,intended,quit_step,7,10192,7,9,negative_slice_window
 capped,570,intended,reward,0,4721,5.293376623376624,5.0,cap_at_5
 capped,570,intended,reward,1,6930,9.944373017913774,5.0,cap_at_5
 capped,570,intended,reward,2,9575,17.344279030199914,5.0,cap_at_5
-capped,570,intended,quit_step,6,2397,6,10,negative_slice_window
+capped,570,intended,quit_step,6,2397,6,12,negative_slice_window
 capped,570,easyrl4rec_slice,reward,0,4721,5.293376623376624,5.0,cap_at_5
 capped,570,easyrl4rec_slice,reward,1,6930,9.944373017913774,5.0,cap_at_5
 capped,570,easyrl4rec_slice,reward,2,9575,17.344279030199914,5.0,cap_at_5
@@ -678,8 +678,9 @@ capped,579,easyrl4rec_slice,reward,3,1383,5.33023598820059,5.0,cap_at_5
 capped,579,easyrl4rec_slice,reward,4,1437,6.896127091558563,5.0,cap_at_5
 random,582,intended,quit_step,8,785,8,9,negative_slice_window
 random,582,intended,reward,1,7076,6.459246102230116,5.0,cap_at_5
-random,582,intended,quit_step,7,2540,7,9,negative_slice_window
+random,582,intended,quit_step,8,804,8,11,negative_slice_window
 random,582,easyrl4rec_slice,reward,1,7076,6.459246102230116,5.0,cap_at_5
+random,582,easyrl4rec_slice,reward,9,689,6.829507193143557,5.0,cap_at_5
 random,582,intended,quit_step,5,3079,5,22,negative_slice_window
 capped,582,intended,reward,0,462,6.120337301587302,5.0,cap_at_5
 capped,582,intended,reward,1,522,5.468229166666666,5.0,cap_at_5
@@ -953,7 +954,7 @@ random,771,intended,quit_step,5,5729,5,11,negative_slice_window
 capped,771,intended,reward,0,9711,5.776894097948933,5.0,cap_at_5
 capped,771,easyrl4rec_slice,reward,0,9711,5.776894097948933,5.0,cap_at_5
 random,785,intended,quit_step,7,2444,7,9,negative_slice_window
-random,785,intended,quit_step,7,8578,7,9,negative_slice_window
+random,785,intended,quit_step,6,8578,6,9,negative_slice_window
 capped,785,intended,reward,0,2334,5.062884398142337,5.0,cap_at_5
 capped,785,intended,reward,1,4092,8.152002573588547,5.0,cap_at_5
 capped,785,intended,reward,2,4646,5.596289481754063,5.0,cap_at_5
@@ -1063,7 +1064,7 @@ random,857,intended,quit_step,8,9615,8,11,negative_slice_window
 random,857,intended,quit_step,5,522,5,9,negative_slice_window
 capped,857,intended,reward,0,1305,5.627264627264627,5.0,cap_at_5
 capped,857,easyrl4rec_slice,reward,0,1305,5.627264627264627,5.0,cap_at_5
-random,865,intended,quit_step,5,5502,5,9,negative_slice_window
+random,865,intended,quit_step,8,1371,8,9,negative_slice_window
 random,865,intended,quit_step,8,8604,8,12,negative_slice_window
 random,865,intended,quit_step,7,4671,7,9,negative_slice_window
 capped,865,intended,reward,0,600,7.202159568086382,5.0,cap_at_5
@@ -1517,6 +1518,9 @@ capped,1130,intended,quit_step,6,2371,6,9,negative_slice_window
 capped,1130,easyrl4rec_slice,reward,0,468,10.07485436893204,5.0,cap_at_5
 capped,1130,easyrl4rec_slice,reward,1,753,5.478377173428444,5.0,cap_at_5
 capped,1130,easyrl4rec_slice,reward,2,4180,5.782608695652174,5.0,cap_at_5
+random,1132,intended,reward,6,2532,5.5024,5.0,cap_at_5
+random,1132,intended,quit_step,8,5663,8,10,negative_slice_window
+random,1132,easyrl4rec_slice,reward,6,2532,5.5024,5.0,cap_at_5
 random,1132,intended,reward,0,991,6.587391967463142,5.0,cap_at_5
 random,1132,intended,quit_step,7,8258,7,9,negative_slice_window
 random,1132,easyrl4rec_slice,reward,0,991,6.587391967463142,5.0,cap_at_5
@@ -1716,8 +1720,7 @@ capped,1261,easyrl4rec_slice,reward,4,8822,15.870472944184066,5.0,cap_at_5
 capped,1262,intended,reward,0,7155,6.026847204388934,5.0,cap_at_5
 capped,1262,intended,quit_step,6,649,6,7,negative_slice_window
 capped,1262,easyrl4rec_slice,reward,0,7155,6.026847204388934,5.0,cap_at_5
-random,1267,intended,quit_step,8,481,8,9,negative_slice_window
-random,1267,intended,quit_step,8,1291,8,12,negative_slice_window
+random,1267,intended,quit_step,7,481,7,9,negative_slice_window
 capped,1267,intended,reward,0,590,6.006632499246307,5.0,cap_at_5
 capped,1267,intended,reward,1,723,5.742057320595423,5.0,cap_at_5
 capped,1267,intended,reward,2,1327,13.550881277020286,5.0,cap_at_5
@@ -2239,6 +2242,7 @@ capped,1662,easyrl4rec_slice,reward,6,768,5.348425563629588,5.0,cap_at_5
 capped,1662,easyrl4rec_slice,reward,7,781,26.19022021848448,5.0,cap_at_5
 capped,1662,easyrl4rec_slice,reward,8,856,8.097360232861588,5.0,cap_at_5
 capped,1662,easyrl4rec_slice,reward,9,904,8.207922845587472,5.0,cap_at_5
+random,1665,intended,quit_step,8,9645,8,9,negative_slice_window
 random,1665,intended,quit_step,8,296,8,10,negative_slice_window
 capped,1665,intended,reward,0,594,6.131126482213439,5.0,cap_at_5
 capped,1665,intended,reward,1,638,7.897315653298835,5.0,cap_at_5
@@ -2494,8 +2498,8 @@ capped,1795,easyrl4rec_slice,reward,3,5711,5.536060802069858,5.0,cap_at_5
 capped,1795,easyrl4rec_slice,reward,4,7788,7.730625626081413,5.0,cap_at_5
 capped,1795,easyrl4rec_slice,reward,5,9815,5.2876890975482524,5.0,cap_at_5
 capped,1795,easyrl4rec_slice,reward,6,9975,7.80655737704918,5.0,cap_at_5
-random,1796,intended,reward,12,4224,5.690400843881856,5.0,cap_at_5
-random,1796,easyrl4rec_slice,reward,12,4224,5.690400843881856,5.0,cap_at_5
+random,1796,intended,reward,11,4224,5.690400843881856,5.0,cap_at_5
+random,1796,easyrl4rec_slice,reward,11,4224,5.690400843881856,5.0,cap_at_5
 random,1796,intended,quit_step,8,1227,8,10,negative_slice_window
 capped,1796,intended,reward,0,3290,11.971526630227531,5.0,cap_at_5
 capped,1796,intended,reward,1,4224,5.690400843881856,5.0,cap_at_5
@@ -2745,7 +2749,7 @@ capped,1977,intended,reward,2,7844,17.673320833792875,5.0,cap_at_5
 capped,1977,easyrl4rec_slice,reward,0,2645,5.493834187061279,5.0,cap_at_5
 capped,1977,easyrl4rec_slice,reward,1,6812,6.628076062639821,5.0,cap_at_5
 capped,1977,easyrl4rec_slice,reward,2,7844,17.673320833792875,5.0,cap_at_5
-random,1983,intended,quit_step,5,4379,5,9,negative_slice_window
+random,1983,intended,quit_step,5,4379,5,11,negative_slice_window
 capped,1983,intended,reward,0,543,6.621782178217821,5.0,cap_at_5
 capped,1983,intended,reward,1,9627,5.028266913809082,5.0,cap_at_5
 capped,1983,intended,quit_step,7,5374,7,12,negative_slice_window
@@ -3120,6 +3124,8 @@ capped,2245,easyrl4rec_slice,reward,0,600,6.902819436112777,5.0,cap_at_5
 capped,2245,easyrl4rec_slice,reward,1,6803,7.426113040732554,5.0,cap_at_5
 random,2259,intended,quit_step,6,1403,6,10,negative_slice_window
 random,2259,intended,quit_step,7,2333,7,9,negative_slice_window
+diverse,2259,intended,reward,18,4108,6.732381274294406,5.0,cap_at_5
+diverse,2259,easyrl4rec_slice,reward,18,4108,6.732381274294406,5.0,cap_at_5
 capped,2259,intended,reward,0,296,15.082536721846584,5.0,cap_at_5
 capped,2259,intended,reward,1,696,6.805697781278719,5.0,cap_at_5
 capped,2259,intended,reward,2,1444,5.549196273164738,5.0,cap_at_5
@@ -3156,7 +3162,7 @@ capped,2284,easyrl4rec_slice,reward,1,625,54.38132295719844,5.0,cap_at_5
 capped,2284,easyrl4rec_slice,reward,2,3338,64.41435145730357,5.0,cap_at_5
 capped,2284,easyrl4rec_slice,reward,3,4410,12.305882352941175,5.0,cap_at_5
 random,2287,intended,quit_step,5,8477,5,6,negative_slice_window
-random,2287,intended,quit_step,6,1399,6,7,negative_slice_window
+random,2287,intended,quit_step,5,1399,5,6,negative_slice_window
 capped,2287,intended,reward,0,610,7.106046511627907,5.0,cap_at_5
 capped,2287,intended,reward,1,666,7.7972222222222225,5.0,cap_at_5
 capped,2287,intended,reward,2,682,8.268082595870206,5.0,cap_at_5
@@ -3334,7 +3340,7 @@ capped,2407,easyrl4rec_slice,reward,6,643,17.736408390410958,5.0,cap_at_5
 capped,2407,easyrl4rec_slice,reward,7,676,7.453073953073953,5.0,cap_at_5
 capped,2407,easyrl4rec_slice,reward,8,721,6.731886969331726,5.0,cap_at_5
 capped,2407,easyrl4rec_slice,reward,9,785,6.136974671006085,5.0,cap_at_5
-random,2429,intended,quit_step,5,9901,5,9,negative_slice_window
+random,2429,intended,quit_step,5,390,5,6,negative_slice_window
 random,2429,intended,quit_step,5,2364,5,9,negative_slice_window
 capped,2429,intended,reward,0,592,6.615372142046376,5.0,cap_at_5
 capped,2429,intended,reward,1,1164,5.33128769442387,5.0,cap_at_5
@@ -3861,7 +3867,7 @@ capped,2796,easyrl4rec_slice,reward,4,2852,5.584356266057664,5.0,cap_at_5
 capped,2796,easyrl4rec_slice,reward,5,4738,5.604235197368421,5.0,cap_at_5
 random,2798,intended,quit_step,5,4247,5,9,negative_slice_window
 random,2798,intended,quit_step,8,5782,8,10,negative_slice_window
-random,2810,intended,quit_step,6,2559,6,10,negative_slice_window
+random,2810,intended,quit_step,7,7102,7,9,negative_slice_window
 random,2810,intended,quit_step,7,9733,7,11,negative_slice_window
 capped,2810,intended,reward,0,166,5.033928571428572,5.0,cap_at_5
 capped,2810,intended,reward,1,324,5.916547619047619,5.0,cap_at_5
@@ -4711,6 +4717,7 @@ random,3581,intended,quit_step,6,7594,6,10,negative_slice_window
 capped,3581,intended,quit_step,7,2944,7,10,negative_slice_window
 capped,3593,intended,quit_step,7,8248,7,14,negative_slice_window
 capped,3598,intended,quit_step,8,1564,8,11,negative_slice_window
+random,3610,intended,quit_step,6,5770,6,10,negative_slice_window
 capped,3610,intended,reward,0,2029,31.32436943620178,5.0,cap_at_5
 capped,3610,intended,reward,1,3772,33.50578351394131,5.0,cap_at_5
 capped,3610,intended,reward,2,3857,40.4201731427421,5.0,cap_at_5
@@ -4983,7 +4990,7 @@ capped,3779,easyrl4rec_slice,reward,2,8220,8.98848971049878,5.0,cap_at_5
 capped,3779,easyrl4rec_slice,reward,3,8669,7.509812167087188,5.0,cap_at_5
 capped,3779,easyrl4rec_slice,reward,4,10099,5.825111698732561,5.0,cap_at_5
 capped,3779,easyrl4rec_slice,reward,5,10415,9.408427200667502,5.0,cap_at_5
-random,3806,intended,quit_step,7,8689,7,14,negative_slice_window
+random,3806,intended,quit_step,7,8689,7,13,negative_slice_window
 diverse,3806,intended,reward,25,5714,12.716298275443284,5.0,cap_at_5
 diverse,3806,easyrl4rec_slice,reward,25,5714,12.716298275443284,5.0,cap_at_5
 capped,3806,intended,reward,0,1375,5.523031862962634,5.0,cap_at_5
@@ -5143,12 +5150,13 @@ capped,3875,easyrl4rec_slice,reward,14,3992,5.072656014470907,5.0,cap_at_5
 capped,3875,easyrl4rec_slice,reward,15,4040,7.582961072112316,5.0,cap_at_5
 capped,3875,easyrl4rec_slice,reward,16,4689,5.4628,5.0,cap_at_5
 random,3877,intended,quit_step,6,925,6,9,negative_slice_window
-random,3885,intended,reward,4,2436,21.436421555614547,5.0,cap_at_5
-random,3885,intended,reward,6,1096,6.232887700534759,5.0,cap_at_5
-random,3885,easyrl4rec_slice,reward,4,2436,21.436421555614547,5.0,cap_at_5
-random,3885,easyrl4rec_slice,reward,6,1096,6.232887700534759,5.0,cap_at_5
-popularity,3885,intended,reward,3,1507,8.333877107123437,5.0,cap_at_5
-popularity,3885,easyrl4rec_slice,reward,3,1507,8.333877107123437,5.0,cap_at_5
+random,3885,intended,reward,3,2436,21.436421555614547,5.0,cap_at_5
+random,3885,intended,reward,5,1096,6.232887700534759,5.0,cap_at_5
+random,3885,intended,quit_step,8,8486,8,20,negative_slice_window
+random,3885,easyrl4rec_slice,reward,3,2436,21.436421555614547,5.0,cap_at_5
+random,3885,easyrl4rec_slice,reward,5,1096,6.232887700534759,5.0,cap_at_5
+popularity,3885,intended,reward,2,1507,8.333877107123437,5.0,cap_at_5
+popularity,3885,easyrl4rec_slice,reward,2,1507,8.333877107123437,5.0,cap_at_5
 diverse,3885,intended,reward,4,9895,10.042223485925504,5.0,cap_at_5
 diverse,3885,easyrl4rec_slice,reward,4,9895,10.042223485925504,5.0,cap_at_5
 capped,3885,intended,reward,0,153,11.809054952453083,5.0,cap_at_5
@@ -5206,6 +5214,7 @@ capped,3909,intended,quit_step,5,6172,5,11,negative_slice_window
 capped,3909,easyrl4rec_slice,reward,0,536,8.408046553626969,5.0,cap_at_5
 random,3918,intended,quit_step,7,8576,7,10,negative_slice_window
 random,3918,intended,quit_step,7,3289,7,9,negative_slice_window
+random,3918,intended,quit_step,7,10552,7,10,negative_slice_window
 random,3925,intended,quit_step,5,4043,5,9,negative_slice_window
 capped,3925,intended,reward,0,2286,6.358857142857143,5.0,cap_at_5
 capped,3925,intended,reward,1,4040,5.049457562220804,5.0,cap_at_5
@@ -5232,7 +5241,7 @@ capped,3935,easyrl4rec_slice,reward,4,5787,9.579688285570638,5.0,cap_at_5
 random,3948,intended,quit_step,8,2570,8,16,negative_slice_window
 random,3949,intended,quit_step,7,2566,7,9,negative_slice_window
 capped,3949,intended,reward,0,6296,50.94400241716185,5.0,cap_at_5
-capped,3949,intended,quit_step,8,5700,8,10,negative_slice_window
+capped,3949,intended,quit_step,7,5700,7,9,negative_slice_window
 capped,3949,easyrl4rec_slice,reward,0,6296,50.94400241716185,5.0,cap_at_5
 random,3964,intended,quit_step,6,9266,6,9,negative_slice_window
 random,3964,intended,reward,2,3723,44.12456521739131,5.0,cap_at_5
@@ -5476,7 +5485,7 @@ capped,4205,easyrl4rec_slice,reward,2,5654,7.45540925749966,5.0,cap_at_5
 capped,4205,easyrl4rec_slice,reward,3,10378,14.657755672987255,5.0,cap_at_5
 random,4239,intended,quit_step,5,608,5,10,negative_slice_window
 capped,4239,intended,quit_step,6,9097,6,10,negative_slice_window
-random,4240,intended,quit_step,6,655,6,11,negative_slice_window
+random,4240,intended,quit_step,7,1335,7,10,negative_slice_window
 random,4240,intended,quit_step,7,7720,7,9,negative_slice_window
 random,4240,intended,quit_step,7,3149,7,9,negative_slice_window
 diverse,4240,intended,reward,25,9872,5.864859477775563,5.0,cap_at_5
@@ -5545,7 +5554,7 @@ capped,4280,easyrl4rec_slice,reward,10,2563,13.25770451520426,5.0,cap_at_5
 capped,4280,easyrl4rec_slice,reward,11,2564,13.88167053364269,5.0,cap_at_5
 capped,4280,easyrl4rec_slice,reward,12,2572,6.036392702651871,5.0,cap_at_5
 capped,4280,easyrl4rec_slice,reward,13,2631,7.786346994212826,5.0,cap_at_5
-random,4296,intended,quit_step,7,1183,7,10,negative_slice_window
+random,4296,intended,quit_step,6,1183,6,7,negative_slice_window
 capped,4296,intended,reward,0,255,8.778884120171673,5.0,cap_at_5
 capped,4296,intended,reward,1,541,5.675961411391569,5.0,cap_at_5
 capped,4296,intended,reward,2,2259,5.720316622691293,5.0,cap_at_5
@@ -5597,8 +5606,8 @@ random,4305,intended,quit_step,8,9994,8,9,negative_slice_window
 random,4305,easyrl4rec_slice,reward,1,4230,27.728627956197663,5.0,cap_at_5
 popularity,4305,intended,reward,4,951,6.244466019417476,5.0,cap_at_5
 popularity,4305,easyrl4rec_slice,reward,4,951,6.244466019417476,5.0,cap_at_5
-diverse,4305,intended,reward,4,5725,19.32458377081145,5.0,cap_at_5
-diverse,4305,easyrl4rec_slice,reward,4,5725,19.32458377081145,5.0,cap_at_5
+diverse,4305,intended,reward,3,5725,19.32458377081145,5.0,cap_at_5
+diverse,4305,easyrl4rec_slice,reward,3,5725,19.32458377081145,5.0,cap_at_5
 stress,4305,intended,reward,0,9158,9.073763955342905,5.0,cap_at_5
 stress,4305,easyrl4rec_slice,reward,0,9158,9.073763955342905,5.0,cap_at_5
 capped,4305,intended,reward,0,142,6.021837432447336,5.0,cap_at_5
@@ -5608,7 +5617,6 @@ capped,4305,easyrl4rec_slice,reward,0,142,6.021837432447336,5.0,cap_at_5
 capped,4305,easyrl4rec_slice,reward,1,203,6.032940953104234,5.0,cap_at_5
 capped,4305,easyrl4rec_slice,reward,2,211,7.653667407557082,5.0,cap_at_5
 random,4307,intended,quit_step,5,10186,5,12,negative_slice_window
-random,4307,intended,quit_step,5,706,5,6,negative_slice_window
 capped,4307,intended,reward,0,640,6.186388779138681,5.0,cap_at_5
 capped,4307,intended,reward,1,1325,6.608923375363725,5.0,cap_at_5
 capped,4307,intended,reward,2,1903,9.130014587892047,5.0,cap_at_5
@@ -5634,6 +5642,7 @@ capped,4307,easyrl4rec_slice,reward,11,9615,5.939296142615644,5.0,cap_at_5
 random,4315,intended,quit_step,8,203,8,10,negative_slice_window
 capped,4315,intended,reward,0,8530,19.59803370786517,5.0,cap_at_5
 capped,4315,easyrl4rec_slice,reward,0,8530,19.59803370786517,5.0,cap_at_5
+random,4321,intended,quit_step,6,3998,6,10,negative_slice_window
 random,4321,intended,quit_step,6,8874,6,9,negative_slice_window
 capped,4321,intended,reward,0,154,7.074518471739817,5.0,cap_at_5
 capped,4321,intended,reward,1,179,5.556452942146036,5.0,cap_at_5
@@ -5796,7 +5805,6 @@ capped,4423,easyrl4rec_slice,reward,7,4875,8.67891866255632,5.0,cap_at_5
 capped,4423,easyrl4rec_slice,reward,8,6103,6.6915955148647255,5.0,cap_at_5
 capped,4423,easyrl4rec_slice,reward,9,7713,16.391629997191274,5.0,cap_at_5
 capped,4423,easyrl4rec_slice,reward,10,7844,6.264198615840932,5.0,cap_at_5
-capped,4427,intended,quit_step,7,403,7,12,negative_slice_window
 random,4428,intended,quit_step,6,3682,6,10,negative_slice_window
 capped,4428,intended,reward,0,509,6.726919878014971,5.0,cap_at_5
 capped,4428,intended,reward,1,1997,9.844901909034926,5.0,cap_at_5
@@ -5840,7 +5848,7 @@ capped,4431,intended,quit_step,7,737,7,9,negative_slice_window
 capped,4431,easyrl4rec_slice,reward,0,4858,5.018910316420146,5.0,cap_at_5
 capped,4431,easyrl4rec_slice,reward,1,7594,5.080657395701643,5.0,cap_at_5
 random,4438,intended,quit_step,8,1907,8,14,negative_slice_window
-random,4438,intended,quit_step,8,935,8,9,negative_slice_window
+random,4438,intended,quit_step,7,935,7,11,negative_slice_window
 capped,4438,intended,reward,0,1963,7.2148070907195,5.0,cap_at_5
 capped,4438,intended,reward,1,2629,6.070438579836719,5.0,cap_at_5
 capped,4438,intended,reward,2,4653,5.041482649842271,5.0,cap_at_5
@@ -5850,7 +5858,7 @@ capped,4438,easyrl4rec_slice,reward,0,1963,7.2148070907195,5.0,cap_at_5
 capped,4438,easyrl4rec_slice,reward,1,2629,6.070438579836719,5.0,cap_at_5
 capped,4438,easyrl4rec_slice,reward,2,4653,5.041482649842271,5.0,cap_at_5
 capped,4438,easyrl4rec_slice,reward,3,9958,5.615228837586067,5.0,cap_at_5
-random,4439,intended,quit_step,6,2853,6,11,negative_slice_window
+random,4439,intended,quit_step,5,2853,5,6,negative_slice_window
 random,4439,intended,reward,4,619,5.149818181818182,5.0,cap_at_5
 random,4439,intended,quit_step,8,2411,8,12,negative_slice_window
 random,4439,easyrl4rec_slice,reward,4,619,5.149818181818182,5.0,cap_at_5
@@ -6349,7 +6357,7 @@ capped,4764,easyrl4rec_slice,reward,0,983,14.61689174230684,5.0,cap_at_5
 capped,4764,easyrl4rec_slice,reward,1,1347,7.423878274401314,5.0,cap_at_5
 capped,4764,easyrl4rec_slice,reward,2,1409,10.094689300731972,5.0,cap_at_5
 random,4772,intended,quit_step,6,9645,6,9,negative_slice_window
-random,4772,intended,quit_step,6,7440,6,11,negative_slice_window
+random,4772,intended,quit_step,6,7440,6,10,negative_slice_window
 diverse,4772,intended,reward,21,4172,7.804407316721878,5.0,cap_at_5
 diverse,4772,easyrl4rec_slice,reward,21,4172,7.804407316721878,5.0,cap_at_5
 capped,4772,intended,reward,0,256,5.814327122153209,5.0,cap_at_5
@@ -6422,7 +6430,7 @@ capped,4812,easyrl4rec_slice,reward,6,2687,7.904210526315789,5.0,cap_at_5
 capped,4812,easyrl4rec_slice,reward,7,3738,5.319607308426507,5.0,cap_at_5
 capped,4812,easyrl4rec_slice,reward,8,3894,5.528890120548705,5.0,cap_at_5
 capped,4812,easyrl4rec_slice,reward,9,3945,5.6485,5.0,cap_at_5
-random,4820,intended,quit_step,7,1965,7,11,negative_slice_window
+random,4820,intended,quit_step,6,1965,6,10,negative_slice_window
 random,4820,intended,quit_step,6,8669,6,12,negative_slice_window
 random,4820,intended,quit_step,7,8544,7,9,negative_slice_window
 capped,4820,intended,reward,0,737,25.3245708984073,5.0,cap_at_5
@@ -6571,7 +6579,7 @@ capped,4919,easyrl4rec_slice,reward,1,8813,5.08,5.0,cap_at_5
 capped,4919,easyrl4rec_slice,reward,2,10377,15.81411192214112,5.0,cap_at_5
 random,4937,intended,reward,2,6222,5.333518312985571,5.0,cap_at_5
 random,4937,easyrl4rec_slice,reward,2,6222,5.333518312985571,5.0,cap_at_5
-random,4937,intended,quit_step,8,691,8,11,negative_slice_window
+random,4937,intended,quit_step,7,691,7,10,negative_slice_window
 capped,4937,intended,reward,0,136,5.3307139953935785,5.0,cap_at_5
 capped,4937,intended,reward,1,5416,69.55429573348918,5.0,cap_at_5
 capped,4937,intended,reward,2,5672,8.587790697674418,5.0,cap_at_5
@@ -6589,7 +6597,6 @@ capped,4957,easyrl4rec_slice,reward,0,2623,33.60233870967742,5.0,cap_at_5
 capped,4957,easyrl4rec_slice,reward,1,9790,8.397169527250828,5.0,cap_at_5
 capped,4957,easyrl4rec_slice,reward,2,9975,11.135245901639344,5.0,cap_at_5
 capped,4957,easyrl4rec_slice,reward,3,10122,5.914907437479701,5.0,cap_at_5
-random,4962,intended,quit_step,5,7230,5,9,negative_slice_window
 random,4962,intended,quit_step,8,2698,8,11,negative_slice_window
 capped,4962,intended,reward,0,629,8.305642090688819,5.0,cap_at_5
 capped,4962,intended,reward,1,977,5.954976803036693,5.0,cap_at_5
@@ -6706,7 +6713,7 @@ random,5019,intended,quit_step,7,3745,7,11,negative_slice_window
 capped,5019,intended,reward,0,2008,7.596666666666667,5.0,cap_at_5
 capped,5019,intended,quit_step,7,1942,7,9,negative_slice_window
 capped,5019,easyrl4rec_slice,reward,0,2008,7.596666666666667,5.0,cap_at_5
-random,5033,intended,quit_step,7,835,7,11,negative_slice_window
+random,5033,intended,quit_step,7,835,7,10,negative_slice_window
 popularity,5033,intended,reward,4,951,5.256893203883495,5.0,cap_at_5
 popularity,5033,easyrl4rec_slice,reward,4,951,5.256893203883495,5.0,cap_at_5
 capped,5033,intended,reward,0,389,5.17459200900394,5.0,cap_at_5
@@ -6778,7 +6785,7 @@ capped,5062,intended,reward,2,1986,5.744903348473645,5.0,cap_at_5
 capped,5062,intended,reward,3,3929,32.03157894736842,5.0,cap_at_5
 capped,5062,intended,reward,4,5027,80.53774243058463,5.0,cap_at_5
 capped,5062,intended,reward,5,7794,5.87578668433256,5.0,cap_at_5
-capped,5062,intended,quit_step,5,7794,5,9,negative_slice_window
+capped,5062,intended,quit_step,5,7794,5,10,negative_slice_window
 capped,5062,easyrl4rec_slice,reward,0,211,7.304101838755304,5.0,cap_at_5
 capped,5062,easyrl4rec_slice,reward,1,1361,10.998202930605474,5.0,cap_at_5
 capped,5062,easyrl4rec_slice,reward,2,1986,5.744903348473645,5.0,cap_at_5
@@ -7376,7 +7383,6 @@ capped,5587,easyrl4rec_slice,reward,2,785,7.346257252016414,5.0,cap_at_5
 capped,5587,easyrl4rec_slice,reward,3,951,5.044951456310679,5.0,cap_at_5
 capped,5587,easyrl4rec_slice,reward,4,2052,6.640960976904699,5.0,cap_at_5
 capped,5587,easyrl4rec_slice,reward,5,3128,10.687479297780722,5.0,cap_at_5
-random,5590,intended,quit_step,7,4932,7,10,negative_slice_window
 capped,5590,intended,reward,0,349,8.951924575346736,5.0,cap_at_5
 capped,5590,intended,reward,1,819,6.242573518435587,5.0,cap_at_5
 capped,5590,intended,reward,2,1370,5.267679719462302,5.0,cap_at_5
@@ -7571,9 +7577,8 @@ capped,5692,easyrl4rec_slice,reward,0,3293,5.4933742727860375,5.0,cap_at_5
 capped,5692,easyrl4rec_slice,reward,1,5960,33.9334255235085,5.0,cap_at_5
 capped,5692,easyrl4rec_slice,reward,2,8978,9.267472411981082,5.0,cap_at_5
 capped,5692,easyrl4rec_slice,reward,3,9667,6.211184834123222,5.0,cap_at_5
-random,5693,intended,reward,2,4180,33.377101449275365,5.0,cap_at_5
-random,5693,intended,quit_step,8,7723,8,9,negative_slice_window
-random,5693,easyrl4rec_slice,reward,2,4180,33.377101449275365,5.0,cap_at_5
+random,5693,intended,reward,1,4180,33.377101449275365,5.0,cap_at_5
+random,5693,easyrl4rec_slice,reward,1,4180,33.377101449275365,5.0,cap_at_5
 random,5693,intended,quit_step,6,7248,6,9,negative_slice_window
 random,5693,intended,quit_step,8,2298,8,15,negative_slice_window
 capped,5693,intended,reward,0,147,6.723533891850724,5.0,cap_at_5
@@ -7687,7 +7692,8 @@ capped,5749,easyrl4rec_slice,reward,1,207,10.360327868852458,5.0,cap_at_5
 capped,5749,easyrl4rec_slice,reward,2,414,17.982117403135934,5.0,cap_at_5
 capped,5749,easyrl4rec_slice,reward,3,425,7.020936515083296,5.0,cap_at_5
 random,5755,intended,quit_step,7,3935,7,9,negative_slice_window
-random,5757,intended,quit_step,8,7134,8,12,negative_slice_window
+random,5757,intended,quit_step,8,7134,8,16,negative_slice_window
+random,5757,easyrl4rec_slice,reward,14,2497,7.009285714285714,5.0,cap_at_5
 random,5757,intended,quit_step,7,1290,7,9,negative_slice_window
 capped,5757,intended,reward,0,2497,7.009285714285714,5.0,cap_at_5
 capped,5757,intended,reward,1,4124,6.107792042710055,5.0,cap_at_5
@@ -7735,12 +7741,11 @@ random,5797,intended,quit_step,8,2876,8,11,negative_slice_window
 capped,5797,intended,reward,0,186,7.79007299270073,5.0,cap_at_5
 capped,5797,intended,reward,1,3106,27.48519095869057,5.0,cap_at_5
 capped,5797,intended,reward,2,8743,7.662584309549166,5.0,cap_at_5
-capped,5797,intended,quit_step,7,7471,7,12,negative_slice_window
+capped,5797,intended,quit_step,6,7471,6,11,negative_slice_window
 capped,5797,easyrl4rec_slice,reward,0,186,7.79007299270073,5.0,cap_at_5
 capped,5797,easyrl4rec_slice,reward,1,3106,27.48519095869057,5.0,cap_at_5
 capped,5797,easyrl4rec_slice,reward,2,8743,7.662584309549166,5.0,cap_at_5
-random,5802,intended,quit_step,7,7689,7,9,negative_slice_window
-random,5802,intended,quit_step,6,5756,6,10,negative_slice_window
+random,5802,intended,quit_step,7,3634,7,9,negative_slice_window
 diverse,5802,intended,reward,6,5736,12.858548387096777,5.0,cap_at_5
 diverse,5802,easyrl4rec_slice,reward,6,5736,12.858548387096777,5.0,cap_at_5
 capped,5802,intended,reward,0,721,8.401633855631445,5.0,cap_at_5
@@ -8022,7 +8027,6 @@ capped,5979,easyrl4rec_slice,reward,1,1205,7.877293760970161,5.0,cap_at_5
 capped,5979,easyrl4rec_slice,reward,2,2475,8.242310443490702,5.0,cap_at_5
 capped,5979,easyrl4rec_slice,reward,3,4205,7.905820895522388,5.0,cap_at_5
 capped,5979,easyrl4rec_slice,reward,4,5787,5.05982905982906,5.0,cap_at_5
-random,5982,intended,quit_step,6,8611,6,11,negative_slice_window
 capped,5982,intended,reward,0,1341,5.414478527607362,5.0,cap_at_5
 capped,5982,intended,reward,1,2347,6.147623862487361,5.0,cap_at_5
 capped,5982,intended,reward,2,2371,7.883022373616165,5.0,cap_at_5
@@ -8077,6 +8081,7 @@ capped,6014,easyrl4rec_slice,reward,0,183,7.800655737704918,5.0,cap_at_5
 capped,6014,easyrl4rec_slice,reward,1,207,8.217868852459016,5.0,cap_at_5
 capped,6014,easyrl4rec_slice,reward,2,211,5.443928066276015,5.0,cap_at_5
 capped,6014,easyrl4rec_slice,reward,3,318,8.489587465291551,5.0,cap_at_5
+random,6018,intended,quit_step,8,10014,8,9,negative_slice_window
 random,6018,intended,quit_step,7,5668,7,9,negative_slice_window
 capped,6018,intended,reward,0,7303,7.276888888888889,5.0,cap_at_5
 capped,6018,intended,quit_step,8,7166,8,13,negative_slice_window
@@ -8264,7 +8269,6 @@ capped,6208,easyrl4rec_slice,reward,1,4624,6.158225198827962,5.0,cap_at_5
 capped,6208,easyrl4rec_slice,reward,2,7015,65.0797490299678,5.0,cap_at_5
 capped,6208,easyrl4rec_slice,reward,3,7696,101.29878116962988,5.0,cap_at_5
 capped,6208,easyrl4rec_slice,reward,4,8783,6.102752293577981,5.0,cap_at_5
-random,6210,intended,quit_step,6,6248,6,10,negative_slice_window
 stress,6210,intended,reward,2,8526,5.068295034549252,5.0,cap_at_5
 stress,6210,easyrl4rec_slice,reward,2,8526,5.068295034549252,5.0,cap_at_5
 capped,6210,intended,reward,0,390,5.014619883040936,5.0,cap_at_5
@@ -8282,7 +8286,7 @@ capped,6211,intended,reward,2,9873,5.932989188662706,5.0,cap_at_5
 capped,6211,easyrl4rec_slice,reward,0,8298,6.801834862385321,5.0,cap_at_5
 capped,6211,easyrl4rec_slice,reward,1,9811,6.64612676056338,5.0,cap_at_5
 capped,6211,easyrl4rec_slice,reward,2,9873,5.932989188662706,5.0,cap_at_5
-random,6214,intended,quit_step,7,2537,7,11,negative_slice_window
+random,6214,intended,quit_step,6,2537,6,12,negative_slice_window
 random,6214,intended,quit_step,8,2292,8,14,negative_slice_window
 capped,6214,intended,reward,0,755,6.880084033613445,5.0,cap_at_5
 capped,6214,intended,reward,1,4172,5.1183926256661385,5.0,cap_at_5
@@ -8502,7 +8506,7 @@ capped,6338,easyrl4rec_slice,reward,2,9568,6.385,5.0,cap_at_5
 capped,6345,intended,reward,0,600,5.008098380323935,5.0,cap_at_5
 capped,6345,intended,quit_step,6,4186,6,15,negative_slice_window
 capped,6345,easyrl4rec_slice,reward,0,600,5.008098380323935,5.0,cap_at_5
-random,6349,intended,quit_step,7,5818,7,9,negative_slice_window
+random,6349,intended,quit_step,8,570,8,9,negative_slice_window
 random,6349,intended,reward,5,7031,8.294162162162163,5.0,cap_at_5
 random,6349,easyrl4rec_slice,reward,5,7031,8.294162162162163,5.0,cap_at_5
 random,6349,intended,quit_step,8,3118,8,11,negative_slice_window
@@ -8734,6 +8738,7 @@ capped,6449,easyrl4rec_slice,reward,1,493,8.86042857142857,5.0,cap_at_5
 capped,6449,easyrl4rec_slice,reward,2,1306,7.621178479931682,5.0,cap_at_5
 capped,6449,easyrl4rec_slice,reward,3,1312,6.961667173714633,5.0,cap_at_5
 random,6475,intended,quit_step,7,1420,7,11,negative_slice_window
+random,6475,intended,quit_step,8,9568,8,9,negative_slice_window
 capped,6475,intended,reward,0,543,61.52910891089109,5.0,cap_at_5
 capped,6475,intended,reward,1,1372,5.04384093113482,5.0,cap_at_5
 capped,6475,intended,reward,2,2950,10.362792574656982,5.0,cap_at_5
@@ -8998,6 +9003,7 @@ capped,6676,easyrl4rec_slice,reward,3,6068,108.0457205963556,5.0,cap_at_5
 capped,6676,easyrl4rec_slice,reward,4,8524,5.484160358844968,5.0,cap_at_5
 capped,6676,easyrl4rec_slice,reward,5,9790,12.67650306132691,5.0,cap_at_5
 capped,6676,easyrl4rec_slice,reward,6,9936,6.546564352982212,5.0,cap_at_5
+random,6682,intended,quit_step,8,2613,8,13,negative_slice_window
 capped,6682,intended,reward,0,967,6.393404255319149,5.0,cap_at_5
 capped,6682,intended,reward,1,5917,5.33675799086758,5.0,cap_at_5
 capped,6682,intended,reward,2,6523,8.736733287388008,5.0,cap_at_5
@@ -9207,7 +9213,7 @@ capped,6893,easyrl4rec_slice,reward,6,1301,15.373655913978494,5.0,cap_at_5
 capped,6893,easyrl4rec_slice,reward,7,1327,8.48675057966214,5.0,cap_at_5
 capped,6893,easyrl4rec_slice,reward,8,1402,5.014687191074707,5.0,cap_at_5
 capped,6893,easyrl4rec_slice,reward,9,1403,7.208131745441012,5.0,cap_at_5
-random,6897,intended,quit_step,8,658,8,11,negative_slice_window
+random,6897,intended,quit_step,7,658,7,10,negative_slice_window
 random,6897,intended,quit_step,6,8699,6,11,negative_slice_window
 capped,6897,intended,reward,0,858,32.822021116138764,5.0,cap_at_5
 capped,6897,intended,reward,1,1258,6.5424635549016985,5.0,cap_at_5
@@ -9298,7 +9304,7 @@ random,7043,intended,quit_step,5,9811,5,7,negative_slice_window
 capped,7043,intended,reward,0,1327,5.911063265982113,5.0,cap_at_5
 capped,7043,intended,quit_step,5,859,5,6,negative_slice_window
 capped,7043,easyrl4rec_slice,reward,0,1327,5.911063265982113,5.0,cap_at_5
-random,7046,intended,quit_step,7,4086,7,10,negative_slice_window
+random,7046,intended,quit_step,6,4086,6,9,negative_slice_window
 random,7056,intended,quit_step,5,3125,5,12,negative_slice_window
 capped,7056,intended,reward,0,314,7.18780567329638,5.0,cap_at_5
 capped,7056,intended,reward,1,582,6.564430379746836,5.0,cap_at_5
@@ -9321,7 +9327,7 @@ capped,7056,easyrl4rec_slice,reward,8,3958,5.155460322151618,5.0,cap_at_5
 capped,7056,easyrl4rec_slice,reward,9,4040,5.579442282749676,5.0,cap_at_5
 capped,7056,easyrl4rec_slice,reward,10,4109,5.016954678839257,5.0,cap_at_5
 random,7057,intended,quit_step,5,3747,5,10,negative_slice_window
-random,7057,intended,quit_step,8,481,8,10,negative_slice_window
+random,7057,intended,quit_step,7,481,7,9,negative_slice_window
 capped,7057,intended,reward,0,403,8.873010320097954,5.0,cap_at_5
 capped,7057,intended,reward,1,5677,5.190061523899669,5.0,cap_at_5
 capped,7057,intended,reward,2,7752,7.0274707925481525,5.0,cap_at_5
@@ -9468,7 +9474,7 @@ capped,7110,easyrl4rec_slice,reward,7,7071,24.73601371357332,5.0,cap_at_5
 capped,7110,easyrl4rec_slice,reward,8,7093,5.4338207335199975,5.0,cap_at_5
 capped,7110,easyrl4rec_slice,reward,9,8340,9.161166666666666,5.0,cap_at_5
 random,7121,intended,quit_step,6,645,6,9,negative_slice_window
-random,7121,intended,quit_step,6,183,6,9,negative_slice_window
+random,7121,intended,quit_step,8,6747,8,9,negative_slice_window
 capped,7121,intended,reward,0,1988,6.076912141029286,5.0,cap_at_5
 capped,7121,intended,reward,1,3610,5.110662107553622,5.0,cap_at_5
 capped,7121,intended,reward,2,3722,5.575806977502445,5.0,cap_at_5

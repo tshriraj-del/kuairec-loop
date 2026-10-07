@@ -1,17 +1,24 @@
 {
   "code": {
-    "config/evaluator.toml": "415b33ca99efe95cc434799341d2c4976ef8499fa15e304603e9c19385fca8f3",
+    "config/evaluator.toml": "00ec1b6a54a02cd934ae23384c8083c6fb374a5f7b97b098e5cc3754904aa755",
     "data/partitions/holdout.json": "be27f1000c1142995f8a90eb43c3d5b4d27f9d64c9edbcac3792cba8267bd533",
     "data/partitions/search.json": "38be186e89c3b8d2b584fa4cda98885dbc4129e0cb9b4f0446337c19c74c89bf",
     "data/partitions/shadow.json": "59de54e0c910416372f65b8af13d684f6e846e8fe83bf32926bc1e03c8b43e01",
     "kuairec_eval/__init__.py": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
-    "kuairec_eval/_integrity.py": "9481f684ce1fbe2304f2e4d11ee3e03b84cea9a880bb2dc28ab84dabcc76121e",
+    "kuairec_eval/_integrity.py": "4f77e746cba90316c3721a20d1854784f68d37b43eef125512a7a192b450d75f",
     "kuairec_eval/data.py": "cc68f07ea9bd746486f47e81ec6b93a40b4d900df1cb823ffdc9bf6c486af428",
-    "kuairec_eval/env.py": "8bdc62f08c3b995409ff891417e8811d6b370bab3916ab6aafdf3a64dbc28e71",
-    "kuairec_eval/harness.py": "ea306a2f5f830aa4fde5dce4119717f8fb52c8272c85a4f2ddbc5c11cbe0ebd2",
-    "kuairec_eval/partitions.py": "6e9d5049dbab249c839e4593489dce78567e64c24c611609ead39133d6093d94"
+    "kuairec_eval/diagnostics/__init__.py": "f929f502f05fe0df5fc61f5ef31ed160220b6b89d4568e94a17c0b5b19e1e906",
+    "kuairec_eval/diagnostics/oracles.py": "49bf25390bee33e90974e6cf3fc36f95b37ebc3fb841a53606c9fc37f0c38be0",
+    "kuairec_eval/env.py": "f1a27b29e13ea77b0f2f09984729ccfc60ad93ed474cf659d49700202db0cddd",
+    "kuairec_eval/harness.py": "28013ba7f27c51f9c906ed38c79efcbe0441bbfd5a27db7f81916f9256045af7",
+    "kuairec_eval/labels.py": "b8d8e1c55c5e75ff39a7103809401b2bfa1d84ce98648ae30a84717e2321a97c",
+    "kuairec_eval/partitions.py": "6e9d5049dbab249c839e4593489dce78567e64c24c611609ead39133d6093d94",
+    "kuairec_eval/rewards.py": "08412337792d378759157ad9a9f12de8a00979ef78ead967bf616e77fd1663e5",
+    "policies/baselines.py": "30322f856b1cce77ef1be04d8aacf0cfc21ed618b073aa364b5cbe8c7b87f8b5",
+    "policies/reference.py": "2f57c0d3a4bb148c234b50bc20811f7891b84b7352f36cbd477f0454970769ba"
   },
   "data": {
+    "big_matrix.csv": "4ee1a72ff9ce4e86ef50525da9dfd7aefcefa717b37c9d570010f689c42f4ef9",
     "item_categories.csv": "b8b8330387cd69659ff6b35b9b69bb35303196a5264d5d7743e92ae8e19cd15e",
     "small_matrix.csv": "6b601cd38b2600d8734b4aede309ad73d1e201fdc4bd76d4bc7d2534793d7d15"
   }

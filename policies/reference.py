@@ -1,13 +1,15 @@
-"""Reference policies for the evaluator audit (ADR-0014). Public data only: the big matrix
-(through kuairec_eval.labels) and item categories (through PolicyContext).
+"""Reference policies (ADR-0014, ADR-0029). Public data only: the big matrix (through
+kuairec_eval.labels) and item categories (through PolicyContext). FROZEN since evaluator v1:
+the acceptance test and every results table depend on these exact definitions.
 
   (a) ShortestFirst          shortest unseen catalog video, canonical duration ascending
   (b) CategoryRotation       rotate categories; random single-tag video inside each category
   (c) CategoryRotation       rotate categories; shortest single-tag video inside each category
   (d) BigMeanLabel("raw")    big-matrix mean watch_ratio per video, minimum 100 big-matrix rows
-  (e) BigMeanLabel(label)    NOT REQUESTED: (d) with the active reward's own label
-  probes, NOT REQUESTED      LongestFirst and CategoryRotation(pick="longest"): mirror (a) and
-                             (c) to test for a long-video bias (ADR-0014)
+  (e) BigMeanLabel(label)    (d) with the active reward's own label
+  LongestFirst, CategoryRotation(pick="longest")   mirrors of (a) and (c)
+
+PERMANENT_ROWS below must appear in every results table (tests/test_reporting.py).
 
 The rotation never reads the quit parameters. It shows only single-tag videos and cycles
 through the K = 29 categories that have one, so a category recurs no sooner than K steps
@@ -18,31 +20,19 @@ from __future__ import annotations
 import numpy as np
 
 from kuairec_eval.labels import big_matrix_video_stats, canonical_durations
+from policies.baselines import RankedPolicy
 
 MIN_BIG_ROWS = 100
 
 
-class ShortestFirst:
+class ShortestFirst(RankedPolicy):
     """(a) Deterministic: same ranking for every user, ties broken by video_id."""
-    stochastic = False
     longest = False
 
     def __init__(self, context, seed: int):
         dur = canonical_durations()
         sign = -1.0 if self.longest else 1.0
-        self.ranking: tuple[int, ...] = tuple(sorted(context.catalog, key=lambda v: (sign * float(dur[v]), v)))
-        self._pos = 0
-
-    def begin_session(self, user: int) -> None:
-        self._pos = 0
-
-    def act(self) -> int:
-        v = self.ranking[self._pos]
-        self._pos += 1
-        return v
-
-    def observe(self, video, result) -> None:
-        pass
+        self.ranking = tuple(sorted(context.catalog, key=lambda v: (sign * float(dur[v]), v)))
 
 
 class LongestFirst(ShortestFirst):
@@ -75,13 +65,13 @@ class CategoryRotation:
         self._pos = 0
         self._shown: set[int] = set()
 
-    def begin_session(self, user: int) -> None:
+    def begin_session(self, user: int, excluded: frozenset[int]) -> None:
         if self.pick == "random":
             self._order = [int(c) for c in self._rng.permutation(self.rotation_categories)]
         else:
             self._order = list(self._fixed_order)
         self._pos = 0
-        self._shown = set()
+        self._shown = set(excluded)  # never shown, never eligible
 
     def act(self) -> int:
         k = len(self._order)
@@ -99,24 +89,35 @@ class CategoryRotation:
         pass
 
 
-class BigMeanLabel:
+class BigMeanLabel(RankedPolicy):
     """(d) label="raw": rank catalog videos by big-matrix mean watch_ratio, among videos with
     at least MIN_BIG_ROWS big-matrix rows (14 of 3,327 fall below). (e) any other label."""
-    stochastic = False
 
     def __init__(self, context, seed: int, label: str = "raw", n_buckets: int | None = None):
         st = big_matrix_video_stats(label, n_buckets).reindex(list(context.catalog))
         eligible = st[st["size"] >= MIN_BIG_ROWS]
-        self.ranking: tuple[int, ...] = tuple(sorted(eligible.index, key=lambda v: (-float(eligible.at[v, "mean"]), v)))
-        self._pos = 0
+        self.ranking = tuple(sorted(eligible.index, key=lambda v: (-float(eligible.at[v, "mean"]), v)))
 
-    def begin_session(self, user: int) -> None:
-        self._pos = 0
 
-    def act(self) -> int:
-        v = self.ranking[self._pos]
-        self._pos += 1
-        return v
+def rotation_random(context, seed: int) -> CategoryRotation:
+    return CategoryRotation(context, seed, "random")
 
-    def observe(self, video, result) -> None:
-        pass
+
+def rotation_shortest(context, seed: int) -> CategoryRotation:
+    return CategoryRotation(context, seed, "shortest")
+
+
+def rotation_longest(context, seed: int) -> CategoryRotation:
+    return CategoryRotation(context, seed, "longest")
+
+
+# Every results table includes these rows (ADR-0029): the four duration probes, plain and inside
+# rotation, and rotation-random, which the session-length-controlled acceptance test compares
+# them against (ADR-0027).
+PERMANENT_ROWS: tuple[tuple[str, str, object], ...] = (
+    ("rotation_random", "(b) category rotation, random pick", rotation_random),
+    ("shortest_first", "(a) probe: shortest first", ShortestFirst),
+    ("longest_first", "probe: longest first", LongestFirst),
+    ("rotation_shortest", "(c) probe: category rotation, shortest pick", rotation_shortest),
+    ("rotation_longest", "probe: category rotation, longest pick", rotation_longest),
+)

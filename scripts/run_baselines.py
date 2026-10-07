@@ -1,4 +1,7 @@
-"""Run the Phase 0 baselines through the frozen harness and write runs/<partition>_baselines.{json,md}.
+"""Run baselines through the frozen harness and write runs/<partition>_baselines.{json,md}.
+
+The PERMANENT_ROWS (rotation-random and the four duration probes, ADR-0029) are always included;
+--policies only chooses which other baselines run alongside them.
 
 Usage: .venv/bin/python scripts/run_baselines.py --partition search
 """
@@ -14,13 +17,13 @@ sys.path.insert(0, str(ROOT))
 from kuairec_eval import harness  # noqa: E402
 from kuairec_eval.env import KuaiEnv  # noqa: E402
 from policies.baselines import REGISTRY  # noqa: E402
+from policies.reference import PERMANENT_ROWS  # noqa: E402
 
-ROWS = [("mean_watch_ratio", "Mean watch_ratio of recommended videos", 4),
+ROWS = [("mean_reward", "Mean reward per recommendation", 4),
         ("cum_reward", "Cumulative reward per session", 3),
         ("session_length", "Session length", 3),
         ("top_category_share", "Share in most-recommended category", 4),
         ("catalog_coverage", "Catalog coverage", 4),
-        ("missing_pair_rate", "(diag) unrecorded-pair rate", 5),
         ("boredom_quit_rate", "(diag) sessions ended by boredom", 4),
         ("max_turn_rate", "(diag) sessions ended by max_turn", 4)]
 
@@ -29,14 +32,21 @@ def fmt(x, d):
     return "n/a" if x is None else f"{x:.{d}f}"
 
 
+def table_rows(chosen: list[str]) -> list[tuple[str, object]]:
+    """Chosen baselines first, then every permanent row (always present)."""
+    rows = [(k, REGISTRY[k]) for k in chosen]
+    rows += [(k, f) for k, _, f in PERMANENT_ROWS if k not in chosen]
+    return rows
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--partition", default="search", choices=["search", "shadow"])
-    ap.add_argument("--policies", nargs="+", default=list(REGISTRY))
+    ap.add_argument("--policies", nargs="+", default=list(REGISTRY), choices=list(REGISTRY))
     args = ap.parse_args()
     command = ".venv/bin/python scripts/run_baselines.py " + shlex.join(sys.argv[1:])
     env = KuaiEnv()
-    results = [harness.run(REGISTRY[p], args.partition, env=env, policy_name=p) for p in args.policies]
+    results = [harness.run(f, args.partition, env=env, policy_name=k) for k, f in table_rows(args.policies)]
     out = ROOT / "runs"
     out.mkdir(exist_ok=True)
     commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True, text=True).stdout.strip() or "uncommitted"
@@ -45,20 +55,23 @@ def main():
 
     r0 = results[0]
     lines = [f"Command: `{command}`  ",
-             f"Partition: {args.partition} ({r0['n_users']} users), seeds {r0['seeds']}, "
+             f"Partition: {args.partition} ({r0['n_users']} users), harness seeds {list(harness.harness_config()['seeds'])}, "
              f"manifest digest `{r0['manifest_digest'][:16]}`, env {r0['env_config']}", "",
-             "Each cell: mean over seeds, [95% t-interval over seeds], {95% user-bootstrap interval where defined}.", "",
-             "| Metric | " + " | ".join(r["policy"] for r in results) + " |",
-             "|---|" + "---|" * len(results)]
-    for key, label, d in ROWS:
+             "Each cell: mean over runs, [95% t-interval over seeds, stochastic policies only], "
+             "{95% user-bootstrap interval where defined}. Compare policies with harness.compare (paired bootstrap).", "",
+             "| Policy | " + " | ".join(label for _, label, _ in ROWS) + " |",
+             "|---|" + "---|" * len(ROWS)]
+    for r in results:
         cells = []
-        for r in results:
+        for key, _, d in ROWS:
             s = r["summary"][key]
-            cell = f"{fmt(s['mean'], d)} [{fmt(s['ci_seeds'][0], d)}, {fmt(s['ci_seeds'][1], d)}]"
+            cell = fmt(s["mean"], d)
+            if s["ci_seeds"] is not None:
+                cell += f" [{fmt(s['ci_seeds'][0], d)}, {fmt(s['ci_seeds'][1], d)}]"
             if "ci_users" in s:
                 cell += f" {{{fmt(s['ci_users'][0], d)}, {fmt(s['ci_users'][1], d)}}}"
             cells.append(cell)
-        lines.append(f"| {label} | " + " | ".join(cells) + " |")
+        lines.append(f"| {r['policy']} | " + " | ".join(cells) + " |")
     md = "\n".join(lines) + "\n"
     (out / f"{args.partition}_baselines.md").write_text(md)
     print(md)

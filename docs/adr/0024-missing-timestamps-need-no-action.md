@@ -1,6 +1,6 @@
 # ADR-0024: Missing small-matrix timestamps need no action
 
-Status: **proposed** (your decision: no action; this records why)
+Status: accepted (evaluator v1)
 
 181,992 of 4,676,570 small-matrix rows have no timestamp, while all 12,530,806 big-matrix rows have one (`scripts/audit_data_checks.py`). The environment never needs time order:
 1. **Reward is a static lookup.** Each (user, video) pair has exactly one row (0 duplicates), and the environment reads only `watch_ratio` and `play_duration` from it. Both are present on all rows.
