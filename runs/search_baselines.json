@@ -1,0 +1,404 @@
+{
+  "command": ".venv/bin/python scripts/run_baselines.py --partition search",
+  "git_commit": "uncommitted",
+  "results": [
+    {
+      "policy": "random",
+      "partition": "search",
+      "n_users": 847,
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "confidence": 0.95,
+      "env_config": {
+        "quit_window": 9,
+        "quit_threshold": 1,
+        "max_turn": 30,
+        "window_mode": "intended",
+        "missing_pair_reward": 0.0
+      },
+      "manifest_digest": "83457af4e4f78e6c99435b1386fa26dfb3ee71dfa17eee96effd63a7f10bda06",
+      "summary": {
+        "mean_watch_ratio": {
+          "mean": 0.9162214545622815,
+          "ci_seeds": [
+            0.9077354104408899,
+            0.9247074986836732
+          ],
+          "ci_users": [
+            0.9001907919964192,
+            0.9336844237152709
+          ]
+        },
+        "cum_reward": {
+          "mean": 7.55799641402592,
+          "ci_seeds": [
+            7.455139305774967,
+            7.660853522276874
+          ],
+          "ci_users": [
+            7.406038671476475,
+            7.706478695206502
+          ]
+        },
+        "session_length": {
+          "mean": 8.281227863046045,
+          "ci_seeds": [
+            8.227913398709092,
+            8.334542327382998
+          ],
+          "ci_users": [
+            8.209200118063755,
+            8.355023612750884
+          ]
+        },
+        "top_category_share": {
+          "mean": 0.2556021085676132,
+          "ci_seeds": [
+            0.25209591116194446,
+            0.2591083059732819
+          ]
+        },
+        "catalog_coverage": {
+          "mean": 0.8805229936880071,
+          "ci_seeds": [
+            0.8753803187132313,
+            0.885665668662783
+          ]
+        },
+        "missing_pair_rate": {
+          "mean": 0.003931174317490493,
+          "ci_seeds": [
+            0.0033563314697865943,
+            0.004506017165194392
+          ]
+        },
+        "boredom_quit_rate": {
+          "mean": 0.9997638724911452,
+          "ci_seeds": [
+            0.9994077674674855,
+            1.0001199775148049
+          ]
+        },
+        "max_turn_rate": {
+          "mean": 0.00023612750885478156,
+          "ci_seeds": [
+            -0.00011997751480491211,
+            0.0005922325325144753
+          ]
+        }
+      },
+      "per_seed": [
+        {
+          "mean_watch_ratio": 0.9202347141930388,
+          "cum_reward": 7.478129324428201,
+          "session_length": 8.161747343565525,
+          "top_category_share": 0.2567626211485607,
+          "catalog_coverage": 0.8779681394649834,
+          "missing_pair_rate": 0.00433964993490521,
+          "boredom_quit_rate": 1.0,
+          "max_turn_rate": 0.0
+        },
+        {
+          "mean_watch_ratio": 0.9008525193960759,
+          "cum_reward": 7.380183745087805,
+          "session_length": 8.223140495867769,
+          "top_category_share": 0.25915290739411345,
+          "catalog_coverage": 0.8710550045085663,
+          "missing_pair_rate": 0.003732950466618812,
+          "boredom_quit_rate": 1.0,
+          "max_turn_rate": 0.0
+        },
+        {
+          "mean_watch_ratio": 0.9284332316693363,
+          "cum_reward": 7.706982351673085,
+          "session_length": 8.335301062573789,
+          "top_category_share": 0.24830028328611897,
+          "catalog_coverage": 0.8878869852720168,
+          "missing_pair_rate": 0.004107648725212409,
+          "boredom_quit_rate": 1.0,
+          "max_turn_rate": 0.0
+        },
+        {
+          "mean_watch_ratio": 0.9024319848229865,
+          "cum_reward": 7.393123427020901,
+          "session_length": 8.210153482880756,
+          "top_category_share": 0.25596778832326716,
+          "catalog_coverage": 0.8716561466786895,
+          "missing_pair_rate": 0.002157031924072461,
+          "boredom_quit_rate": 0.9988193624557261,
+          "max_turn_rate": 0.0011806375442739079
+        },
+        {
+          "mean_watch_ratio": 0.9234033987315169,
+          "cum_reward": 7.7033865589573765,
+          "session_length": 8.377804014167651,
+          "top_category_share": 0.25493235625704624,
+          "catalog_coverage": 0.8951006913134957,
+          "missing_pair_rate": 0.0042277339346110665,
+          "boredom_quit_rate": 1.0,
+          "max_turn_rate": 0.0
+        },
+        {
+          "mean_watch_ratio": 0.8978081042808606,
+          "cum_reward": 7.355242544988066,
+          "session_length": 8.2172373081464,
+          "top_category_share": 0.25948275862068965,
+          "catalog_coverage": 0.8773669972948602,
+          "missing_pair_rate": 0.0030172413793103647,
+          "boredom_quit_rate": 1.0,
+          "max_turn_rate": 0.0
+        },
+        {
+          "mean_watch_ratio": 0.9140951195611218,
+          "cum_reward": 7.582564710786826,
+          "session_length": 8.335301062573789,
+          "top_category_share": 0.25311614730878185,
+          "catalog_coverage": 0.8818755635707844,
+          "missing_pair_rate": 0.004815864022662875,
+          "boredom_quit_rate": 1.0,
+          "max_turn_rate": 0.0
+        },
+        {
+          "mean_watch_ratio": 0.9202852579381262,
+          "cum_reward": 7.656729885112131,
+          "session_length": 8.357733175914994,
+          "top_category_share": 0.24692753213730753,
+          "catalog_coverage": 0.8809738503155996,
+          "missing_pair_rate": 0.004520412487639458,
+          "boredom_quit_rate": 0.9988193624557261,
+          "max_turn_rate": 0.0011806375442739079
+        },
+        {
+          "mean_watch_ratio": 0.9244868388952533,
+          "cum_reward": 7.614191485399395,
+          "session_length": 8.268004722550177,
+          "top_category_share": 0.2604598029415965,
+          "catalog_coverage": 0.8782687105500451,
+          "missing_pair_rate": 0.0038554905040696363,
+          "boredom_quit_rate": 1.0,
+          "max_turn_rate": 0.0
+        },
+        {
+          "mean_watch_ratio": 0.9301833761344988,
+          "cum_reward": 7.709430106805408,
+          "session_length": 8.325855962219599,
+          "top_category_share": 0.26091888825865,
+          "catalog_coverage": 0.8830778479110309,
+          "missing_pair_rate": 0.004537719795802642,
+          "boredom_quit_rate": 1.0,
+          "max_turn_rate": 0.0
+        }
+      ],
+      "wall_seconds": 0.67
+    },
+    {
+      "policy": "popularity",
+      "partition": "search",
+      "n_users": 847,
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "confidence": 0.95,
+      "env_config": {
+        "quit_window": 9,
+        "quit_threshold": 1,
+        "max_turn": 30,
+        "window_mode": "intended",
+        "missing_pair_reward": 0.0
+      },
+      "manifest_digest": "83457af4e4f78e6c99435b1386fa26dfb3ee71dfa17eee96effd63a7f10bda06",
+      "summary": {
+        "mean_watch_ratio": {
+          "mean": 0.7724295561286055,
+          "ci_seeds": [
+            0.7724295561286055,
+            0.7724295561286055
+          ],
+          "ci_users": [
+            0.7532760378576242,
+            0.7931007587810095
+          ]
+        },
+        "cum_reward": {
+          "mean": 3.853940146634577,
+          "ci_seeds": [
+            3.8539401466345766,
+            3.8539401466345775
+          ],
+          "ci_users": [
+            3.7582803552299966,
+            3.9579907380383372
+          ]
+        },
+        "session_length": {
+          "mean": 5.0,
+          "ci_seeds": [
+            5.0,
+            5.0
+          ],
+          "ci_users": [
+            5.0,
+            5.0
+          ]
+        },
+        "top_category_share": {
+          "mean": 0.5999999999999999,
+          "ci_seeds": [
+            0.5999999999999998,
+            0.6
+          ]
+        },
+        "catalog_coverage": {
+          "mean": 0.0015028554253080852,
+          "ci_seeds": [
+            0.001502855425308085,
+            0.0015028554253080854
+          ]
+        },
+        "missing_pair_rate": {
+          "mean": 0.0021251475796930652,
+          "ci_seeds": [
+            0.0021251475796930652,
+            0.0021251475796930652
+          ]
+        },
+        "boredom_quit_rate": {
+          "mean": 1.0,
+          "ci_seeds": [
+            1.0,
+            1.0
+          ]
+        },
+        "max_turn_rate": {
+          "mean": 0.0,
+          "ci_seeds": [
+            0.0,
+            0.0
+          ]
+        }
+      },
+      "per_seed": [
+        {
+          "mean_watch_ratio": 0.7724295561286055,
+          "cum_reward": 3.8539401466345775,
+          "session_length": 5.0,
+          "top_category_share": 0.6,
+          "catalog_coverage": 0.0015028554253080854,
+          "missing_pair_rate": 0.0021251475796930652,
+          "boredom_quit_rate": 1.0,
+          "max_turn_rate": 0.0
+        },
+        {
+          "mean_watch_ratio": 0.7724295561286055,
+          "cum_reward": 3.8539401466345775,
+          "session_length": 5.0,
+          "top_category_share": 0.6,
+          "catalog_coverage": 0.0015028554253080854,
+          "missing_pair_rate": 0.0021251475796930652,
+          "boredom_quit_rate": 1.0,
+          "max_turn_rate": 0.0
+        },
+        {
+          "mean_watch_ratio": 0.7724295561286055,
+          "cum_reward": 3.8539401466345775,
+          "session_length": 5.0,
+          "top_category_share": 0.6,
+          "catalog_coverage": 0.0015028554253080854,
+          "missing_pair_rate": 0.0021251475796930652,
+          "boredom_quit_rate": 1.0,
+          "max_turn_rate": 0.0
+        },
+        {
+          "mean_watch_ratio": 0.7724295561286055,
+          "cum_reward": 3.8539401466345775,
+          "session_length": 5.0,
+          "top_category_share": 0.6,
+          "catalog_coverage": 0.0015028554253080854,
+          "missing_pair_rate": 0.0021251475796930652,
+          "boredom_quit_rate": 1.0,
+          "max_turn_rate": 0.0
+        },
+        {
+          "mean_watch_ratio": 0.7724295561286055,
+          "cum_reward": 3.8539401466345775,
+          "session_length": 5.0,
+          "top_category_share": 0.6,
+          "catalog_coverage": 0.0015028554253080854,
+          "missing_pair_rate": 0.0021251475796930652,
+          "boredom_quit_rate": 1.0,
+          "max_turn_rate": 0.0
+        },
+        {
+          "mean_watch_ratio": 0.7724295561286055,
+          "cum_reward": 3.8539401466345775,
+          "session_length": 5.0,
+          "top_category_share": 0.6,
+          "catalog_coverage": 0.0015028554253080854,
+          "missing_pair_rate": 0.0021251475796930652,
+          "boredom_quit_rate": 1.0,
+          "max_turn_rate": 0.0
+        },
+        {
+          "mean_watch_ratio": 0.7724295561286055,
+          "cum_reward": 3.8539401466345775,
+          "session_length": 5.0,
+          "top_category_share": 0.6,
+          "catalog_coverage": 0.0015028554253080854,
+          "missing_pair_rate": 0.0021251475796930652,
+          "boredom_quit_rate": 1.0,
+          "max_turn_rate": 0.0
+        },
+        {
+          "mean_watch_ratio": 0.7724295561286055,
+          "cum_reward": 3.8539401466345775,
+          "session_length": 5.0,
+          "top_category_share": 0.6,
+          "catalog_coverage": 0.0015028554253080854,
+          "missing_pair_rate": 0.0021251475796930652,
+          "boredom_quit_rate": 1.0,
+          "max_turn_rate": 0.0
+        },
+        {
+          "mean_watch_ratio": 0.7724295561286056,
+          "cum_reward": 3.8539401466345775,
+          "session_length": 5.0,
+          "top_category_share": 0.6,
+          "catalog_coverage": 0.0015028554253080854,
+          "missing_pair_rate": 0.0021251475796930652,
+          "boredom_quit_rate": 1.0,
+          "max_turn_rate": 0.0
+        },
+        {
+          "mean_watch_ratio": 0.7724295561286055,
+          "cum_reward": 3.8539401466345775,
+          "session_length": 5.0,
+          "top_category_share": 0.6,
+          "catalog_coverage": 0.0015028554253080854,
+          "missing_pair_rate": 0.0021251475796930652,
+          "boredom_quit_rate": 1.0,
+          "max_turn_rate": 0.0
+        }
+      ],
+      "wall_seconds": 7.75
+    }
+  ]
+}

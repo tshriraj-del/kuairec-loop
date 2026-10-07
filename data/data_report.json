@@ -1,0 +1,45 @@
+{
+  "stats": {
+    "small": {
+      "users": 1411,
+      "videos": 3327,
+      "interactions": 4676570,
+      "unique_pairs": 4676570,
+      "density_rows": 0.9962024941648523,
+      "density_unique_pairs": 0.9962024941648523,
+      "watch_ratio_nan": 0,
+      "watch_ratio_inf": 0,
+      "missing_cells": 17827,
+      "rows_without_timestamp": 181992,
+      "watch_ratio_gt_5": 22790,
+      "watch_ratio_max": 571.5214280603849,
+      "watch_ratio_p50_p99_p999": [
+        0.7691665893199678,
+        3.585138252983777,
+        12.15285526508072
+      ]
+    },
+    "big": {
+      "users": 7176,
+      "videos": 10728,
+      "interactions": 12530806,
+      "unique_pairs": 10300969,
+      "density_rows": 0.16277129228507986,
+      "density_unique_pairs": 0.13380639967760627,
+      "watch_ratio_nan": 0,
+      "watch_ratio_inf": 0
+    }
+  },
+  "mismatches": [],
+  "overlap": {
+    "pairs_in_both_unique": 0,
+    "big_rows_on_small_pairs": 0,
+    "small_users_in_big": 1411,
+    "small_videos_in_big": 3327,
+    "big_rows_in_small_user_x_small_video_block": 0,
+    "big_rows_from_small_users": 571061,
+    "big_rows_on_small_videos": 10272525,
+    "big_users_with_rows_on_small_videos": 5765,
+    "small_videos_with_big_rows": 3327
+  }
+}

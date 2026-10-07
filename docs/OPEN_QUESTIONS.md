@@ -1,0 +1,14 @@
+# Open questions (Phase 0)
+
+These are decisions I made provisionally, each with an ADR, that you may want to change. Nothing below was guessed silently.
+
+1. **Quit parameters.** I used EasyRL4Rec's `KuaiEnv-v0` defaults: N=9, n_Q=1, max_turn=30. The paper says N=1, n_Q=1, which never fires as worded, and the class defaults are 5/1/100. Under these settings random sessions average 8.3 steps and 99.98% end by boredom, so max_turn hardly matters. Is this the regime you want Phase 1 to optimise in? (ADR-0002)
+2. **Correct window or bug-compatible window?** The default is the intended last-N window. EasyRL4Rec's slice wraps for t = 5..8 and changed the quit step in 1,025 of 2,541 random sequences. If you need comparability with published EasyRL4Rec/CIRS numbers, set `window_mode = "easyrl4rec_slice"` and re-freeze. (ADR-0003)
+3. **Reward scale and target.** The reward is raw watch_ratio as you specified (max 571.5, p99.9 12.15). EasyRL4Rec caps it at 5. Separately, per-video median watch_ratio has a Spearman correlation of −0.997 with video duration, so a watch_ratio maximiser will learn "show short videos". Keep raw watch_ratio, cap or log it, or move to play_duration or a duration-normalised target? (ADR-0005)
+4. **Unrecorded cells** (17,827, 0.38%) return reward 0 and are excluded from mean watch_ratio. EasyRL4Rec also returns 0. Acceptable? (ADR-0004)
+5. **Popularity measure.** Distinct big-matrix users per video. It has no rank correlation with small-matrix watch_ratio (ρ = −0.012), so it is a weak baseline. Do you want a stronger non-learning baseline in Phase 1, such as big-matrix mean watch_ratio or a category-diverse popularity? That would need a new policy, not an evaluator change. (ADR-0010)
+6. **Which interval decides comparisons?** The seed t-interval you asked for has zero width for deterministic policies. I added a user-cluster bootstrap. For Phase 1 policy comparisons I'd suggest a paired-by-user test on the same partition. Your call, and whether S = 10 is enough. (ADR-0009)
+7. **Leak protection is in-process.** It catches accidents, but a determined policy could reach the closure. Run the env in a separate process before any learned policy touches it? (ADR-0007)
+8. **Catalog.** The env offers only the 3,327 small-matrix videos. Policies trained on the big matrix know 10,728. I assumed recommending outside the 3,327 is impossible, not penalised. Confirm. (ADR-0008)
+9. **Sessions per user.** One session per user per seed, with the policy's state carried across users within a seed. Should later phases allow several sessions per user, letting a policy learn a user across sessions? That changes the harness and needs a re-freeze. (ADR-0008)
+10. **Time.** The env ignores timestamps, and 181,992 small-matrix rows have none. If later phases need time-ordered replay or temporal splits, the small matrix can't supply them for those rows.

@@ -1,0 +1,18 @@
+{
+  "code": {
+    "config/evaluator.toml": "415b33ca99efe95cc434799341d2c4976ef8499fa15e304603e9c19385fca8f3",
+    "data/partitions/holdout.json": "be27f1000c1142995f8a90eb43c3d5b4d27f9d64c9edbcac3792cba8267bd533",
+    "data/partitions/search.json": "38be186e89c3b8d2b584fa4cda98885dbc4129e0cb9b4f0446337c19c74c89bf",
+    "data/partitions/shadow.json": "59de54e0c910416372f65b8af13d684f6e846e8fe83bf32926bc1e03c8b43e01",
+    "kuairec_eval/__init__.py": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+    "kuairec_eval/_integrity.py": "9481f684ce1fbe2304f2e4d11ee3e03b84cea9a880bb2dc28ab84dabcc76121e",
+    "kuairec_eval/data.py": "cc68f07ea9bd746486f47e81ec6b93a40b4d900df1cb823ffdc9bf6c486af428",
+    "kuairec_eval/env.py": "8bdc62f08c3b995409ff891417e8811d6b370bab3916ab6aafdf3a64dbc28e71",
+    "kuairec_eval/harness.py": "ea306a2f5f830aa4fde5dce4119717f8fb52c8272c85a4f2ddbc5c11cbe0ebd2",
+    "kuairec_eval/partitions.py": "6e9d5049dbab249c839e4593489dce78567e64c24c611609ead39133d6093d94"
+  },
+  "data": {
+    "item_categories.csv": "b8b8330387cd69659ff6b35b9b69bb35303196a5264d5d7743e92ae8e19cd15e",
+    "small_matrix.csv": "6b601cd38b2600d8734b4aede309ad73d1e201fdc4bd76d4bc7d2534793d7d15"
+  }
+}

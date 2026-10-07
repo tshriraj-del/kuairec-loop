@@ -1,0 +1,18 @@
+[project]
+name = "kuairec-loop"
+version = "0.0.1"
+description = "Closed-loop short-video recommender on KuaiRec. Phase 0: data, environment, frozen evaluator."
+requires-python = ">=3.12,<3.13"
+dependencies = ["numpy>=2.0", "pandas>=2.2", "scipy>=1.13"]
+
+[dependency-groups]
+dev = ["pytest>=8"]
+# Only needed by the differential test, which imports EasyRL4Rec's KuaiEnv unmodified.
+reference = ["scikit-learn>=1.5", "gymnasium>=0.29", "tqdm", "logzero"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.setuptools]
+packages = ["kuairec_eval", "policies"]

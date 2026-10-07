@@ -1,0 +1,52 @@
+load item feature
+{
+  "command": ".venv/bin/python scripts/differential.py ",
+  "reference_commit": "95d0acfa55e2150d0775ebd41de0826272edcc94",
+  "env_config": {
+    "quit_window": 9,
+    "quit_threshold": 1,
+    "max_turn": 30,
+    "window_mode": "intended",
+    "missing_pair_reward": 0.0
+  },
+  "users": 847,
+  "sequences": 5929,
+  "sequences_per_source": {
+    "random": 2541,
+    "popularity": 847,
+    "diverse": 847,
+    "stress": 847,
+    "capped": 847
+  },
+  "reference_steps": 64468,
+  "reference_session_end": {
+    "capped/boredom": 847,
+    "diverse/max_turn": 847,
+    "popularity/boredom": 847,
+    "random/boredom": 2539,
+    "random/max_turn": 2,
+    "stress/boredom": 847
+  },
+  "differences": [
+    {
+      "our_window_mode": "easyrl4rec_slice",
+      "kind": "reward",
+      "cause": "cap_at_5",
+      "count": 4295
+    },
+    {
+      "our_window_mode": "intended",
+      "kind": "quit_step",
+      "cause": "negative_slice_window",
+      "count": 1348
+    },
+    {
+      "our_window_mode": "intended",
+      "kind": "reward",
+      "cause": "cap_at_5",
+      "count": 3863
+    }
+  ],
+  "unexplained": 0
+}
+exit=0

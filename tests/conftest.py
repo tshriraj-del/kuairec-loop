@@ -1,0 +1,12 @@
+import sys
+from pathlib import Path
+
+import pytest
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+
+@pytest.fixture(scope="session")
+def env():
+    from kuairec_eval.env import KuaiEnv
+    return KuaiEnv()

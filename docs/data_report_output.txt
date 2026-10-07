@@ -1,0 +1,39 @@
+== loaded
+  big_matrix.csv                   rows=12,530,806
+  small_matrix.csv                 rows= 4,676,570
+  item_categories.csv              rows=    10,728
+  item_daily_features.csv          rows=   343,341
+  user_features.csv                rows=     7,176
+  kuairec_caption_category.csv     rows=    10,728
+
+== item 1: matrix statistics vs published
+  matrix stat                 measured    published  match
+  small  users                   1,411        1,411  yes
+  small  videos                  3,327        3,327  yes
+  small  interactions        4,676,570    4,676,570  yes
+  small  density(rows)        99.6202%        99.6%  yes
+  small  unique pairs        4,676,570            -  (density 99.6202%)
+  small  wr NaN/inf           0/0     
+  big    users                   7,176        7,176  yes
+  big    videos                 10,728       10,728  yes
+  big    interactions       12,530,806   12,530,806  yes
+  big    density(rows)        16.2771%        16.3%  yes
+  big    unique pairs       10,300,969            -  (density 13.3806%)
+  big    wr NaN/inf           0/0     
+  small  missing cells (user x video not recorded): 17,827
+  small  rows with no timestamp/date: 181,992
+  small  watch_ratio > 5: 22,790  max 571.521  p50 0.769  p99 3.585  p99.9 12.153
+
+== item 2: overlap
+  pairs_in_both_unique                                      0
+  big_rows_on_small_pairs                                   0
+  small_users_in_big                                    1,411
+  small_videos_in_big                                   3,327
+  big_rows_in_small_user_x_small_video_block                0
+  big_rows_from_small_users                           571,061
+  big_rows_on_small_videos                         10,272,525
+  big_users_with_rows_on_small_videos                   5,765
+  small_videos_with_big_rows                            3,327
+  (small users: 1,411; small videos: 3,327; big users: 7,176; big videos: 10,728)
+
+all published figures matched

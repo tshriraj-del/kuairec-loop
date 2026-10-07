@@ -1,0 +1,26 @@
+# Frozen evaluator configuration. Hashed into kuairec_eval/FROZEN_MANIFEST.json.
+# Changing anything here fails every later run until scripts/freeze.py is re-run.
+
+[env]
+# KuaiEnv "feel bored then quit" rule (CIRS, arXiv 2204.01266, Sec 5.1.2; EasyRL4Rec
+# src/core/envs/KuaiRec/KuaiEnv.py::_determine_whether_to_leave). See ADR-0002.
+quit_window = 9          # N   (EasyRL4Rec: num_leave_compute, KuaiEnv-v0 default 9)
+quit_threshold = 1       # n_Q (EasyRL4Rec: leave_threshold,   KuaiEnv-v0 default 1)
+max_turn = 30            # EasyRL4Rec KuaiEnv-v0 default 30
+# "intended": window = the last min(t, N) recommendations.
+# "easyrl4rec_slice": window = sequence[t-N:t] with Python's negative-index semantics,
+#                     which is what EasyRL4Rec actually executes for 0 < t < N. See ADR-0003.
+window_mode = "intended"
+# Reward returned for the 17,827 (user, video) cells absent from small_matrix.csv. See ADR-0004.
+missing_pair_reward = 0.0
+
+[partition]
+seed = 20261005
+search = 0.6
+shadow = 0.2
+holdout = 0.2
+
+[harness]
+seeds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+confidence = 0.95
+user_bootstrap_resamples = 2000
