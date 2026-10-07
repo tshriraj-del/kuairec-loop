@@ -18,4 +18,4 @@ Status: accepted (evaluator v1)
 The N-axis looser setting (3, 1) is the documented alternative (OPEN_QUESTIONS A2).
 
 ## Decision on A2 (evaluator v1 approval, 2026-10-06)
-Approved: N = 9 with thresholds 2 (looser), 1 (primary) and 0 (tighter). The N-axis alternative (3, 1) is not used. After the diversity-level check (ADR-0028), the three profiles are recorded as robustness checks.
+Approved: N = 9 with thresholds 2 (looser), 1 (primary) and 0 (tighter). The N-axis alternative (3, 1) is not used. The role of the three profiles follows the claim-2 outcome in ADR-0028. Claim 2 stands against the full-cycle baseline (C1), so the earlier wording, "robustness checks only", no longer applies: the profiles are the repeat tolerances the system is meant to learn from the session-ended signal.

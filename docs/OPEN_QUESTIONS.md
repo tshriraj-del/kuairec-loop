@@ -1,8 +1,12 @@
 # Open questions
 
-## C. After the evaluator-v1 freeze (2026-10-06): open
+## D. For Phase 2: open
 
-- **C1. Which reading of "strict rotation" should the claim-2 outcome use?** The recorded outcome reads strict rotation as "no category repeated within the 9-item window". On that reading, tolerating repeats is worth 6.4% of the gap under looser (< 10%), so claim 2 returns to "a greedy personalized policy narrows and the diversity layer fixes it". If strict rotation means a full cycle through all categories, as in policies (b)/(c), the figure is 19.2% and claim 2 stands. Of that 19.2%, 12.8% comes from concentrating on favourite categories, which window-strict rotation also does (ADR-0028). Switching changes only the recorded text in ADR-0028 and AUDIT.md. No re-freeze is needed, because both readings are computed and reported.
+- **D1. What does a policy tuned to the primary setting lose when it runs under the tighter setting?** Claim 2 says the system learns how soon a category can be revisited and how many repeats are tolerated (ADR-0028). This item measures the cost of having learned the wrong tolerance. It can be measured with the frozen code: build the `free` category-affinity oracle with the primary configuration and run it in a tighter-profile environment. Compare it with the same oracle built for tighter and with the full-cycle baseline.
+
+## C. After the evaluator-v1 freeze: resolved
+
+- C1, the reading of "strict rotation": **the full-cycle policy is the baseline** (your decision, made after the check), and both readings are recorded. Claim 2 stands, reworded: "from the session-ended signal alone, the system learns how soon a category can be revisited and how many repeats are tolerated, measured against the full-cycle policy". Split of the looser setting's 19.2%: 12.8% from revisiting after the window and 6.4% from tolerating repeats; tolerating repeats adds 4.7% under the primary setting (ADR-0028).
 
 ## A. From the evaluator audit: resolved by the v1 approval
 
