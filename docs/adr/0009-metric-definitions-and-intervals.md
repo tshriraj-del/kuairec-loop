@@ -2,6 +2,8 @@
 
 Status: accepted (Phase 0)
 
+Pending: the evaluator v1 proposal supersedes the interval section (paired bootstrap, seed intervals for stochastic policies only; ADR-0021) and renames mean_watch_ratio to mean_reward.
+
 ## Definitions (per seed, pooled over the seed's sessions)
 - `mean_watch_ratio`: mean reward over recommendations whose pair is recorded. Each recommendation has equal weight, so longer sessions weigh more.
 - `cum_reward`: mean over sessions of the summed reward.

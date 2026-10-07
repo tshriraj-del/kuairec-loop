@@ -2,6 +2,8 @@
 
 Status: accepted (Phase 0)
 
+Pending: the evaluator v1 proposal supersedes the reward part; the reward becomes a switch defaulting to duration_pct (ADR-0016, ADR-0018). The repeat ban stands.
+
 ## Decision
 - **Reward is the raw recorded watch_ratio**, as the brief specifies. EasyRL4Rec caps it at 5 (`KuaiData.load_mat`). 22,790 small-matrix cells exceed 5 and the maximum is 571.52 (`scripts/data_report.py`). This is the only reward difference in the differential test (cause `cap_at_5`).
 - **A repeat recommendation raises `RepeatRecommendationError`.** The brief says "forbids", and an exception makes a policy bug loud. A zero reward or a forced quit would hide it. EasyRL4Rec allows repeats (its repeat check is commented out). A new session (reset) clears the history.

@@ -1,0 +1,115 @@
+### Reward: `raw`
+
+Command: `.venv/bin/python scripts/audit_rewards.py `  
+Per-video Spearman(mean reward over search users, canonical duration) = -0.9848
+
+Cum reward: mean per session over 847 search users {95% user bootstrap} [95% seed t-interval, stochastic policies only].
+
+| Policy | Cum reward / session | Mean reward / rec | Session length | Top-category share | Coverage | Boredom-quit rate | Unrecorded-pair rate |
+|---|---|---|---|---|---|---|---|
+| random | 7.558 {7.406, 7.706} [7.455, 7.661] | 0.9162 | 8.28 | 0.256 | 0.8805 | 1.000 | 0.0039 |
+| popularity (big-matrix distinct users) | 3.854 {3.758, 3.958} | 0.7724 | 5.00 | 0.600 | 0.0015 | 1.000 | 0.0021 |
+| (a) shortest first | 20.410 {19.971, 20.884} | 2.5795 | 8.00 | 0.375 | 0.0024 | 1.000 | 0.0109 |
+| (b) category rotation, random pick | 22.965 {22.630, 23.317} [22.824, 23.106] | 0.7668 | 30.00 | 0.035 | 0.6348 | 0.000 | 0.0017 |
+| (c) category rotation, shortest pick | 48.763 {47.877, 49.766} | 1.6326 | 30.00 | 0.067 | 0.0090 | 0.000 | 0.0044 |
+| (d) big-matrix mean watch_ratio, >=100 rows | 15.687 {15.279, 16.118} | 2.6326 | 6.00 | 0.500 | 0.0018 | 1.000 | 0.0069 |
+| probe: longest first [extra] | 0.201 {0.189, 0.214} | 0.0402 | 5.00 | 0.600 | 0.0015 | 1.000 | 0.0009 |
+| probe: category rotation, longest pick [extra] | 6.158 {6.026, 6.288} | 0.2060 | 30.00 | 0.067 | 0.0090 | 0.000 | 0.0034 |
+| oracle: non-personalized fixed sequence (greedy, search-user means) | 67.588 {66.200, 69.177} | 2.2650 | 30.00 | 0.167 | 0.0090 | 0.000 | 0.0054 |
+| oracle: personalized greedy | 200.734 {190.375, 212.365} | 6.6911 | 30.00 | 0.192 | 0.9068 | 0.000 | 0.0000 |
+
+Quit-free top-30 bounds: personalized 204.393, non-personalized 67.818.
+
+| Paired comparison (A - B), per-user, 10,000 resamples | Metric | Mean | 95% interval |
+|---|---|---|---|
+| **T1_shortest_not_above_random** a_shortest_first - random -> FAIL | cum_reward | 12.8524 | [12.4298, 13.2856] |
+| **T2_personalized_beats_nonpersonalized** oracle_personalized - oracle_nonpersonalized -> PASS | cum_reward | 133.1459 | [122.8698, 143.6890] |
+| a_shortest_first - random | mean_reward | 1.6619 | [1.6101, 1.7153] |
+| c_rotation_shortest - b_rotation_random | cum_reward | 25.7978 | [25.0402, 26.6442] |
+| c_rotation_shortest - b_rotation_random | mean_reward | 0.8656 | [0.8403, 0.8937] |
+| oracle_personalized - oracle_nonpersonalized | mean_reward | 4.4259 | [4.0845, 4.7776] |
+| probe_longest_first - random | cum_reward | -7.3571 | [-7.5073, -7.2105] |
+| probe_rotation_longest - b_rotation_random | cum_reward | -16.8073 | [-17.0920, -16.5352] |
+| probe_rotation_longest - b_rotation_random | mean_reward | -0.5609 | [-0.5703, -0.5518] |
+| b_rotation_random - random | cum_reward | 15.4070 | [15.1464, 15.6797] |
+| d_big_mean_watch_ratio - random | cum_reward | 8.1287 | [7.7351, 8.5344] |
+
+### Reward: `capped5`
+
+Command: `.venv/bin/python scripts/audit_rewards.py `  
+Per-video Spearman(mean reward over search users, canonical duration) = -0.9931
+
+Cum reward: mean per session over 847 search users {95% user bootstrap} [95% seed t-interval, stochastic policies only].
+
+| Policy | Cum reward / session | Mean reward / rec | Session length | Top-category share | Coverage | Boredom-quit rate | Unrecorded-pair rate |
+|---|---|---|---|---|---|---|---|
+| random | 7.245 {7.131, 7.355} [7.169, 7.322] | 0.8783 | 8.28 | 0.256 | 0.8805 | 1.000 | 0.0039 |
+| popularity (big-matrix distinct users) | 3.802 {3.724, 3.889} | 0.7621 | 5.00 | 0.600 | 0.0015 | 1.000 | 0.0021 |
+| (a) shortest first | 19.265 {18.994, 19.529} | 2.4347 | 8.00 | 0.375 | 0.0024 | 1.000 | 0.0109 |
+| (b) category rotation, random pick | 22.238 {21.963, 22.516} [22.201, 22.275] | 0.7426 | 30.00 | 0.035 | 0.6348 | 0.000 | 0.0017 |
+| (c) category rotation, shortest pick | 46.591 {46.019, 47.170} | 1.5599 | 30.00 | 0.067 | 0.0090 | 0.000 | 0.0044 |
+| (d) big-matrix mean watch_ratio, >=100 rows | 14.690 {14.465, 14.919} | 2.4652 | 6.00 | 0.500 | 0.0018 | 1.000 | 0.0069 |
+| (e) big-matrix mean capped5 label, >=100 rows [extra] | 19.481 {19.218, 19.754} | 2.4620 | 8.00 | 0.375 | 0.0024 | 1.000 | 0.0109 |
+| probe: longest first [extra] | 0.201 {0.189, 0.214} | 0.0402 | 5.00 | 0.600 | 0.0015 | 1.000 | 0.0009 |
+| probe: category rotation, longest pick [extra] | 6.080 {5.974, 6.184} | 0.2033 | 30.00 | 0.067 | 0.0090 | 0.000 | 0.0034 |
+| oracle: non-personalized fixed sequence (greedy, search-user means) | 63.444 {62.734, 64.178} | 2.1242 | 30.00 | 0.167 | 0.0090 | 0.000 | 0.0044 |
+| oracle: personalized greedy | 110.193 {108.389, 111.997} | 3.6731 | 30.00 | 0.193 | 0.9005 | 0.000 | 0.0000 |
+
+Quit-free top-30 bounds: personalized 111.998, non-personalized 63.715.
+
+| Paired comparison (A - B), per-user, 10,000 resamples | Metric | Mean | 95% interval |
+|---|---|---|---|
+| **T1_shortest_not_above_random** a_shortest_first - random -> FAIL | cum_reward | 12.0195 | [11.7783, 12.2662] |
+| **T2_personalized_beats_nonpersonalized** oracle_personalized - oracle_nonpersonalized -> PASS | cum_reward | 46.7489 | [45.0004, 48.4825] |
+| a_shortest_first - random | mean_reward | 1.5555 | [1.5258, 1.5853] |
+| c_rotation_shortest - b_rotation_random | cum_reward | 24.3522 | [23.9610, 24.7298] |
+| c_rotation_shortest - b_rotation_random | mean_reward | 0.8172 | [0.8042, 0.8298] |
+| oracle_personalized - oracle_nonpersonalized | mean_reward | 1.5489 | [1.4905, 1.6066] |
+| probe_longest_first - random | cum_reward | -7.0445 | [-7.1561, -6.9330] |
+| probe_rotation_longest - b_rotation_random | cum_reward | -16.1588 | [-16.3708, -15.9504] |
+| probe_rotation_longest - b_rotation_random | mean_reward | -0.5392 | [-0.5462, -0.5323] |
+| b_rotation_random - random | cum_reward | 14.9930 | [14.7895, 15.1971] |
+| e_big_mean_label - random | cum_reward | 12.2358 | [11.9946, 12.4871] |
+| d_big_mean_watch_ratio - random | cum_reward | 7.4442 | [7.2339, 7.6585] |
+
+### Reward: `duration_pct`
+
+Command: `.venv/bin/python scripts/audit_rewards.py `  
+Per-video Spearman(mean reward over search users, canonical duration) = +0.2262
+
+Cum reward: mean per session over 847 search users {95% user bootstrap} [95% seed t-interval, stochastic policies only].
+
+| Policy | Cum reward / session | Mean reward / rec | Session length | Top-category share | Coverage | Boredom-quit rate | Unrecorded-pair rate |
+|---|---|---|---|---|---|---|---|
+| random | 4.357 {4.298, 4.417} [4.316, 4.398] | 0.5282 | 8.28 | 0.256 | 0.8805 | 1.000 | 0.0039 |
+| popularity (big-matrix distinct users) | 2.612 {2.569, 2.656} | 0.5236 | 5.00 | 0.600 | 0.0015 | 1.000 | 0.0021 |
+| (a) shortest first | 4.160 {4.096, 4.224} | 0.5257 | 8.00 | 0.375 | 0.0024 | 1.000 | 0.0109 |
+| (b) category rotation, random pick | 15.844 {15.679, 16.014} [15.815, 15.873] | 0.5291 | 30.00 | 0.035 | 0.6348 | 0.000 | 0.0017 |
+| (c) category rotation, shortest pick | 15.814 {15.615, 16.006} | 0.5295 | 30.00 | 0.067 | 0.0090 | 0.000 | 0.0044 |
+| (d) big-matrix mean watch_ratio, >=100 rows | 3.144 {3.093, 3.198} | 0.5277 | 6.00 | 0.500 | 0.0018 | 1.000 | 0.0069 |
+| (e) big-matrix mean duration_pct label, >=100 rows [extra] | 3.287 {3.238, 3.333} | 0.5480 | 6.00 | 0.500 | 0.0018 | 1.000 | 0.0002 |
+| probe: longest first [extra] | 2.688 {2.644, 2.731} | 0.5381 | 5.00 | 0.600 | 0.0015 | 1.000 | 0.0009 |
+| probe: category rotation, longest pick [extra] | 16.031 {15.857, 16.208} | 0.5362 | 30.00 | 0.067 | 0.0090 | 0.000 | 0.0034 |
+| oracle: non-personalized fixed sequence (greedy, search-user means) | 17.182 {16.985, 17.384} | 0.5734 | 30.00 | 0.200 | 0.0090 | 0.000 | 0.0011 |
+| oracle: personalized greedy | 28.548 {28.426, 28.668} | 0.9516 | 30.00 | 0.194 | 0.9940 | 0.000 | 0.0000 |
+
+Quit-free top-30 bounds: personalized 28.642, non-personalized 17.186.
+
+| Paired comparison (A - B), per-user, 10,000 resamples | Metric | Mean | 95% interval |
+|---|---|---|---|
+| **T1_shortest_not_above_random** a_shortest_first - random -> PASS | cum_reward | -0.1966 | [-0.2603, -0.1318] |
+| **T2_personalized_beats_nonpersonalized** oracle_personalized - oracle_nonpersonalized -> PASS | cum_reward | 11.3660 | [11.1667, 11.5648] |
+| a_shortest_first - random | mean_reward | -0.0025 | [-0.0091, 0.0039] |
+| c_rotation_shortest - b_rotation_random | cum_reward | -0.0299 | [-0.1170, 0.0579] |
+| c_rotation_shortest - b_rotation_random | mean_reward | 0.0004 | [-0.0025, 0.0034] |
+| oracle_personalized - oracle_nonpersonalized | mean_reward | 0.3783 | [0.3717, 0.3849] |
+| probe_longest_first - random | cum_reward | -1.6687 | [-1.7268, -1.6107] |
+| probe_rotation_longest - b_rotation_random | cum_reward | 0.1871 | [0.1063, 0.2680] |
+| probe_rotation_longest - b_rotation_random | mean_reward | 0.0072 | [0.0045, 0.0099] |
+| b_rotation_random - random | cum_reward | 11.4875 | [11.3584, 11.6181] |
+| e_big_mean_label - random | cum_reward | -1.0695 | [-1.1259, -1.0119] |
+| d_big_mean_watch_ratio - random | cum_reward | -1.2125 | [-1.2734, -1.1504] |
+
+raw            T1 FAIL  T2 PASS  both FAIL
+capped5        T1 FAIL  T2 PASS  both FAIL
+duration_pct   T1 PASS  T2 PASS  both PASS

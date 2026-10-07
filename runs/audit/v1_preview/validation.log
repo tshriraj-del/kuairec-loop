@@ -1,0 +1,47 @@
+manifest digest: df3dc2563949e1658dac8e2c0d9186dbbbd58816477bf1d73336d53fcc96ec82
+== pytest
+.................................................................        [100%]
+65 passed in 131.17s (0:02:11)
+== audit_rewards
+raw            T1 FAIL  T2 PASS  both FAIL
+capped5        T1 FAIL  T2 PASS  both FAIL
+duration_pct   T1 PASS  T2 PASS  both PASS
+== differential
+  "reference_steps": 64508,
+  "unexplained": 0
+== run_baselines
+Command: `.venv/bin/python scripts/run_baselines.py --partition search`  
+Partition: search (847 users), seeds [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], manifest digest `df3dc2563949e165`, env {'quit_profile': 'primary', 'quit_window': 9, 'quit_threshold': 1, 'max_turn': 30, 'window_mode': 'intended', 'reward': 'duration_pct', 'reward_cap': 5.0, 'duration_buckets': 5}
+
+Each cell: mean over runs, [95% t-interval over seeds, stochastic policies only], {95% user-bootstrap interval where defined}. Compare policies with harness.compare (paired bootstrap).
+
+| Metric | random | popularity |
+|---|---|---|
+| Mean reward per recommendation | 0.5282 [0.5252, 0.5312] {0.5226, 0.5339} | 0.5231 {0.5145, 0.5320} |
+| Cumulative reward per session | 4.381 [4.340, 4.421] {4.322, 4.441} | 2.616 {2.572, 2.660} |
+| Session length | 8.293 [8.238, 8.348] {8.221, 8.366} | 5.000 {5.000, 5.000} |
+| Share in most-recommended category | 0.2541 [0.2507, 0.2575] | 0.6000 |
+| Catalog coverage | 0.8811 [0.8756, 0.8866] | 0.0018 |
+== survival
+harness, random, search x 10 seeds (N=9, n_Q=1): 8,470 sessions, mean 8.293, median 8.0, P(reach 30) 0.0004
+
+Monte Carlo, 100,000 random sequences: median / mean session length / P(reach 30)
+   N                      n_Q=0                     n_Q=1                     n_Q=2
+--
+threshold axis at N = 9 (median, mean, ratio of mean to primary, P(reach 30)):
+== correlation
+search users: 847; search-user small-matrix rows: 2,807,328
+Phase 0 replication: Spearman(first-row duration, per-video median watch_ratio), n=3327 videos -> -0.9967
+
+reward                                      per-video mean  per-video median  per-interaction  buckets Spearman  buckets Pearson
+raw                                                -0.9848           -0.9966          -0.6200           -1.0000          -0.6758
+capped5                                            -0.9931           -0.9966          -0.6200           -1.0000          -0.6831
+duration_pct                                        0.2262            0.2205           0.0183            0.2090           0.4986
+play_duration_ms (extra, not a candidate)           0.1659           -0.1238          -0.0044            0.8827           0.4465
+== data checks
+== does the unrecorded-pair mask carry reward information? (search users; ADR-0020)
+  Spearman per video: #unrecorded vs mean watch_ratio   +0.0303 (p=0.081)
+  Spearman per video: #unrecorded vs mean duration_pct  -0.0440 (p=0.011)
+  Spearman per user:  #unrecorded vs mean watch_ratio   +0.0782 (p=0.023)
+  Spearman per user:  #unrecorded vs mean duration_pct  -0.0913 (p=0.0079)
+exit=0

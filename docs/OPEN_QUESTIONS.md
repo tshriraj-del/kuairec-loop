@@ -1,14 +1,27 @@
-# Open questions (Phase 0)
+# Open questions
 
-These are decisions I made provisionally, each with an ADR, that you may want to change. Nothing below was guessed silently.
+## A. From the evaluator audit (2026-10-06): open
 
-1. **Quit parameters.** I used EasyRL4Rec's `KuaiEnv-v0` defaults: N=9, n_Q=1, max_turn=30. The paper says N=1, n_Q=1, which never fires as worded, and the class defaults are 5/1/100. Under these settings random sessions average 8.3 steps and 99.98% end by boredom, so max_turn hardly matters. Is this the regime you want Phase 1 to optimise in? (ADR-0002)
-2. **Correct window or bug-compatible window?** The default is the intended last-N window. EasyRL4Rec's slice wraps for t = 5..8 and changed the quit step in 1,025 of 2,541 random sequences. If you need comparability with published EasyRL4Rec/CIRS numbers, set `window_mode = "easyrl4rec_slice"` and re-freeze. (ADR-0003)
-3. **Reward scale and target.** The reward is raw watch_ratio as you specified (max 571.5, p99.9 12.15). EasyRL4Rec caps it at 5. Separately, per-video median watch_ratio has a Spearman correlation of −0.997 with video duration, so a watch_ratio maximiser will learn "show short videos". Keep raw watch_ratio, cap or log it, or move to play_duration or a duration-normalised target? (ADR-0005)
-4. **Unrecorded cells** (17,827, 0.38%) return reward 0 and are excluded from mean watch_ratio. EasyRL4Rec also returns 0. Acceptable? (ADR-0004)
-5. **Popularity measure.** Distinct big-matrix users per video. It has no rank correlation with small-matrix watch_ratio (ρ = −0.012), so it is a weak baseline. Do you want a stronger non-learning baseline in Phase 1, such as big-matrix mean watch_ratio or a category-diverse popularity? That would need a new policy, not an evaluator change. (ADR-0010)
-6. **Which interval decides comparisons?** The seed t-interval you asked for has zero width for deterministic policies. I added a user-cluster bootstrap. For Phase 1 policy comparisons I'd suggest a paired-by-user test on the same partition. Your call, and whether S = 10 is enough. (ADR-0009)
-7. **Leak protection is in-process.** It catches accidents, but a determined policy could reach the closure. Run the env in a separate process before any learned policy touches it? (ADR-0007)
-8. **Catalog.** The env offers only the 3,327 small-matrix videos. Policies trained on the big matrix know 10,728. I assumed recommending outside the 3,327 is impossible, not penalised. Confirm. (ADR-0008)
-9. **Sessions per user.** One session per user per seed, with the policy's state carried across users within a seed. Should later phases allow several sessions per user, letting a policy learn a user across sessions? That changes the harness and needs a re-freeze. (ADR-0008)
-10. **Time.** The env ignores timestamps, and 181,992 small-matrix rows have none. If later phases need time-ordered replay or temporal splits, the small matrix can't supply them for those rows.
+These are decisions the audit made provisionally, each with an ADR. Nothing below was guessed silently.
+
+- **A1. duration_pct still leans slightly toward long videos.** On search users, its per-video Spearman with duration is +0.226. It stays at +0.22 to +0.23 for every bucket count from 5 to 100, while big-matrix rows give about 0, so it isn't a bucketing artifact (`scripts/audit_duration_correlation.py`). It can be exploited, but only a little: rotation-longest beats rotation-random by +0.187 [0.106, 0.268] cumulative reward (+1.2%) and by +0.0072 per recommendation (`scripts/audit_rewards.py`). That is 1.6% of the 11.37 personalization gap. A fix that uses small-matrix statistics is ruled out by your "big matrix only" constraint. Do you accept the lean, or add a mirror acceptance test (longest-first must not beat random) before freezing? (ADR-0016, ADR-0018)
+- **A2. Which axis for the quit profiles?** The rule I fixed beforehand (vary N, threshold 1) found a looser setting at N=3 but could not produce a tighter one: every N ≥ 6 has a random median of 8. I therefore propose the threshold axis at N=9: looser (9, 2), tighter (9, 0). The documented alternative is the N-axis looser (3, 1). Your pick. (ADR-0019)
+- **A3. How should T1 be stated?** I read "must not score above random" as "the paired 95% interval for cumulative reward does not lie entirely above 0". Under duration_pct, shortest-first is significantly *below* random on cumulative reward only because its sessions are shorter (8.00 vs 8.28); per recommendation the two are tied (−0.0025 [−0.0091, 0.0039]). Do you want T1 stated on per-recommendation reward, or on the rotation pair (c) − (b), which isolates duration? Every reading passes duration_pct and fails raw and capped5. (ADR-0018)
+- **A4. The visible mask carries a weak reward signal.** Removing unrecorded pairs from the action set (your decision) shows each user's 12.6 unrecorded videos to policies. Their count correlates weakly with reward: per user, −0.091 (p 0.008) with duration_pct (`scripts/audit_data_checks.py`). I've flagged it rather than acted on it. (ADR-0020)
+- **A5. What duration_pct means as an objective.** It ranks play time against big-matrix (organic) viewing. Small-matrix exposure is forced, so random already scores 0.528 per recommendation, not 0.5. Should a capped watch_ratio be reported next to it as a secondary metric? (ADR-0016)
+- **A6. The non-personalized oracle in v1.** It uses one common value vector, applied within each user's action set, because only 2,319 of 3,327 videos are recorded for every search user. Do you accept that definition? (ADR-0015)
+- **A7. Deterministic policies get a second, checking run.** It verifies the `stochastic=False` declaration and doubles the cost of deterministic policies only. Accept? (ADR-0021)
+- **A8. Commit order.** The audit work is uncommitted, because this brief only asked for the phase-0 commit. My suggestion: commit the audit as is and tag it, so the v0 audit commands stay reproducible. Then apply `docs/proposals/evaluator-v1.patch`, run `scripts/freeze.py --refreeze`, and commit that separately.
+
+## B. Phase 0 questions: status after the audit brief
+
+1. Quit parameters. **Resolved:** keep N=9, n_Q=1, max_turn=30 as primary, with profiles proposed (ADR-0019, A2).
+2. Correct or EasyRL4Rec window. **Resolved:** the intended window is primary; the slice is kept only for the differential check (ADR-0019).
+3. Reward scale and target. **Audited:** duration_pct is recommended, pending your approval (ADR-0018, A1, A3, A5).
+4. Unrecorded cells. **Resolved:** removed from the action set (ADR-0020, A4).
+5. Popularity measure. **Kept.** Reference policies (a)-(d) now give stronger non-learning baselines (ADR-0014).
+6. Which interval decides comparisons. **Resolved:** paired bootstrap; seed intervals for stochastic policies only (ADR-0021).
+7. Process isolation. **Resolved:** not now; it is an entry condition for the agent-loop phase (ADR-0023).
+8. Catalog. **Resolved:** the 3,327 small-matrix videos (ADR-0022).
+9. Sessions per user. **Resolved:** one per user per seed; state across users is allowed (ADR-0022).
+10. Missing timestamps. **Resolved:** no action, and ADR-0024 records why.

@@ -1,0 +1,42 @@
+== video_duration constancy
+  big                                              videos with >1 distinct duration:  4,034 of 10,728
+  small (all rows; duration is a video attribute)  videos with >1 distinct duration:  1,224 of 3,327
+  catalog videos whose small median duration != big median duration: 1 of 3,327 (max abs diff 32 ms)
+  catalog canonical (big median) duration ms: min 3067  p10 6221  median 9593  p90 21672  max 315040
+
+== timestamps (ADR-0024)
+  big                rows without timestamp:         0 of 12,530,806
+  small (all users)  rows without timestamp:   181,992 of 4,676,570
+  small (all users)  duplicate (user, video) rows: 0
+
+== play_duration vs watch_ratio * video_duration
+  big            max |play - wr*dur| / dur = 9.58e-05; rows with play_duration == 0: 240,151
+  small/search   max |play - wr*dur| / dur = 2.92e-03; rows with play_duration == 0: 19,572
+
+== big-matrix views per catalog video (for the policy (d) floor)
+  rows    quantiles q00=4  q01=368  q05=1199  q10=1571  q25=2146  q50=2832
+  users   quantiles q00=3  q01=338  q05=1084  q10=1388  q25=1865  q50=2404
+  catalog videos with <   10 big rows:     5
+  catalog videos with <   50 big rows:     9
+  catalog videos with <  100 big rows:    14
+  catalog videos with <  200 big rows:    23
+  catalog videos with <  500 big rows:    50
+  catalog videos with < 1000 big rows:   119
+
+== categories and single-tag videos in the catalog
+  categories present in catalog: 31  (ids 0..30)
+  catalog videos by number of tags: {1: 2209, 2: 973, 3: 138, 4: 7}
+  categories with >=1 single-tag catalog video: 29
+  single-tag videos per category, smallest five: [(1, 0), (1, 13), (1, 29), (4, 3), (4, 22)]; largest: (504, 28)
+  categories with no single-tag catalog video: [23, 24]
+  catalog videos with a repeated tag inside their own tuple: 0
+
+== per-user unrecorded cells (small matrix, search users)
+  search users: 847; unrecorded cells per user: mean 12.56, median 12, max 32, users with 0: 6
+  catalog videos recorded for every search user: 2,319 of 3,327; videos unrecorded for at least one search user: 1,008
+
+== does the unrecorded-pair mask carry reward information? (search users; ADR-0020)
+  Spearman per video: #unrecorded vs mean watch_ratio   +0.0303 (p=0.081)
+  Spearman per video: #unrecorded vs mean duration_pct  -0.0440 (p=0.011)
+  Spearman per user:  #unrecorded vs mean watch_ratio   +0.0782 (p=0.023)
+  Spearman per user:  #unrecorded vs mean duration_pct  -0.0913 (p=0.0079)

@@ -1,0 +1,7 @@
+K=  5 (effective   5)  rho(catalog, big rows) = -0.0062   rho(all big videos) = +0.0211   min videos/bucket 2137   min rows/bucket 1,117,664
+K= 10 (effective  10)  rho(catalog, big rows) = -0.0017   rho(all big videos) = +0.0100   min videos/bucket 1006   min rows/bucket   318,465
+K= 20 (effective  20)  rho(catalog, big rows) = -0.0000   rho(all big videos) = +0.0096   min videos/bucket  472   min rows/bucket   148,554
+K= 50 (effective  50)  rho(catalog, big rows) = +0.0004   rho(all big videos) = +0.0100   min videos/bucket  148   min rows/bucket    44,204
+K=100 (effective 100)  rho(catalog, big rows) = -0.0013   rho(all big videos) = +0.0108   min videos/bucket   39   min rows/bucket     3,246
+
+chosen K = 5 (meets |rho| <= 0.05)

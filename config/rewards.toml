@@ -1,0 +1,9 @@
+# Reward candidates for the evaluator audit (ADR-0016). NOT part of the v0 manifest:
+# the frozen v0 environment always returns raw watch_ratio. The audit applies the
+# active candidate through audit/reward_env.py. Evaluator v1 (proposed) moves this
+# section into config/evaluator.toml.
+
+[reward]
+active = "raw"           # one of: raw | capped5 | duration_pct
+cap = 5.0                # capped5: min(watch_ratio, cap), as in EasyRL4Rec KuaiData.load_mat
+duration_buckets = 5     # duration_pct: K, chosen by scripts/audit_bucket_choice.py (big matrix only)

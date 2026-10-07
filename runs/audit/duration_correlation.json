@@ -1,0 +1,73 @@
+{
+  "n_search_rows": 2807328,
+  "phase0_replication": -0.9966550048064083,
+  "by_reward": {
+    "raw": {
+      "per_video_mean": -0.9848071804947177,
+      "per_video_median": -0.9966438888867706,
+      "per_interaction": -0.6199789896428496,
+      "buckets_spearman": -1.0,
+      "buckets_pearson": -0.6758084250139191,
+      "n_videos": 3327,
+      "n_interactions": 2807328,
+      "n_buckets": 20
+    },
+    "capped5": {
+      "per_video_mean": -0.9931488643491668,
+      "per_video_median": -0.9966438888867706,
+      "per_interaction": -0.6199805577517857,
+      "buckets_spearman": -1.0,
+      "buckets_pearson": -0.6830678016215125,
+      "n_videos": 3327,
+      "n_interactions": 2807328,
+      "n_buckets": 20
+    },
+    "duration_pct": {
+      "per_video_mean": 0.22619497252999546,
+      "per_video_median": 0.22052051796777503,
+      "per_interaction": 0.01831235011323382,
+      "buckets_spearman": 0.20902255639097742,
+      "buckets_pearson": 0.498623513256924,
+      "n_videos": 3327,
+      "n_interactions": 2807328,
+      "n_buckets": 20
+    },
+    "play_duration_ms (extra, not a candidate)": {
+      "per_video_mean": 0.16594146910467844,
+      "per_video_median": -0.12378426684139314,
+      "per_interaction": -0.0044095069371120925,
+      "buckets_spearman": 0.882706766917293,
+      "buckets_pearson": 0.4465221662085136,
+      "n_videos": 3327,
+      "n_interactions": 2807328,
+      "n_buckets": 20
+    }
+  },
+  "duration_pct_by_K": {
+    "5": {
+      "per_video_mean_search": 0.22619497252999546,
+      "per_interaction_search": 0.01831235011323382,
+      "per_video_mean_big": -0.006237352217964904
+    },
+    "10": {
+      "per_video_mean_search": 0.23069757582731265,
+      "per_interaction_search": 0.019189219536713403,
+      "per_video_mean_big": -0.0017192195163119397
+    },
+    "20": {
+      "per_video_mean_search": 0.23128392550099117,
+      "per_interaction_search": 0.019323302194854834,
+      "per_video_mean_big": -4.819793356366844e-05
+    },
+    "50": {
+      "per_video_mean_search": 0.22901774118744506,
+      "per_interaction_search": 0.0192957838537216,
+      "per_video_mean_big": 0.0004171118333188552
+    },
+    "100": {
+      "per_video_mean_search": 0.22298115305659597,
+      "per_interaction_search": 0.01907366778977234,
+      "per_video_mean_big": -0.0012916313022744924
+    }
+  }
+}

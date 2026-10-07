@@ -1,0 +1,34 @@
+{
+  "duration_nunique_gt1_big": 4034,
+  "duration_nunique_gt1_small": 1224,
+  "catalog_small_vs_big_duration_mismatch": 1,
+  "rows_without_timestamp_big": 0,
+  "rows_without_timestamp_small": 181992,
+  "play_vs_ratio_maxrel_big": 9.580081918316737e-05,
+  "play_vs_ratio_maxrel_small": 0.002921739089867712,
+  "catalog_videos_lt_10_big_rows": 5,
+  "catalog_videos_lt_50_big_rows": 9,
+  "catalog_videos_lt_100_big_rows": 14,
+  "catalog_videos_lt_200_big_rows": 23,
+  "catalog_videos_lt_500_big_rows": 50,
+  "catalog_videos_lt_1000_big_rows": 119,
+  "catalog_videos_by_n_tags": {
+    "1": 2209,
+    "2": 973,
+    "3": 138,
+    "4": 7
+  },
+  "categories_in_catalog": 31,
+  "categories_with_single_tag_video": 29,
+  "categories_without_single_tag_video": [
+    23,
+    24
+  ],
+  "catalog_videos_recorded_for_all_search_users": 2319,
+  "search_unrecorded_per_user_mean": 12.563164108618654,
+  "search_unrecorded_per_user_max": 32,
+  "mask_per video_watch_ratio": 0.030282018271657836,
+  "mask_per video_duration_pct": -0.04396741186119196,
+  "mask_per user_watch_ratio": 0.07819894550938923,
+  "mask_per user_duration_pct": -0.09125181004561593
+}

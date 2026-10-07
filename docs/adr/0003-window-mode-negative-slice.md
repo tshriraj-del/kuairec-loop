@@ -2,6 +2,8 @@
 
 Status: accepted (Phase 0)
 
+Pending: the evaluator v1 proposal makes harness.run refuse the slice mode; it stays for scripts/differential.py only (ADR-0019).
+
 ## Context
 EasyRL4Rec builds the window as `self.sequence_action[t - N:t]` on a list of length t. For 0 < t < N the start index is negative, and Python counts it from the end. For N = 9 the window at t = 5..8 is `seq[2t-9:t]`, so t=5 sees items 1-4 (item 0 dropped) and t=8 sees only item 7. Items that should be in the window are skipped, so the reference undercounts and quits later.
 

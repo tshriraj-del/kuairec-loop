@@ -12,3 +12,7 @@ Each layer was checked by planting a violation: an ndarray attribute, a float at
 
 ## Limits
 Python can't enforce this against deliberate evasion (`env._lookup.__closure__`, building the filename at runtime, `importlib`). The goal is to make accidental leakage impossible and deliberate leakage obvious in review. A process boundary (env in a subprocess) would close this. Deferred: OPEN_QUESTIONS Q7.
+
+## Amendment (evaluator audit, 2026-10-06)
+The static scan missed `from kuairec_eval import env`, because it compared only the module part of `from X import Y` against the banned list. `tests/test_policy_isolation.py` now matches banned modules by prefix and by `module.name`, and also bans `kuairec_eval.rewards`, `kuairec_eval.diagnostics` and `audit`. Five planted import patterns are caught. Oracles get the same runtime guard as the small matrix (ADR-0015).
+

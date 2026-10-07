@@ -1,0 +1,53 @@
+{
+  "grid": [
+    {
+      "K_requested": 5,
+      "K_effective": 5,
+      "rho_catalog": -0.006237352217964904,
+      "rho_all_big_videos": 0.021121977302578736,
+      "min_videos_per_bucket": 2137,
+      "min_rows_per_bucket": 1117664
+    },
+    {
+      "K_requested": 10,
+      "K_effective": 10,
+      "rho_catalog": -0.0017192195163119397,
+      "rho_all_big_videos": 0.010004576820715438,
+      "min_videos_per_bucket": 1006,
+      "min_rows_per_bucket": 318465
+    },
+    {
+      "K_requested": 20,
+      "K_effective": 20,
+      "rho_catalog": -4.819793356366844e-05,
+      "rho_all_big_videos": 0.009576747399177531,
+      "min_videos_per_bucket": 472,
+      "min_rows_per_bucket": 148554
+    },
+    {
+      "K_requested": 50,
+      "K_effective": 50,
+      "rho_catalog": 0.0004171118333188552,
+      "rho_all_big_videos": 0.010015808055293701,
+      "min_videos_per_bucket": 148,
+      "min_rows_per_bucket": 44204
+    },
+    {
+      "K_requested": 100,
+      "K_effective": 100,
+      "rho_catalog": -0.0012916313022744924,
+      "rho_all_big_videos": 0.010795714228809813,
+      "min_videos_per_bucket": 39,
+      "min_rows_per_bucket": 3246
+    }
+  ],
+  "threshold": 0.05,
+  "chosen": {
+    "K_requested": 5,
+    "K_effective": 5,
+    "rho_catalog": -0.006237352217964904,
+    "rho_all_big_videos": 0.021121977302578736,
+    "min_videos_per_bucket": 2137,
+    "min_rows_per_bucket": 1117664
+  }
+}

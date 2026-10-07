@@ -1,0 +1,101 @@
+{
+  "raw": {
+    "T1_shortest_not_above_random": {
+      "a": "a_shortest_first",
+      "b": "random",
+      "metric": "cum_reward",
+      "mean": 12.852376499193525,
+      "ci": [
+        12.42978401553758,
+        13.285607391940884
+      ],
+      "n_users": 847,
+      "dropped_users": 0,
+      "resamples": 10000,
+      "seed": 0,
+      "pass": false
+    },
+    "T2_personalized_beats_nonpersonalized": {
+      "a": "oracle_personalized",
+      "b": "oracle_nonpersonalized",
+      "metric": "cum_reward",
+      "mean": 133.1459167238893,
+      "ci": [
+        122.86977484028453,
+        143.68898163029658
+      ],
+      "n_users": 847,
+      "dropped_users": 0,
+      "resamples": 10000,
+      "seed": 0,
+      "pass": true
+    },
+    "both_pass": false
+  },
+  "capped5": {
+    "T1_shortest_not_above_random": {
+      "a": "a_shortest_first",
+      "b": "random",
+      "metric": "cum_reward",
+      "mean": 12.0195067587796,
+      "ci": [
+        11.77825191390652,
+        12.26624937872007
+      ],
+      "n_users": 847,
+      "dropped_users": 0,
+      "resamples": 10000,
+      "seed": 0,
+      "pass": false
+    },
+    "T2_personalized_beats_nonpersonalized": {
+      "a": "oracle_personalized",
+      "b": "oracle_nonpersonalized",
+      "metric": "cum_reward",
+      "mean": 46.74885769840548,
+      "ci": [
+        45.00038218000336,
+        48.482485609373356
+      ],
+      "n_users": 847,
+      "dropped_users": 0,
+      "resamples": 10000,
+      "seed": 0,
+      "pass": true
+    },
+    "both_pass": false
+  },
+  "duration_pct": {
+    "T1_shortest_not_above_random": {
+      "a": "a_shortest_first",
+      "b": "random",
+      "metric": "cum_reward",
+      "mean": -0.19659357861195673,
+      "ci": [
+        -0.2602954519426045,
+        -0.13184940776380313
+      ],
+      "n_users": 847,
+      "dropped_users": 0,
+      "resamples": 10000,
+      "seed": 0,
+      "pass": true
+    },
+    "T2_personalized_beats_nonpersonalized": {
+      "a": "oracle_personalized",
+      "b": "oracle_nonpersonalized",
+      "metric": "cum_reward",
+      "mean": 11.365957696140972,
+      "ci": [
+        11.16670080326052,
+        11.56478315382504
+      ],
+      "n_users": 847,
+      "dropped_users": 0,
+      "resamples": 10000,
+      "seed": 0,
+      "pass": true
+    },
+    "both_pass": true
+  }
+}

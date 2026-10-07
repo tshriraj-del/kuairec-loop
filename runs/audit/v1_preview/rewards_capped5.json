@@ -1,0 +1,749 @@
+{
+  "reward": "capped5",
+  "env_config": {
+    "quit_profile": "primary",
+    "quit_window": 9,
+    "quit_threshold": 1,
+    "max_turn": 30,
+    "window_mode": "intended",
+    "reward": "capped5",
+    "reward_cap": 5.0,
+    "duration_buckets": 5
+  },
+  "manifest_digest": "df3dc2563949e1658dac8e2c0d9186dbbbd58816477bf1d73336d53fcc96ec82",
+  "rho_per_video_mean_reward_vs_duration": -0.9931488643491668,
+  "quit_free": {
+    "personalized_bound": 111.9982754804857,
+    "nonpersonalized_quit_free": 63.957384598794526
+  },
+  "policies": {
+    "random": {
+      "label": "random",
+      "stochastic": true,
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "summary": {
+        "mean_reward": {
+          "mean": 0.8787336816426334,
+          "ci_seeds": [
+            0.8734092517136585,
+            0.8840581115716084
+          ],
+          "ci_users": [
+            0.8669557719250502,
+            0.8907158847472503
+          ]
+        },
+        "cum_reward": {
+          "mean": 7.287698237971132,
+          "ci_seeds": [
+            7.209085312014637,
+            7.3663111639276275
+          ],
+          "ci_users": [
+            7.173079598714546,
+            7.398601971938914
+          ]
+        },
+        "session_length": {
+          "mean": 8.293152302243211,
+          "ci_seeds": [
+            8.237963131775057,
+            8.348341472711365
+          ],
+          "ci_users": [
+            8.220888429752067,
+            8.365672963400236
+          ]
+        },
+        "top_category_share": {
+          "mean": 0.2541057812738507,
+          "ci_seeds": [
+            0.25066610218690555,
+            0.25754546036079584
+          ]
+        },
+        "catalog_coverage": {
+          "mean": 0.8810640216411182,
+          "ci_seeds": [
+            0.8755708978484471,
+            0.8865571454337893
+          ]
+        },
+        "boredom_quit_rate": {
+          "mean": 0.9997638724911452,
+          "ci_seeds": [
+            0.9994077674674855,
+            1.0001199775148049
+          ]
+        },
+        "max_turn_rate": {
+          "mean": 0.00023612750885478156,
+          "ci_seeds": [
+            -0.00011997751480491211,
+            0.0005922325325144753
+          ]
+        }
+      }
+    },
+    "popularity": {
+      "label": "popularity (big-matrix distinct users)",
+      "stochastic": false,
+      "seeds": [
+        0
+      ],
+      "summary": {
+        "mean_reward": {
+          "mean": 0.7619825234608857,
+          "ci_seeds": null,
+          "ci_users": [
+            0.746592858134159,
+            0.7796433648999508
+          ]
+        },
+        "cum_reward": {
+          "mean": 3.8099126173044278,
+          "ci_seeds": null,
+          "ci_users": [
+            3.732964290670795,
+            3.898216824499754
+          ]
+        },
+        "session_length": {
+          "mean": 5.0,
+          "ci_seeds": null,
+          "ci_users": [
+            5.0,
+            5.0
+          ]
+        },
+        "top_category_share": {
+          "mean": 0.6,
+          "ci_seeds": null
+        },
+        "catalog_coverage": {
+          "mean": 0.0018034265103697023,
+          "ci_seeds": null
+        },
+        "boredom_quit_rate": {
+          "mean": 1.0,
+          "ci_seeds": null
+        },
+        "max_turn_rate": {
+          "mean": 0.0,
+          "ci_seeds": null
+        }
+      }
+    },
+    "a_shortest_first": {
+      "label": "(a) shortest first",
+      "stochastic": false,
+      "seeds": [
+        0
+      ],
+      "summary": {
+        "mean_reward": {
+          "mean": 2.4347464084586203,
+          "ci_seeds": null,
+          "ci_users": [
+            2.401410185100075,
+            2.4677328476087665
+          ]
+        },
+        "cum_reward": {
+          "mean": 19.2767525562261,
+          "ci_seeds": null,
+          "ci_users": [
+            19.005601796051277,
+            19.542984670771382
+          ]
+        },
+        "session_length": {
+          "mean": 7.917355371900826,
+          "ci_seeds": null,
+          "ci_users": [
+            7.894923258559622,
+            7.9386068476977565
+          ]
+        },
+        "top_category_share": {
+          "mean": 0.37891440501043844,
+          "ci_seeds": null
+        },
+        "catalog_coverage": {
+          "mean": 0.0036068530207394047,
+          "ci_seeds": null
+        },
+        "boredom_quit_rate": {
+          "mean": 1.0,
+          "ci_seeds": null
+        },
+        "max_turn_rate": {
+          "mean": 0.0,
+          "ci_seeds": null
+        }
+      }
+    },
+    "b_rotation_random": {
+      "label": "(b) category rotation, random pick",
+      "stochastic": true,
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "summary": {
+        "mean_reward": {
+          "mean": 0.7434944677142556,
+          "ci_seeds": [
+            0.7425056029459645,
+            0.7444833324825468
+          ],
+          "ci_users": [
+            0.7343093364925157,
+            0.7525967070185097
+          ]
+        },
+        "cum_reward": {
+          "mean": 22.30483403142767,
+          "ci_seeds": [
+            22.275168088378933,
+            22.334499974476408
+          ],
+          "ci_users": [
+            22.02928009477547,
+            22.57790121055529
+          ]
+        },
+        "session_length": {
+          "mean": 30.0,
+          "ci_seeds": [
+            30.0,
+            30.0
+          ],
+          "ci_users": [
+            30.0,
+            30.0
+          ]
+        },
+        "top_category_share": {
+          "mean": 0.03510822510822511,
+          "ci_seeds": [
+            0.03501777591210417,
+            0.03519867430434605
+          ]
+        },
+        "catalog_coverage": {
+          "mean": 0.6340847610459874,
+          "ci_seeds": [
+            0.6327091092189121,
+            0.6354604128730628
+          ]
+        },
+        "boredom_quit_rate": {
+          "mean": 0.0,
+          "ci_seeds": [
+            0.0,
+            0.0
+          ]
+        },
+        "max_turn_rate": {
+          "mean": 1.0,
+          "ci_seeds": [
+            1.0,
+            1.0
+          ]
+        }
+      }
+    },
+    "c_rotation_shortest": {
+      "label": "(c) category rotation, shortest pick",
+      "stochastic": false,
+      "seeds": [
+        0
+      ],
+      "summary": {
+        "mean_reward": {
+          "mean": 1.5606548592902145,
+          "ci_seeds": null,
+          "ci_users": [
+            1.5414839570136722,
+            1.5801557781465279
+          ]
+        },
+        "cum_reward": {
+          "mean": 46.81964577870643,
+          "ci_seeds": null,
+          "ci_users": [
+            46.24451871041017,
+            47.40467334439583
+          ]
+        },
+        "session_length": {
+          "mean": 30.0,
+          "ci_seeds": null,
+          "ci_users": [
+            30.0,
+            30.0
+          ]
+        },
+        "top_category_share": {
+          "mean": 0.06666666666666667,
+          "ci_seeds": null
+        },
+        "catalog_coverage": {
+          "mean": 0.011722272317403066,
+          "ci_seeds": null
+        },
+        "boredom_quit_rate": {
+          "mean": 0.0,
+          "ci_seeds": null
+        },
+        "max_turn_rate": {
+          "mean": 1.0,
+          "ci_seeds": null
+        }
+      }
+    },
+    "d_big_mean_watch_ratio": {
+      "label": "(d) big-matrix mean watch_ratio, >=100 rows",
+      "stochastic": false,
+      "seeds": [
+        0
+      ],
+      "summary": {
+        "mean_reward": {
+          "mean": 2.4654126958816995,
+          "ci_seeds": null,
+          "ci_users": [
+            2.428469875311029,
+            2.503905054493347
+          ]
+        },
+        "cum_reward": {
+          "mean": 14.693510376400024,
+          "ci_seeds": null,
+          "ci_users": [
+            14.47000755458745,
+            14.92346266157375
+          ]
+        },
+        "session_length": {
+          "mean": 5.959858323494687,
+          "ci_seeds": null,
+          "ci_users": [
+            5.9456906729634005,
+            5.9728453364817
+          ]
+        },
+        "top_category_share": {
+          "mean": 0.5033676703645008,
+          "ci_seeds": null
+        },
+        "catalog_coverage": {
+          "mean": 0.0021039975954313195,
+          "ci_seeds": null
+        },
+        "boredom_quit_rate": {
+          "mean": 1.0,
+          "ci_seeds": null
+        },
+        "max_turn_rate": {
+          "mean": 0.0,
+          "ci_seeds": null
+        }
+      }
+    },
+    "e_big_mean_label": {
+      "label": "(e) big-matrix mean capped5 label, >=100 rows [extra]",
+      "stochastic": false,
+      "seeds": [
+        0
+      ],
+      "summary": {
+        "mean_reward": {
+          "mean": 2.4622064419684584,
+          "ci_seeds": null,
+          "ci_users": [
+            2.4297845058416123,
+            2.496471058005246
+          ]
+        },
+        "cum_reward": {
+          "mean": 19.497070373414935,
+          "ci_seeds": null,
+          "ci_users": [
+            19.231889119796758,
+            19.77411983353329
+          ]
+        },
+        "session_length": {
+          "mean": 7.9185360094451,
+          "ci_seeds": null,
+          "ci_users": [
+            7.896103896103896,
+            7.9386068476977565
+          ]
+        },
+        "top_category_share": {
+          "mean": 0.37870881168927983,
+          "ci_seeds": null
+        },
+        "catalog_coverage": {
+          "mean": 0.0033062819356777877,
+          "ci_seeds": null
+        },
+        "boredom_quit_rate": {
+          "mean": 1.0,
+          "ci_seeds": null
+        },
+        "max_turn_rate": {
+          "mean": 0.0,
+          "ci_seeds": null
+        }
+      }
+    },
+    "probe_longest_first": {
+      "label": "probe: longest first [extra]",
+      "stochastic": false,
+      "seeds": [
+        0
+      ],
+      "summary": {
+        "mean_reward": {
+          "mean": 0.04030524568121243,
+          "ci_seeds": null,
+          "ci_users": [
+            0.03785753222630678,
+            0.04284731638451915
+          ]
+        },
+        "cum_reward": {
+          "mean": 0.20285863322197,
+          "ci_seeds": null,
+          "ci_users": [
+            0.19047518020857926,
+            0.21582437398652005
+          ]
+        },
+        "session_length": {
+          "mean": 5.033057851239669,
+          "ci_seeds": null,
+          "ci_users": [
+            5.008264462809917,
+            5.074380165289257
+          ]
+        },
+        "top_category_share": {
+          "mean": 0.5960591133004927,
+          "ci_seeds": null
+        },
+        "catalog_coverage": {
+          "mean": 0.003907424105801022,
+          "ci_seeds": null
+        },
+        "boredom_quit_rate": {
+          "mean": 1.0,
+          "ci_seeds": null
+        },
+        "max_turn_rate": {
+          "mean": 0.0,
+          "ci_seeds": null
+        }
+      }
+    },
+    "probe_rotation_longest": {
+      "label": "probe: category rotation, longest pick [extra]",
+      "stochastic": false,
+      "seeds": [
+        0
+      ],
+      "summary": {
+        "mean_reward": {
+          "mean": 0.20361195623221962,
+          "ci_seeds": null,
+          "ci_users": [
+            0.20006839759139466,
+            0.2070732914722694
+          ]
+        },
+        "cum_reward": {
+          "mean": 6.1083586869665885,
+          "ci_seeds": null,
+          "ci_users": [
+            6.00205192774184,
+            6.212198744168083
+          ]
+        },
+        "session_length": {
+          "mean": 30.0,
+          "ci_seeds": null,
+          "ci_users": [
+            30.0,
+            30.0
+          ]
+        },
+        "top_category_share": {
+          "mean": 0.06666666666666667,
+          "ci_seeds": null
+        },
+        "catalog_coverage": {
+          "mean": 0.0123234144875263,
+          "ci_seeds": null
+        },
+        "boredom_quit_rate": {
+          "mean": 0.0,
+          "ci_seeds": null
+        },
+        "max_turn_rate": {
+          "mean": 1.0,
+          "ci_seeds": null
+        }
+      }
+    },
+    "oracle_nonpersonalized": {
+      "label": "oracle: non-personalized (common values, greedy)",
+      "stochastic": false,
+      "seeds": [
+        0
+      ],
+      "summary": {
+        "mean_reward": {
+          "mean": 2.1250725489488054,
+          "ci_seeds": null,
+          "ci_users": [
+            2.1013773508614513,
+            2.149546491230431
+          ]
+        },
+        "cum_reward": {
+          "mean": 63.752176468464164,
+          "ci_seeds": null,
+          "ci_users": [
+            63.04132052584353,
+            64.48639473691293
+          ]
+        },
+        "session_length": {
+          "mean": 30.0,
+          "ci_seeds": null,
+          "ci_users": [
+            30.0,
+            30.0
+          ]
+        },
+        "top_category_share": {
+          "mean": 0.19704840613931524,
+          "ci_seeds": null
+        },
+        "catalog_coverage": {
+          "mean": 0.009918845807033363,
+          "ci_seeds": null
+        },
+        "boredom_quit_rate": {
+          "mean": 0.0,
+          "ci_seeds": null
+        },
+        "max_turn_rate": {
+          "mean": 1.0,
+          "ci_seeds": null
+        }
+      }
+    },
+    "oracle_personalized": {
+      "label": "oracle: personalized greedy",
+      "stochastic": false,
+      "seeds": [
+        0
+      ],
+      "summary": {
+        "mean_reward": {
+          "mean": 3.673088598545202,
+          "ci_seeds": null,
+          "ci_users": [
+            3.61296069046015,
+            3.7332316052431347
+          ]
+        },
+        "cum_reward": {
+          "mean": 110.19265795635606,
+          "ci_seeds": null,
+          "ci_users": [
+            108.3888207138045,
+            111.99694815729404
+          ]
+        },
+        "session_length": {
+          "mean": 30.0,
+          "ci_seeds": null,
+          "ci_users": [
+            30.0,
+            30.0
+          ]
+        },
+        "top_category_share": {
+          "mean": 0.19268004722550178,
+          "ci_seeds": null
+        },
+        "catalog_coverage": {
+          "mean": 0.9005109708446047,
+          "ci_seeds": null
+        },
+        "boredom_quit_rate": {
+          "mean": 0.0,
+          "ci_seeds": null
+        },
+        "max_turn_rate": {
+          "mean": 1.0,
+          "ci_seeds": null
+        }
+      }
+    }
+  },
+  "acceptance": {
+    "T1_shortest_not_above_random": {
+      "a": "a_shortest_first",
+      "b": "random",
+      "metric": "cum_reward",
+      "mean": 11.989054318254967,
+      "ci": [
+        11.74626730327245,
+        12.237460053639731
+      ],
+      "n_users": 847,
+      "resamples": 10000,
+      "pass": false
+    },
+    "T2_personalized_beats_nonpersonalized": {
+      "a": "oracle_personalized",
+      "b": "oracle_nonpersonalized",
+      "metric": "cum_reward",
+      "mean": 46.44048148789191,
+      "ci": [
+        44.69044291563897,
+        48.16670348158877
+      ],
+      "n_users": 847,
+      "resamples": 10000,
+      "pass": true
+    },
+    "both_pass": false
+  },
+  "supplementary": [
+    {
+      "a": "a_shortest_first",
+      "b": "random",
+      "metric": "mean_reward",
+      "mean": 1.5550862725297168,
+      "ci": [
+        1.5253572401471018,
+        1.5848450939228615
+      ],
+      "n_users": 847,
+      "resamples": 10000
+    },
+    {
+      "a": "c_rotation_shortest",
+      "b": "b_rotation_random",
+      "metric": "cum_reward",
+      "mean": 24.514811747278767,
+      "ci": [
+        24.118756155857046,
+        24.9001109455713
+      ],
+      "n_users": 847,
+      "resamples": 10000
+    },
+    {
+      "a": "c_rotation_shortest",
+      "b": "b_rotation_random",
+      "metric": "mean_reward",
+      "mean": 0.817160391575959,
+      "ci": [
+        0.8039585385285684,
+        0.8300036981857102
+      ],
+      "n_users": 847,
+      "resamples": 10000
+    },
+    {
+      "a": "oracle_personalized",
+      "b": "oracle_nonpersonalized",
+      "metric": "mean_reward",
+      "mean": 1.5480160495963968,
+      "ci": [
+        1.4896814305212989,
+        1.6055567827196255
+      ],
+      "n_users": 847,
+      "resamples": 10000
+    },
+    {
+      "a": "probe_longest_first",
+      "b": "random",
+      "metric": "cum_reward",
+      "mean": -7.084839604749163,
+      "ci": [
+        -7.197846382268567,
+        -6.972477328276475
+      ],
+      "n_users": 847,
+      "resamples": 10000
+    },
+    {
+      "a": "probe_rotation_longest",
+      "b": "b_rotation_random",
+      "metric": "cum_reward",
+      "mean": -16.19647534446108,
+      "ci": [
+        -16.40752867530781,
+        -15.990154800661
+      ],
+      "n_users": 847,
+      "resamples": 10000
+    },
+    {
+      "a": "probe_rotation_longest",
+      "b": "b_rotation_random",
+      "metric": "mean_reward",
+      "mean": -0.539882511482036,
+      "ci": [
+        -0.5469176225102603,
+        -0.5330051600220334
+      ],
+      "n_users": 847,
+      "resamples": 10000
+    },
+    {
+      "a": "b_rotation_random",
+      "b": "random",
+      "metric": "cum_reward",
+      "mean": 15.017135793456537,
+      "ci": [
+        14.814164314696901,
+        15.220352048858533
+      ],
+      "n_users": 847,
+      "resamples": 10000
+    }
+  ],
+  "command": ".venv/bin/python scripts/audit_rewards.py ",
+  "wall_seconds": 15.2
+}

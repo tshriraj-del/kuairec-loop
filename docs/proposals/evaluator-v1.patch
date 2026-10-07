@@ -1,0 +1,2296 @@
+diff --git a/README.md b/README.md
+index f47303b..655082e 100644
+--- a/README.md
++++ b/README.md
+@@ -3,10 +3,12 @@
+ Closed-loop short-video recommender on KuaiRec 2.0 (CC BY-SA 4.0). **Phase 0:** data loading, the environment, the frozen evaluator, and two baselines.
+ 
+ ```
+-kuairec_eval/          FROZEN evaluator (hash-checked): data.py env.py partitions.py harness.py _integrity.py
+-config/evaluator.toml  FROZEN quit-rule parameters, partition seed, harness seeds
++kuairec_eval/          FROZEN evaluator (hash-checked): data.py env.py labels.py rewards.py partitions.py
++                       harness.py _integrity.py diagnostics/ (oracles; policies may not import)
++config/evaluator.toml  FROZEN reward switch, quit profiles, partition seed, harness and comparison settings
+ data/partitions/       FROZEN search / shadow / holdout user lists
+-policies/baselines.py  uniform random, global popularity (big matrix only)
++policies/              baselines (random, popularity) and reference policies; v1 protocol:
++                       `stochastic` attribute, begin_session(user, excluded), act(), observe()
+ scripts/               data_report, freeze, run_baselines, differential, popularity_diagnostic, final_report
+ tests/                 37 tests
+ docs/                  RESULTS.md, OPEN_QUESTIONS.md, adr/0001-0013
+@@ -27,4 +29,6 @@ Reproduce:
+ .venv/bin/python -m pytest -v
+ ```
+ 
+-Changing anything under `kuairec_eval/`, `config/` or `data/partitions/` makes every later run fail until `scripts/freeze.py --refreeze` is run on purpose.
++Changing anything under `kuairec_eval/`, `config/evaluator.toml` or `data/partitions/`, or adding a module inside `kuairec_eval/`, makes every later run fail until `scripts/freeze.py --refreeze` is run on purpose.
++
++Compare policies with `harness.compare(result_a, result_b, metric)`, a paired bootstrap over users (ADR-0021).
+diff --git a/audit/__init__.py b/audit/__init__.py
+deleted file mode 100644
+index 16f193d..0000000
+--- a/audit/__init__.py
++++ /dev/null
+@@ -1 +0,0 @@
+-"""Evaluator audit scaffolding (not frozen, deleted by evaluator v1). ADR-0026."""
+diff --git a/audit/reward_env.py b/audit/reward_env.py
+deleted file mode 100644
+index 888f4ec..0000000
+--- a/audit/reward_env.py
++++ /dev/null
+@@ -1,51 +0,0 @@
+-"""Frozen v0 KuaiEnv dynamics with the reward swapped for a candidate (ADR-0026).
+-
+-Quit rule, repeat ban, max_turn and unrecorded-pair handling all come from the frozen
+-environment, unchanged: RewardEnv calls KuaiEnv.step and replaces only `reward`, and only
+-for recorded pairs (unrecorded pairs keep missing_pair_reward = 0, as in v0). Under
+-"raw" every replaced value is asserted equal to the frozen environment's own reward.
+-The candidate matrix lives in a closure, never on the instance (same rule as ADR-0007).
+-"""
+-from __future__ import annotations
+-
+-import dataclasses
+-
+-import numpy as np
+-
+-from kuairec_eval.env import KuaiEnv, StepResult
+-from kuairec_eval.rewards import RewardConfig, reward_matrix
+-
+-
+-class RewardEnv:
+-    def __init__(self, base: KuaiEnv, cfg: RewardConfig, matrix: np.ndarray | None = None):
+-        mat = reward_matrix(cfg, base.users, base.catalog) if matrix is None else matrix
+-        uidx = {u: i for i, u in enumerate(base.users)}
+-        vidx = {v: j for j, v in enumerate(base.catalog)}
+-
+-        def lookup(user: int, video: int) -> float:
+-            return float(mat[uidx[user], vidx[video]])
+-
+-        self._lookup = lookup
+-        self._base = base
+-        self._user: int | None = None
+-        self.reward_config = cfg
+-        self.users, self.catalog, self.categories = base.users, base.catalog, base.categories
+-        self.config, self.manifest_digest = base.config, base.manifest_digest
+-
+-    def reset(self, user: int) -> dict:
+-        obs = self._base.reset(user)
+-        self._user = int(user)
+-        return obs
+-
+-    def step(self, video: int) -> StepResult:
+-        r = self._base.step(video)
+-        if not r.observed:
+-            return r
+-        value = self._lookup(self._user, int(video))
+-        if self.reward_config.active == "raw" and value != r.reward:
+-            raise AssertionError(f"raw candidate {value} != frozen env reward {r.reward}")
+-        return dataclasses.replace(r, reward=value)
+-
+-    @property
+-    def history(self) -> tuple[int, ...]:
+-        return self._base.history
+diff --git a/audit/runner.py b/audit/runner.py
+deleted file mode 100644
+index eacd8f2..0000000
+--- a/audit/runner.py
++++ /dev/null
+@@ -1,91 +0,0 @@
+-"""Run policies through the frozen harness pieces and compare them by paired bootstrap.
+-
+-run_policy() executes exactly what kuairec_eval.harness.run does (verify, partitions.load,
+-run_seed per seed, seed_metrics, t_interval, user_bootstrap), so its `summary` equals
+-harness.run's; tests/test_audit.py checks that. It additionally keeps per-user values,
+-averaged over seeds, which harness.run does not return and paired comparisons need.
+-
+-paired_bootstrap(): per-user differences d_u = A(u) - B(u) on the same users; resample
+-users with replacement (numpy default_rng(seed)); percentile interval of mean(d). ADR-0018.
+-"""
+-from __future__ import annotations
+-
+-from dataclasses import dataclass, field
+-
+-import numpy as np
+-
+-from kuairec_eval import _integrity, harness, partitions
+-
+-
+-@dataclass
+-class PolicyRun:
+-    name: str
+-    stochastic: bool
+-    seeds: list[int]
+-    summary: dict
+-    per_seed: list[dict]
+-    users: np.ndarray
+-    cum_reward: np.ndarray        # per user, mean over seeds
+-    session_length: np.ndarray    # per user, mean over seeds
+-    reward_sum: np.ndarray        # per user, summed over seeds, recorded pairs only
+-    reward_n: np.ndarray          # per user, count over seeds, recorded pairs only
+-    extra: dict = field(default_factory=dict)
+-
+-    @property
+-    def mean_reward(self) -> np.ndarray:
+-        with np.errstate(invalid="ignore", divide="ignore"):
+-            return self.reward_sum / self.reward_n
+-
+-
+-def run_policy(env, factory, partition: str, seeds: list[int], name: str, stochastic: bool) -> PolicyRun:
+-    _integrity.verify()
+-    cfg = harness.harness_config()
+-    users = partitions.load(partition)
+-    logs = [harness.run_seed(env, factory, users, s) for s in seeds]
+-    per_seed = [harness.seed_metrics(log, env) for log in logs]
+-    summary = {}
+-    for m in harness.METRICS:
+-        mean, lo, hi = harness.t_interval(np.array([p[m] for p in per_seed]), cfg["confidence"])
+-        summary[m] = {"mean": mean, "ci_seeds": [lo, hi]}
+-    for m, ci in harness.user_bootstrap(logs, cfg["confidence"], cfg["user_bootstrap_resamples"]).items():
+-        summary[m]["ci_users"] = list(ci)
+-
+-    order = np.array(sorted(users))
+-    index = {u: i for i, u in enumerate(order)}
+-    n = len(order)
+-    cum, length = np.zeros(n), np.zeros(n)
+-    rsum, rn = np.zeros(n), np.zeros(n)
+-    for log in logs:
+-        for u, ln, r in zip(log.sess_user, log.sess_len, log.sess_reward):
+-            cum[index[u]] += r
+-            length[index[u]] += ln
+-        for u, r, ok in zip(log.rec_user, log.rec_reward, log.rec_observed):
+-            if ok:
+-                rsum[index[u]] += r
+-                rn[index[u]] += 1
+-    return PolicyRun(name=name, stochastic=stochastic, seeds=list(seeds), summary=summary, per_seed=per_seed,
+-                     users=order, cum_reward=cum / len(logs), session_length=length / len(logs),
+-                     reward_sum=rsum, reward_n=rn)
+-
+-
+-def paired_bootstrap(a: np.ndarray, b: np.ndarray, resamples: int = 10_000, seed: int = 0,
+-                     confidence: float = 0.95) -> dict:
+-    a, b = np.asarray(a, dtype=float), np.asarray(b, dtype=float)
+-    keep = ~(np.isnan(a) | np.isnan(b))
+-    d = a[keep] - b[keep]
+-    rng = np.random.default_rng(seed)
+-    boot = np.empty(resamples)
+-    for start in range(0, resamples, 1000):
+-        stop = min(start + 1000, resamples)
+-        boot[start:stop] = d[rng.integers(0, len(d), size=(stop - start, len(d)))].mean(axis=1)
+-    lo, hi = np.percentile(boot, [50 * (1 - confidence), 50 * (1 + confidence)])
+-    return {"mean": float(d.mean()), "ci": [float(lo), float(hi)], "n_users": int(keep.sum()),
+-            "dropped_users": int((~keep).sum()), "resamples": resamples, "seed": seed}
+-
+-
+-def compare(a: PolicyRun, b: PolicyRun, metric: str, **kw) -> dict:
+-    if not np.array_equal(a.users, b.users):
+-        raise ValueError("paired comparison needs the same users")
+-    get = {"cum_reward": lambda r: r.cum_reward, "session_length": lambda r: r.session_length,
+-           "mean_reward": lambda r: r.mean_reward}[metric]
+-    return {"a": a.name, "b": b.name, "metric": metric, **paired_bootstrap(get(a), get(b), **kw)}
+diff --git a/config/evaluator.toml b/config/evaluator.toml
+index 4ddcba7..80f0f2c 100644
+--- a/config/evaluator.toml
++++ b/config/evaluator.toml
+@@ -1,18 +1,30 @@
+-# Frozen evaluator configuration. Hashed into kuairec_eval/FROZEN_MANIFEST.json.
++# Frozen evaluator configuration (v1). Hashed into kuairec_eval/FROZEN_MANIFEST.json.
+ # Changing anything here fails every later run until scripts/freeze.py is re-run.
++# Policies never receive these values; they see only PolicyContext, the per-session
++# excluded set and each StepResult (ADR-0019).
+ 
+ [env]
+ # KuaiEnv "feel bored then quit" rule (CIRS, arXiv 2204.01266, Sec 5.1.2; EasyRL4Rec
+-# src/core/envs/KuaiRec/KuaiEnv.py::_determine_whether_to_leave). See ADR-0002.
+-quit_window = 9          # N   (EasyRL4Rec: num_leave_compute, KuaiEnv-v0 default 9)
+-quit_threshold = 1       # n_Q (EasyRL4Rec: leave_threshold,   KuaiEnv-v0 default 1)
+-max_turn = 30            # EasyRL4Rec KuaiEnv-v0 default 30
+-# "intended": window = the last min(t, N) recommendations.
+-# "easyrl4rec_slice": window = sequence[t-N:t] with Python's negative-index semantics,
+-#                     which is what EasyRL4Rec actually executes for 0 < t < N. See ADR-0003.
++# KuaiEnv._determine_whether_to_leave). Exact definition: kuairec_eval/env.py docstring.
++quit_profile = "primary"   # primary | looser | tighter (looser/tighter are sensitivity settings)
++max_turn = 30
++# "intended": window = the last min(t, N) recommendations. "easyrl4rec_slice" reproduces
++# EasyRL4Rec's seq[t-N:t] and is accepted only by scripts/differential.py: harness.run
++# refuses it (ADR-0003, ADR-0019).
+ window_mode = "intended"
+-# Reward returned for the 17,827 (user, video) cells absent from small_matrix.csv. See ADR-0004.
+-missing_pair_reward = 0.0
++# Reward candidate (ADR-0016, ADR-0018): raw | capped5 | duration_pct
++reward = "duration_pct"
++
++[quit_profiles]
++# From the random policy's survival curve (scripts/audit_survival.py, ADR-0019):
++# random median session length 8 / mean 8.26 under primary.
++primary = { quit_window = 9, quit_threshold = 1 }
++looser  = { quit_window = 9, quit_threshold = 2 }   # median 13, mean 15.01
++tighter = { quit_window = 9, quit_threshold = 0 }   # median 4,  mean 4.16
++
++[reward]
++cap = 5.0               # capped5: min(watch_ratio, cap), as in EasyRL4Rec KuaiData.load_mat
++duration_buckets = 5    # duration_pct: K from scripts/audit_bucket_choice.py (big matrix only)
+ 
+ [partition]
+ seed = 20261005
+@@ -21,6 +33,8 @@ shadow = 0.2
+ holdout = 0.2
+ 
+ [harness]
+-seeds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
++seeds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]   # stochastic policies; deterministic ones run seeds[0] only
+ confidence = 0.95
+-user_bootstrap_resamples = 2000
++user_bootstrap_resamples = 2000          # descriptive per-policy interval
++paired_bootstrap_resamples = 10000       # comparisons (ADR-0021)
++paired_bootstrap_seed = 0
+diff --git a/config/rewards.toml b/config/rewards.toml
+deleted file mode 100644
+index 57e9ee6..0000000
+--- a/config/rewards.toml
++++ /dev/null
+@@ -1,9 +0,0 @@
+-# Reward candidates for the evaluator audit (ADR-0016). NOT part of the v0 manifest:
+-# the frozen v0 environment always returns raw watch_ratio. The audit applies the
+-# active candidate through audit/reward_env.py. Evaluator v1 (proposed) moves this
+-# section into config/evaluator.toml.
+-
+-[reward]
+-active = "raw"           # one of: raw | capped5 | duration_pct
+-cap = 5.0                # capped5: min(watch_ratio, cap), as in EasyRL4Rec KuaiData.load_mat
+-duration_buckets = 5     # duration_pct: K, chosen by scripts/audit_bucket_choice.py (big matrix only)
+diff --git a/docs/adr/0002-quit-rule-definition-and-parameters.md b/docs/adr/0002-quit-rule-definition-and-parameters.md
+index 61da49c..46d0c45 100644
+--- a/docs/adr/0002-quit-rule-definition-and-parameters.md
++++ b/docs/adr/0002-quit-rule-definition-and-parameters.md
+@@ -2,7 +2,7 @@
+ 
+ Status: accepted (Phase 0)
+ 
+-Pending: the evaluator v1 proposal amends the parameters into quit profiles (ADR-0019).
++Amended by ADR-0019 (evaluator v1): the parameters became quit profiles; primary keeps N=9, n_Q=1, max_turn=30.
+ 
+ ## Context
+ The CIRS paper (arXiv 2204.01266, Sec 5.1.2) says: "for the most recent N recommended items, if there are more than n_Q items in the N items [that] have at least one attribute of the current recommended target, then the user ... ends the interaction". It reports N = 1, n_Q = 1 for KuaiEnv. As worded, that rule can never fire, because one window item cannot be "more than 1" items.
+diff --git a/docs/adr/0003-window-mode-negative-slice.md b/docs/adr/0003-window-mode-negative-slice.md
+index c8d8c01..1b5b353 100644
+--- a/docs/adr/0003-window-mode-negative-slice.md
++++ b/docs/adr/0003-window-mode-negative-slice.md
+@@ -2,7 +2,7 @@
+ 
+ Status: accepted (Phase 0)
+ 
+-Pending: the evaluator v1 proposal makes harness.run refuse the slice mode; it stays for scripts/differential.py only (ADR-0019).
++Amended by ADR-0019 (evaluator v1): harness.run refuses the slice mode; it stays for scripts/differential.py only.
+ 
+ ## Context
+ EasyRL4Rec builds the window as `self.sequence_action[t - N:t]` on a list of length t. For 0 < t < N the start index is negative, and Python counts it from the end. For N = 9 the window at t = 5..8 is `seq[2t-9:t]`, so t=5 sees items 1-4 (item 0 dropped) and t=8 sees only item 7. Items that should be in the window are skipped, so the reference undercounts and quits later.
+diff --git a/docs/adr/0004-unrecorded-pairs.md b/docs/adr/0004-unrecorded-pairs.md
+index 541f1fa..f7fd6d8 100644
+--- a/docs/adr/0004-unrecorded-pairs.md
++++ b/docs/adr/0004-unrecorded-pairs.md
+@@ -2,7 +2,7 @@
+ 
+ Status: accepted (Phase 0)
+ 
+-Pending: the evaluator v1 proposal supersedes this; unrecorded pairs leave the action set (ADR-0020).
++Superseded by ADR-0020 (evaluator v1): unrecorded pairs leave the action set.
+ 
+ ## Context
+ The small matrix is 99.62% dense, so 1,411 × 3,327 − 4,676,570 = 17,827 (user, video) cells have no recorded watch_ratio (`scripts/data_report.py`). The brief says step() "returns the recorded watch_ratio for that pair" and is silent about cells with no record. EasyRL4Rec builds a dense matrix from a `csr_matrix`, so missing cells silently become 0.0.
+diff --git a/docs/adr/0005-raw-reward-and-repeat-ban.md b/docs/adr/0005-raw-reward-and-repeat-ban.md
+index a5e28a0..e70ab9a 100644
+--- a/docs/adr/0005-raw-reward-and-repeat-ban.md
++++ b/docs/adr/0005-raw-reward-and-repeat-ban.md
+@@ -2,7 +2,7 @@
+ 
+ Status: accepted (Phase 0)
+ 
+-Pending: the evaluator v1 proposal supersedes the reward part; the reward becomes a switch defaulting to duration_pct (ADR-0016, ADR-0018). The repeat ban stands.
++Superseded in part by ADR-0016 and ADR-0018 (evaluator v1): the reward is a switch defaulting to duration_pct. The repeat ban stands.
+ 
+ ## Decision
+ - **Reward is the raw recorded watch_ratio**, as the brief specifies. EasyRL4Rec caps it at 5 (`KuaiData.load_mat`). 22,790 small-matrix cells exceed 5 and the maximum is 571.52 (`scripts/data_report.py`). This is the only reward difference in the differential test (cause `cap_at_5`).
+diff --git a/docs/adr/0008-harness-protocol.md b/docs/adr/0008-harness-protocol.md
+index 9b0fd1d..63d7e9d 100644
+--- a/docs/adr/0008-harness-protocol.md
++++ b/docs/adr/0008-harness-protocol.md
+@@ -2,7 +2,7 @@
+ 
+ Status: accepted (Phase 0)
+ 
+-Pending: the evaluator v1 proposal amends the policy interface (stochastic declaration, begin_session(user, excluded)) and the seed rules (ADR-0021, ADR-0022).
++Amended by ADR-0021 and ADR-0022 (evaluator v1): checked stochastic declaration, begin_session(user, excluded), seed rules.
+ 
+ ## Decision
+ - **Policy interface:** `factory(context, seed) -> policy` with `begin_session(user)`, `act() -> video`, `observe(video, StepResult)`. `PolicyContext` holds only `catalog` (the 3,327 small-matrix video ids) and `categories`.
+diff --git a/docs/adr/0009-metric-definitions-and-intervals.md b/docs/adr/0009-metric-definitions-and-intervals.md
+index 2b8cc3f..10a05ae 100644
+--- a/docs/adr/0009-metric-definitions-and-intervals.md
++++ b/docs/adr/0009-metric-definitions-and-intervals.md
+@@ -2,7 +2,7 @@
+ 
+ Status: accepted (Phase 0)
+ 
+-Pending: the evaluator v1 proposal supersedes the interval section (paired bootstrap, seed intervals for stochastic policies only; ADR-0021) and renames mean_watch_ratio to mean_reward.
++Superseded in part by ADR-0021 (evaluator v1): comparisons use the paired bootstrap, seed intervals are reported for stochastic policies only, and mean_watch_ratio is renamed mean_reward.
+ 
+ ## Definitions (per seed, pooled over the seed's sessions)
+ - `mean_watch_ratio`: mean reward over recommendations whose pair is recorded. Each recommendation has equal weight, so longer sessions weigh more.
+diff --git a/docs/adr/0011-frozen-evaluator-integrity.md b/docs/adr/0011-frozen-evaluator-integrity.md
+index 8f4ca56..463d3b3 100644
+--- a/docs/adr/0011-frozen-evaluator-integrity.md
++++ b/docs/adr/0011-frozen-evaluator-integrity.md
+@@ -2,7 +2,7 @@
+ 
+ Status: accepted (Phase 0)
+ 
+-Pending: the evaluator v1 proposal amends the frozen file list, adds big_matrix.csv and fails on unlisted modules (ADR-0025).
++Amended by ADR-0025 (evaluator v1): more frozen files, big_matrix.csv frozen, unlisted modules fail verification.
+ 
+ ## Decision
+ - `kuairec_eval/FROZEN_MANIFEST.json` stores sha256 hashes for `kuairec_eval/{__init__,_integrity,data,env,partitions,harness}.py`, `config/evaluator.toml`, the three partition files, and the data files `small_matrix.csv` and `item_categories.csv`.
+diff --git a/docs/adr/0012-differential-test-method.md b/docs/adr/0012-differential-test-method.md
+index ddf328f..98edd22 100644
+--- a/docs/adr/0012-differential-test-method.md
++++ b/docs/adr/0012-differential-test-method.md
+@@ -2,7 +2,7 @@
+ 
+ Status: accepted (Phase 0)
+ 
+-Pending: under the evaluator v1 proposal the differential check builds our environment with reward=raw and keeps sequences inside each user's action set.
++Amended (evaluator v1): the differential check builds our environment with reward=raw and keeps sequences inside each user's action set.
+ 
+ ## Decision
+ - **Reference:** EasyRL4Rec cloned at commit `95d0acfa55e2150d0775ebd41de0826272edcc94` into `third_party/` (gitignored). Its `preprocessing_kuairec.py`, `KuaiData.load_mat`, `KuaiData.load_category` and `KuaiEnv` run unmodified in `data/cache/easyrl4rec_ws/`.
+diff --git a/docs/adr/0015-oracle-ceilings.md b/docs/adr/0015-oracle-ceilings.md
+index e76df6f..2f5915c 100644
+--- a/docs/adr/0015-oracle-ceilings.md
++++ b/docs/adr/0015-oracle-ceilings.md
+@@ -1,6 +1,6 @@
+ # ADR-0015: Oracle ceilings
+ 
+-Status: accepted (evaluator audit, 2026-10-06); v1 amendment proposed (ADR-0020)
++Status: accepted (evaluator audit, 2026-10-06); v1 amendment accepted
+ 
+ ## Decision
+ - **Location and isolation:** `kuairec_eval/diagnostics/`. Policies may not use it, enforced three ways: an import-time guard, a call-time guard in every factory and constructor (Python caches modules, so the import guard fires only once), and the AST scan in `tests/test_policy_isolation.py`. Each was checked by a test that plants a violation.
+diff --git a/docs/adr/0018-acceptance-test-and-reward-recommendation.md b/docs/adr/0018-acceptance-test-and-reward-recommendation.md
+index 893b96b..b308286 100644
+--- a/docs/adr/0018-acceptance-test-and-reward-recommendation.md
++++ b/docs/adr/0018-acceptance-test-and-reward-recommendation.md
+@@ -1,6 +1,6 @@
+ # ADR-0018: Acceptance test procedure and reward recommendation
+ 
+-Status: procedure accepted (audit); recommendation **proposed**, pending your approval of evaluator v1
++Status: accepted (evaluator v1): procedure from the audit, recommendation adopted
+ 
+ ## Procedure (what the brief left open)
+ - **Score:** cumulative reward per session. Per user, it is averaged over seeds for stochastic policies and is the single session for deterministic ones.
+diff --git a/docs/adr/0019-v1-quit-window-and-profiles.md b/docs/adr/0019-v1-quit-window-and-profiles.md
+index da141b2..0aa2825 100644
+--- a/docs/adr/0019-v1-quit-window-and-profiles.md
++++ b/docs/adr/0019-v1-quit-window-and-profiles.md
+@@ -1,6 +1,6 @@
+ # ADR-0019: Quit window and quit profiles (evaluator v1)
+ 
+-Status: **proposed** (docs/proposals/evaluator-v1.patch)
++Status: accepted (evaluator v1)
+ 
+ ## Decision
+ - The intended window is primary. `window_mode = "easyrl4rec_slice"` stays in `EnvConfig` for `scripts/differential.py`, but `harness.run` refuses it.
+diff --git a/docs/adr/0020-v1-action-set-without-unrecorded-pairs.md b/docs/adr/0020-v1-action-set-without-unrecorded-pairs.md
+index 0999739..b552dba 100644
+--- a/docs/adr/0020-v1-action-set-without-unrecorded-pairs.md
++++ b/docs/adr/0020-v1-action-set-without-unrecorded-pairs.md
+@@ -1,6 +1,6 @@
+ # ADR-0020: Unrecorded pairs leave the action set (evaluator v1)
+ 
+-Status: **proposed**; supersedes ADR-0004 on approval
++Status: accepted (evaluator v1)
+ 
+ ## Decision (your decision; the delivery mechanism is mine)
+ - **Action set:** for user u, the 3,327 small-matrix videos minus u's unrecorded pairs. Search users have 12.56 on average and at most 32.
+diff --git a/docs/adr/0021-v1-comparisons-and-seed-intervals.md b/docs/adr/0021-v1-comparisons-and-seed-intervals.md
+index aee1f76..ab9abf2 100644
+--- a/docs/adr/0021-v1-comparisons-and-seed-intervals.md
++++ b/docs/adr/0021-v1-comparisons-and-seed-intervals.md
+@@ -1,6 +1,6 @@
+ # ADR-0021: Comparisons by paired bootstrap; seed intervals for stochastic policies only (evaluator v1)
+ 
+-Status: **proposed**; supersedes ADR-0009's interval section on approval
++Status: accepted (evaluator v1)
+ 
+ ## Decision
+ - `harness.compare(a, b, metric)` gives the paired bootstrap over users of mean_u[a(u) − b(u)] for `cum_reward`, `session_length` or `mean_reward`. It uses 10,000 resamples, `paired_bootstrap_seed = 0` and the configured confidence. It refuses unequal user sets.
+diff --git a/docs/adr/0022-v1-sessions-and-action-set.md b/docs/adr/0022-v1-sessions-and-action-set.md
+index 59178cf..38f7b7c 100644
+--- a/docs/adr/0022-v1-sessions-and-action-set.md
++++ b/docs/adr/0022-v1-sessions-and-action-set.md
+@@ -1,6 +1,6 @@
+ # ADR-0022: Sessions and the catalog (evaluator v1)
+ 
+-Status: **proposed** (records your decisions; no code change beyond ADR-0020/0021)
++Status: accepted (evaluator v1)
+ 
+ - **Catalog:** the 3,327 small-matrix videos. Policies trained on the big matrix know 10,728, but recommending outside the 3,327 is impossible (`KeyError`), not penalised.
+ - **Sessions:** one per user per run (= seed). Users are visited once each, in `default_rng(seed)` order.
+diff --git a/docs/adr/0023-process-isolation-entry-condition.md b/docs/adr/0023-process-isolation-entry-condition.md
+index 7ce20e9..6aa0c83 100644
+--- a/docs/adr/0023-process-isolation-entry-condition.md
++++ b/docs/adr/0023-process-isolation-entry-condition.md
+@@ -1,6 +1,6 @@
+ # ADR-0023: Process isolation is deferred; it is an entry condition for the agent-loop phase
+ 
+-Status: **proposed** (your decision: not now)
++Status: accepted (evaluator v1)
+ 
+ ## Decision
+ Phase 1 keeps the in-process protections of ADR-0007 and ADR-0015. Before the first evaluation of a policy that can execute arbitrary code or tools, which is the agent-loop phase, the following must hold:
+diff --git a/docs/adr/0024-missing-timestamps-need-no-action.md b/docs/adr/0024-missing-timestamps-need-no-action.md
+index 6b2cac0..e28ae40 100644
+--- a/docs/adr/0024-missing-timestamps-need-no-action.md
++++ b/docs/adr/0024-missing-timestamps-need-no-action.md
+@@ -1,6 +1,6 @@
+ # ADR-0024: Missing small-matrix timestamps need no action
+ 
+-Status: **proposed** (your decision: no action; this records why)
++Status: accepted (evaluator v1)
+ 
+ 181,992 of 4,676,570 small-matrix rows have no timestamp, while all 12,530,806 big-matrix rows have one (`scripts/audit_data_checks.py`). The environment never needs time order:
+ 1. **Reward is a static lookup.** Each (user, video) pair has exactly one row (0 duplicates), and the environment reads only `watch_ratio` and `play_duration` from it. Both are present on all rows.
+diff --git a/docs/adr/0025-v1-integrity-changes.md b/docs/adr/0025-v1-integrity-changes.md
+index a1dd288..d0c4bd3 100644
+--- a/docs/adr/0025-v1-integrity-changes.md
++++ b/docs/adr/0025-v1-integrity-changes.md
+@@ -1,6 +1,6 @@
+ # ADR-0025: Integrity changes for evaluator v1
+ 
+-Status: **proposed**; amends ADR-0011 on approval
++Status: accepted (evaluator v1)
+ 
+ - **Newly frozen:** `kuairec_eval/labels.py`, `kuairec_eval/rewards.py`, `kuairec_eval/diagnostics/__init__.py`, `kuairec_eval/diagnostics/oracles.py`.
+ - **`big_matrix.csv` joins the frozen data**, because the duration_pct buckets and reference sets come from it. It is about 1.0 GB and is hashed once per process.
+diff --git a/kuairec_eval/_integrity.py b/kuairec_eval/_integrity.py
+index 886dc1b..1f44ba2 100644
+--- a/kuairec_eval/_integrity.py
++++ b/kuairec_eval/_integrity.py
+@@ -1,4 +1,5 @@
+-"""Hash check for the frozen evaluator (environment, partitions, harness, config, data).
++"""Hash check for the frozen evaluator (environment, rewards, oracles, partitions, harness,
++config, data).
+ 
+ `verify()` is called by Environment.__init__, partitions.load and harness.run, so
+ any run fails if a frozen file changed since `scripts/freeze.py` last wrote the
+@@ -19,15 +20,20 @@ FROZEN_CODE = [
+     "kuairec_eval/_integrity.py",
+     "kuairec_eval/data.py",
+     "kuairec_eval/env.py",
++    "kuairec_eval/labels.py",
++    "kuairec_eval/rewards.py",
+     "kuairec_eval/partitions.py",
+     "kuairec_eval/harness.py",
++    "kuairec_eval/diagnostics/__init__.py",
++    "kuairec_eval/diagnostics/oracles.py",
+     "config/evaluator.toml",
+     "data/partitions/search.json",
+     "data/partitions/shadow.json",
+     "data/partitions/holdout.json",
+ ]
+-# Relative to the KuaiRec data dir: the tables the environment answers from.
+-FROZEN_DATA = ["small_matrix.csv", "item_categories.csv"]
++# Relative to the KuaiRec data dir. big_matrix.csv is evaluator input since v1: the
++# duration_pct reward takes its buckets and reference sets from it (ADR-0016, ADR-0025).
++FROZEN_DATA = ["small_matrix.csv", "item_categories.csv", "big_matrix.csv"]
+ 
+ 
+ class FrozenEvaluatorError(RuntimeError):
+@@ -75,6 +81,12 @@ def verify(repo_root: Path | None = None, data_dir: Path | None = None,
+     else:
+         actual_data = expected["data"]
+     problems = []
++    # Any module inside the package must be frozen, so an unlisted file cannot change behaviour.
++    package = repo_root / "kuairec_eval"
++    for path in sorted(package.rglob("*.py")):
++        rel = path.relative_to(repo_root).as_posix()
++        if rel not in FROZEN_CODE:
++            problems.append(f"code:{rel} is inside kuairec_eval/ but not in the manifest")
+     for section, actual in (("code", actual_code), ("data", actual_data)):
+         want = expected.get(section, {})
+         for p in sorted(set(want) | set(actual)):
+diff --git a/kuairec_eval/diagnostics/__init__.py b/kuairec_eval/diagnostics/__init__.py
+index cc1b820..b48f399 100644
+--- a/kuairec_eval/diagnostics/__init__.py
++++ b/kuairec_eval/diagnostics/__init__.py
+@@ -5,7 +5,7 @@ No policy may import or call anything in this package. Enforced three ways:
+     because Python caches modules, hence the call-time guard below);
+   * every factory and constructor re-checks the call stack (guard_against_policies);
+   * tests/test_policy_isolation.py fails on any policies/ file that references it.
+-Not in the v0 manifest; evaluator v1 (proposed) adds it.
++Frozen since evaluator v1 (kuairec_eval/_integrity.py FROZEN_CODE).
+ """
+ from __future__ import annotations
+ 
+diff --git a/kuairec_eval/diagnostics/oracles.py b/kuairec_eval/diagnostics/oracles.py
+index 2bc6d18..7e7ef2c 100644
+--- a/kuairec_eval/diagnostics/oracles.py
++++ b/kuairec_eval/diagnostics/oracles.py
+@@ -1,19 +1,22 @@
+-"""Oracle ceilings (DIAGNOSTICS ONLY, see package docstring). ADR-0015.
++"""Oracle ceilings (DIAGNOSTICS ONLY, see package docstring). ADR-0015 (v1 update).
+ 
+ Both oracles know the quit rule and the true small-matrix reward of the active candidate,
+ and both use the same greedy step, so their gap measures personalization rather than
+ optimiser quality:
+ 
+-  greedy step   given the session so far, show the highest-value unseen video that does
+-                not trigger the boredom rule at this step (ties: lower video_id). Values
+-                for unrecorded pairs are the environment's missing_pair_reward (0 in v0).
++  greedy step   given the session so far, show the highest-value video in the user's action
++                set that is unseen and does not trigger the boredom rule at this step
++                (ties: lower video_id). Unrecorded pairs are outside the action set.
+ 
+-  PersonalizedGreedyOracle   values = the user's own row of the reward matrix
+-  FixedSequenceOracle        values = column means over the search users; one sequence,
+-                             built once, shown to every user (in-sample by construction)
++  PersonalizedGreedyOracle    values = the user's own row of the reward matrix
++  CommonValueGreedyOracle     values = one vector for everybody: each video's mean reward
++                              over the search users who have it recorded. Applied within each
++                              user's action set, so the sequence differs between users only
++                              where a video is unavailable to them (in-sample by construction)
+ 
+-Greedy is not proven optimal under the category constraint. top_k_bound() gives the
+-quit-free upper bound (sum of the k best values), so the slack is visible.
++Greedy is not proven optimal under the category constraint. top_k() reports the quit-free
++versions (the k best values in the action set), so the slack is visible; for the
++personalized oracle that is a true upper bound on any policy's cumulative reward.
+ """
+ from __future__ import annotations
+ 
+@@ -25,14 +28,10 @@ from kuairec_eval.diagnostics import guard_against_policies
+ from kuairec_eval.env import EnvConfig, boredom_quit
+ 
+ 
+-def _filled(values: np.ndarray, missing: float) -> np.ndarray:
+-    return np.where(np.isnan(values), missing, values)
+-
+-
+ def greedy_sequence(values: np.ndarray, videos: np.ndarray, categories: Mapping[int, tuple[int, ...]],
+                     cfg: EnvConfig) -> list[int]:
+-    """Greedy no-quit sequence of up to cfg.max_turn videos for one value vector over `videos`."""
+-    order = [int(videos[i]) for i in np.lexsort((videos, -values))]
++    """Greedy no-quit sequence of up to cfg.max_turn videos; entries with non-finite value are unavailable."""
++    order = [int(videos[i]) for i in np.lexsort((videos, -values)) if np.isfinite(values[i])]
+     seq: list[int] = []
+     while len(seq) < cfg.max_turn:
+         for i, v in enumerate(order):
+@@ -42,16 +41,22 @@ def greedy_sequence(values: np.ndarray, videos: np.ndarray, categories: Mapping[
+                 break
+         else:
+             break
+-    return seq
++    chosen = set(seq)
++    return seq + [v for v in order if v not in chosen]  # padding, only reached if no safe video remains
+ 
+ 
+-class _SequencePlayer:
++class _GreedyPlayer:
+     stochastic = False
+ 
+-    def __init__(self):
++    def __init__(self, context, videos: np.ndarray, cfg: EnvConfig):
++        guard_against_policies()
++        self._videos, self._cfg, self._categories = videos, cfg, context.categories
+         self._seq: list[int] = []
+         self._pos = 0
+ 
++    def _play(self, values: np.ndarray) -> None:
++        self._seq, self._pos = greedy_sequence(values, self._videos, self._categories, self._cfg), 0
++
+     def act(self) -> int:
+         v = self._seq[self._pos]
+         self._pos += 1
+@@ -61,38 +66,31 @@ class _SequencePlayer:
+         pass
+ 
+ 
+-class PersonalizedGreedyOracle(_SequencePlayer):
+-    def __init__(self, context, matrix: np.ndarray, user_index: Mapping[int, int], videos: np.ndarray,
+-                 cfg: EnvConfig):
+-        guard_against_policies()
+-        super().__init__()
+-        self._matrix, self._user_index, self._videos, self._cfg = matrix, user_index, videos, cfg
+-        self._categories = context.categories
++class PersonalizedGreedyOracle(_GreedyPlayer):
++    def __init__(self, context, matrix: np.ndarray, user_index: Mapping[int, int], videos: np.ndarray, cfg: EnvConfig):
++        super().__init__(context, videos, cfg)
++        self._matrix, self._user_index = matrix, user_index
+ 
+-    def begin_session(self, user: int) -> None:
+-        row = _filled(self._matrix[self._user_index[user]], self._cfg.missing_pair_reward)
+-        seq = greedy_sequence(row, self._videos, self._categories, self._cfg)
+-        # Pad with the best remaining videos in case no non-triggering video was left (never observed).
+-        chosen = set(seq)
+-        rest = [int(self._videos[i]) for i in np.lexsort((self._videos, -row)) if int(self._videos[i]) not in chosen]
+-        self._seq, self._pos = seq + rest, 0
++    def begin_session(self, user: int, excluded: frozenset[int]) -> None:
++        row = self._matrix[self._user_index[user]]
++        self._play(np.where(np.isnan(row), -np.inf, row))
+ 
+ 
+-class FixedSequenceOracle(_SequencePlayer):
+-    def __init__(self, context, sequence: list[int]):
+-        guard_against_policies()
+-        super().__init__()
+-        self.sequence = tuple(sequence)
+-        chosen = set(sequence)
+-        rest = [v for v in context.catalog if v not in chosen]
+-        self._full = list(sequence) + rest
++class CommonValueGreedyOracle(_GreedyPlayer):
++    def __init__(self, context, common: np.ndarray, videos: np.ndarray, cfg: EnvConfig):
++        super().__init__(context, videos, cfg)
++        self._common = common
++        self._vidx = {int(v): j for j, v in enumerate(videos)}
+ 
+-    def begin_session(self, user: int) -> None:
+-        self._seq, self._pos = self._full, 0
++    def begin_session(self, user: int, excluded: frozenset[int]) -> None:
++        values = self._common.copy()
++        values[[self._vidx[v] for v in excluded]] = -np.inf
++        self._play(values)
+ 
+ 
+-def column_means(matrix: np.ndarray, user_rows: np.ndarray, missing: float) -> np.ndarray:
+-    return _filled(matrix[user_rows], missing).mean(axis=0)
++def common_values(matrix: np.ndarray, users: np.ndarray, selection_users: list[int]) -> np.ndarray:
++    rows = np.searchsorted(users, np.asarray(sorted(selection_users)))
++    return np.nanmean(matrix[rows], axis=0)
+ 
+ 
+ def personalized_factory(matrix: np.ndarray, users: np.ndarray, videos: np.ndarray, cfg: EnvConfig):
+@@ -105,23 +103,23 @@ def personalized_factory(matrix: np.ndarray, users: np.ndarray, videos: np.ndarr
+ 
+ 
+ def nonpersonalized_factory(matrix: np.ndarray, users: np.ndarray, videos: np.ndarray, cfg: EnvConfig,
+-                            selection_users: list[int], categories: Mapping[int, tuple[int, ...]]):
+-    """Fixed sequence chosen greedily on the mean value over `selection_users` (the search users)."""
++                            selection_users: list[int]):
++    """Common value vector from `selection_users` (the search users), applied per user."""
+     guard_against_policies()
+-    rows = np.searchsorted(users, np.asarray(sorted(selection_users)))
+-    seq = greedy_sequence(column_means(matrix, rows, cfg.missing_pair_reward), videos, categories, cfg)
++    common = common_values(matrix, users, selection_users)
+ 
+     def factory(context, seed: int):
+-        return FixedSequenceOracle(context, seq)
+-    factory.sequence = tuple(seq)
++        return CommonValueGreedyOracle(context, common, videos, cfg)
++    factory.common_values = common
+     return factory
+ 
+ 
+-def top_k_bound(matrix: np.ndarray, users: np.ndarray, eval_users: list[int], k: int, missing: float) -> dict:
+-    """Quit-free upper bounds on cumulative reward over k steps without repeats."""
+-    rows = np.searchsorted(users, np.asarray(sorted(eval_users)))
+-    vals = _filled(matrix[rows], missing)
+-    per_user = np.sort(vals, axis=1)[:, -k:].sum(axis=1)
+-    means = vals.mean(axis=0)
+-    return {"personalized": float(per_user.mean()), "nonpersonalized": float(np.sort(means)[-k:].sum()),
+-            "per_user": per_user}
++def top_k(matrix: np.ndarray, users: np.ndarray, eval_users: list[int], k: int, common: np.ndarray) -> dict:
++    """Quit-free versions over k steps without repeats, within each user's action set."""
++    rows = matrix[np.searchsorted(users, np.asarray(sorted(eval_users)))]
++    own = np.where(np.isnan(rows), -np.inf, rows)
++    personalized = np.sort(own, axis=1)[:, -k:].sum(axis=1)
++    pick = np.where(np.isnan(rows), -np.inf, common[None, :])
++    top = np.argsort(-pick, axis=1, kind="stable")[:, :k]
++    nonpersonalized = np.take_along_axis(rows, top, axis=1).sum(axis=1)
++    return {"personalized_bound": float(personalized.mean()), "nonpersonalized_quit_free": float(nonpersonalized.mean())}
+diff --git a/kuairec_eval/env.py b/kuairec_eval/env.py
+index e752b98..437e58e 100644
+--- a/kuairec_eval/env.py
++++ b/kuairec_eval/env.py
+@@ -1,4 +1,4 @@
+-"""KuaiRec closed-loop environment answering from the fully observed small matrix.
++"""KuaiRec closed-loop environment answering from the fully observed small matrix (v1).
+ 
+ Quit rule implemented (the "feel bored then quit" exit of CIRS, arXiv 2204.01266,
+ Sec 5.1.2 and Fig. 6, as coded in EasyRL4Rec commit 95d0acf,
+@@ -15,6 +15,7 @@ src/core/envs/BaseEnv.py::step):
+          window_mode = "easyrl4rec_slice": W_t = seq[t-N:t] evaluated on the Python
+              list seq = [a_0..a_{t-1}], so for 0 < t < N the negative start t-N
+              counts from the end of the list and W_t can drop early items.
++             Accepted only by scripts/differential.py; harness.run refuses it.
+     3. count(c) = number of occurrences of category c across C(w) for w in W_t
+        (multiset union, as collections.Counter over the chained tuples).
+     4. The user quits at step t iff there is a category c in C(a_t) with
+@@ -22,23 +23,19 @@ src/core/envs/BaseEnv.py::step):
+     5. Independently, the session ends at step t iff t >= max_turn - 1, so a
+        session has at most max_turn recommendations.
+     6. The reward of a_t is returned and counted even when step t is the quitting
+-       step: the quit takes effect after a_t is shown (EasyRL4Rec computes
+-       `terminated` first, then still returns mat[user, a_t]).
++       step: the quit takes effect after a_t is shown.
+ 
+-    N = config.quit_window, n_Q = config.quit_threshold, max_turn = config.max_turn.
++    (N, n_Q) = config/evaluator.toml [quit_profiles][quit_profile]; max_turn = [env].
+ 
+-The CIRS text says "more than n_Q items in the N items have at least one attribute
+-of the current recommended target" and reports N = 1, n_Q = 1 for KuaiEnv, which can
+-never trigger as written. The code's per-category count above is what we implement;
+-see ADR-0002.
++Reward = config/evaluator.toml [env] reward, one of kuairec_eval.rewards.REWARDS.
+ 
+-Deviations from EasyRL4Rec's KuaiEnv, all deliberate and listed in ADR-0003/0004/0005:
+-  * reward is the raw recorded watch_ratio (EasyRL4Rec caps it at 5);
+-  * repeat recommendations raise RepeatRecommendationError (EasyRL4Rec allows them);
+-  * window_mode defaults to "intended" rather than reproducing the slice quirk.
++Action set (ADR-0020): for user u, the 3,327 small-matrix videos minus the pairs absent
++from small_matrix.csv (12.6 per search user on average). reset(u) returns that excluded
++set; step() raises UnavailableActionError for an excluded video and
++RepeatRecommendationError for a repeat.
+ 
+-Rewards are reachable only through step(): the matrix lives in a closure and is
+-never stored on the instance (ADR-0007).
++Rewards are reachable only through step(): the matrix lives in a closure and is never
++stored on the instance (ADR-0007).
+ """
+ from __future__ import annotations
+ 
+@@ -53,6 +50,7 @@ import numpy as np
+ 
+ from kuairec_eval import _integrity
+ from kuairec_eval.data import REPO_ROOT, load_item_categories, load_small_matrix
++from kuairec_eval.rewards import RewardConfig, reward_matrix
+ 
+ CONFIG_PATH = REPO_ROOT / "config" / "evaluator.toml"
+ WINDOW_MODES = ("intended", "easyrl4rec_slice")
+@@ -62,45 +60,60 @@ class RepeatRecommendationError(ValueError):
+     pass
+ 
+ 
++class UnavailableActionError(ValueError):
++    pass
++
++
+ class SessionClosedError(RuntimeError):
+     pass
+ 
+ 
+ @dataclass(frozen=True)
+ class EnvConfig:
++    quit_profile: str
+     quit_window: int
+     quit_threshold: int
+     max_turn: int
+-    window_mode: str = "intended"
+-    missing_pair_reward: float = 0.0
++    window_mode: str
++    reward: str
++    reward_cap: float
++    duration_buckets: int
+ 
+     def __post_init__(self):
+         if self.window_mode not in WINDOW_MODES:
+             raise ValueError(f"window_mode must be one of {WINDOW_MODES}")
+         if self.quit_window < 1 or self.max_turn < 1 or self.quit_threshold < 0:
+             raise ValueError("quit_window, max_turn must be >= 1 and quit_threshold >= 0")
++        self.reward_config()  # validates the reward name
++
++    def reward_config(self) -> RewardConfig:
++        return RewardConfig(active=self.reward, cap=self.reward_cap, duration_buckets=self.duration_buckets)
+ 
+     @classmethod
+-    def from_toml(cls, path: Path = CONFIG_PATH) -> "EnvConfig":
++    def from_toml(cls, path: Path = CONFIG_PATH, **overrides) -> "EnvConfig":
++        """overrides: quit_profile, window_mode, reward, max_turn (for sensitivity runs and the
++        differential check; harness.run still refuses window_mode != "intended")."""
+         with open(path, "rb") as f:
+-            return cls(**tomllib.load(f)["env"])
++            cfg = tomllib.load(f)
++        env = {**cfg["env"], **overrides}
++        profile = cfg["quit_profiles"][env["quit_profile"]]
++        return cls(quit_profile=env["quit_profile"], quit_window=profile["quit_window"],
++                   quit_threshold=profile["quit_threshold"], max_turn=env["max_turn"],
++                   window_mode=env["window_mode"], reward=env["reward"], reward_cap=cfg["reward"]["cap"],
++                   duration_buckets=cfg["reward"]["duration_buckets"])
+ 
+ 
+ @dataclass(frozen=True)
+ class StepResult:
+     reward: float
+     done: bool
+-    observed: bool            # False if the pair is absent from small_matrix.csv
+     quit_reason: str | None   # "boredom", "max_turn" or None
+     t: int                    # index of the recommendation just made
+ 
+ 
+-def _build_oracle(user_ids: np.ndarray, video_ids: np.ndarray, rewards: np.ndarray,
+-                  users: np.ndarray, videos: np.ndarray) -> Callable[[int, int], float]:
++def _build_oracle(mat: np.ndarray, users: np.ndarray, videos: np.ndarray) -> Callable[[int, int], float]:
+     uidx = {int(u): i for i, u in enumerate(users)}
+     vidx = {int(v): j for j, v in enumerate(videos)}
+-    mat = np.full((len(users), len(videos)), np.nan, dtype=np.float64)
+-    mat[[uidx[int(u)] for u in user_ids], [vidx[int(v)] for v in video_ids]] = rewards
+ 
+     def lookup(user: int, video: int) -> float:
+         return float(mat[uidx[user], vidx[video]])
+@@ -126,14 +139,17 @@ class KuaiEnv:
+         small = load_small_matrix()
+         users = np.sort(small["user_id"].unique())
+         videos = np.sort(small["video_id"].unique())
+-        self._lookup = _build_oracle(small["user_id"].to_numpy(), small["video_id"].to_numpy(),
+-                                     small["watch_ratio"].to_numpy(), users, videos)
++        mat = reward_matrix(self.config.reward_config(), users, videos, small=small)
+         del small
++        self._lookup = _build_oracle(mat, users, videos)
++        missing = np.isnan(mat)
++        self._excluded: dict[int, frozenset[int]] = {
++            int(u): frozenset(int(v) for v in videos[missing[i]]) for i, u in enumerate(users)}
++        del mat, missing
+         self.users: tuple[int, ...] = tuple(int(u) for u in users)
+         self.catalog: tuple[int, ...] = tuple(int(v) for v in videos)
+         cats = load_item_categories()
+         self.categories: Mapping[int, tuple[int, ...]] = {v: cats[v] for v in self.catalog}
+-        self._user_set = frozenset(self.users)
+         self._catalog_set = frozenset(self.catalog)
+         self._user: int | None = None
+         self._seq: list[int] = []
+@@ -141,10 +157,10 @@ class KuaiEnv:
+         self._done = True
+ 
+     def reset(self, user: int) -> dict:
+-        if user not in self._user_set:
++        if user not in self._excluded:
+             raise KeyError(f"user {user} is not in the small matrix")
+         self._user, self._seq, self._shown, self._done = int(user), [], set(), False
+-        return {"user": self._user, "t": 0}
++        return {"user": self._user, "t": 0, "excluded": self._excluded[self._user]}
+ 
+     def step(self, video: int) -> StepResult:
+         if self._done:
+@@ -152,21 +168,20 @@ class KuaiEnv:
+         video = int(video)
+         if video not in self._catalog_set:
+             raise KeyError(f"video {video} is not in the small-matrix catalog")
++        if video in self._excluded[self._user]:
++            raise UnavailableActionError(f"video {video} has no record for user {self._user}")
+         if video in self._shown:
+             raise RepeatRecommendationError(f"video {video} already shown to user {self._user}")
+         c = self.config
+         t = len(self._seq)
+-        bored = boredom_quit(self._seq, video, self.categories, c.quit_window,
+-                             c.quit_threshold, c.window_mode)
++        bored = boredom_quit(self._seq, video, self.categories, c.quit_window, c.quit_threshold, c.window_mode)
+         at_cap = t >= c.max_turn - 1
+         self._seq.append(video)
+         self._shown.add(video)
+-        value = self._lookup(self._user, video)
+-        observed = not np.isnan(value)
+-        reward = value if observed else float(c.missing_pair_reward)
++        reward = self._lookup(self._user, video)
+         self._done = bored or at_cap
+         reason = "boredom" if bored else ("max_turn" if at_cap else None)
+-        return StepResult(reward=reward, done=self._done, observed=observed, quit_reason=reason, t=t)
++        return StepResult(reward=reward, done=self._done, quit_reason=reason, t=t)
+ 
+     @property
+     def history(self) -> tuple[int, ...]:
+diff --git a/kuairec_eval/harness.py b/kuairec_eval/harness.py
+index d36d36a..ba77457 100644
+--- a/kuairec_eval/harness.py
++++ b/kuairec_eval/harness.py
+@@ -1,28 +1,33 @@
+-"""Run a policy over a user partition for S seeds and summarise five metrics.
+-
+-Per seed s (ADR-0008, ADR-0009):
+-  * users of the partition are visited once each, in numpy default_rng(s) order;
+-  * the policy is built fresh by policy_factory(context, s);
+-  * each user gets exactly one session (reset -> act/step until done).
+-
+-Metrics per seed, all pooled over the seed's sessions:
+-  mean_watch_ratio      mean reward over recommendations whose pair is recorded
+-                        (unrecorded pairs are excluded here, counted in missing_pair_rate)
+-  cum_reward            mean over sessions of the summed reward (unrecorded pairs add
+-                        config.missing_pair_reward, i.e. 0)
+-  session_length        mean number of recommendations per session
+-  top_category_share    max over categories c of (#recommendations whose video carries c)
+-                        / #recommendations; a video with k tags counts toward k categories
+-  catalog_coverage      distinct videos recommended / catalog size (3,327)
+-plus diagnostics: missing_pair_rate, boredom_quit_rate, max_turn_rate.
+-
+-Across seeds: mean and a two-sided t-interval at `confidence` with S-1 dof.
+-Because seeds only change policy randomness and user order, a deterministic policy
+-has a zero-width seed interval. For session-level metrics we therefore also report a
+-user-cluster bootstrap interval (resampling users, seed-averaged), labelled ci_users.
++"""Run a policy over a user partition; compare policies by paired bootstrap over users (v1).
++
++Protocol (ADR-0008, ADR-0021, ADR-0022):
++  * policy_factory(context, seed) returns a policy with a boolean attribute `stochastic`
++    and methods begin_session(user, excluded), act() -> video, observe(video, StepResult);
++  * `stochastic` means "per-user results may depend on the seed": internal randomness OR
++    state carried across users (the seed sets the user order). A stochastic policy is run
++    once per seed in config seeds. A policy declaring stochastic=False is run on seeds[0]
++    and checked on seeds[1]; if any user's values differ, run() raises (ADR-0021);
++  * per run: a fresh policy, every partition user visited once in default_rng(seed)
++    order, one session per user; the policy may keep state across users within the run;
++  * run() refuses window_mode != "intended" (the EasyRL4Rec slice is for the differential
++    check only).
++
++Metrics per run, pooled over the run's sessions:
++  mean_reward         mean reward per recommendation
++  cum_reward          mean over sessions of the summed reward
++  session_length      mean number of recommendations per session
++  top_category_share  max over categories c of (#recommendations carrying c) / #recommendations
++  catalog_coverage    distinct videos recommended / catalog size (3,327)
++  boredom_quit_rate, max_turn_rate
++
++Reported per policy: mean over runs; ci_seeds (t-interval over runs) for stochastic policies
++only; ci_users (user-cluster bootstrap) as a descriptive interval; per-user values (mean over
++runs). Decisions between policies use compare(): per-user differences on the same users,
++users resampled with replacement, percentile interval of the mean difference.
+ """
+ from __future__ import annotations
+ 
++import dataclasses
+ import time
+ import tomllib
+ from collections import Counter
+@@ -38,8 +43,9 @@ from kuairec_eval.data import REPO_ROOT
+ from kuairec_eval.env import KuaiEnv, StepResult
+ 
+ CONFIG_PATH = REPO_ROOT / "config" / "evaluator.toml"
+-METRICS = ("mean_watch_ratio", "cum_reward", "session_length", "top_category_share",
+-           "catalog_coverage", "missing_pair_rate", "boredom_quit_rate", "max_turn_rate")
++METRICS = ("mean_reward", "cum_reward", "session_length", "top_category_share",
++           "catalog_coverage", "boredom_quit_rate", "max_turn_rate")
++PER_USER = ("cum_reward", "session_length", "mean_reward")
+ 
+ 
+ @dataclass(frozen=True)
+@@ -50,7 +56,8 @@ class PolicyContext:
+ 
+ 
+ class Policy(Protocol):
+-    def begin_session(self, user: int) -> None: ...
++    stochastic: bool
++    def begin_session(self, user: int, excluded: frozenset[int]) -> None: ...
+     def act(self) -> int: ...
+     def observe(self, video: int, result: StepResult) -> None: ...
+ 
+@@ -64,7 +71,6 @@ class SeedLog:
+     rec_user: list[int] = field(default_factory=list)
+     rec_video: list[int] = field(default_factory=list)
+     rec_reward: list[float] = field(default_factory=list)
+-    rec_observed: list[bool] = field(default_factory=list)
+     sess_user: list[int] = field(default_factory=list)
+     sess_len: list[int] = field(default_factory=list)
+     sess_reward: list[float] = field(default_factory=list)
+@@ -76,14 +82,16 @@ def harness_config() -> dict:
+         return tomllib.load(f)["harness"]
+ 
+ 
+-def run_seed(env: KuaiEnv, factory: PolicyFactory, users: list[int], seed: int) -> SeedLog:
+-    ctx = PolicyContext(catalog=env.catalog, categories=MappingProxyType(dict(env.categories)))
+-    policy = factory(ctx, seed)
++def context_for(env: KuaiEnv) -> PolicyContext:
++    return PolicyContext(catalog=env.catalog, categories=MappingProxyType(dict(env.categories)))
++
++
++def run_seed(env: KuaiEnv, policy: Policy, users: list[int], seed: int) -> SeedLog:
+     order = np.random.default_rng(seed).permutation(np.asarray(users, dtype=np.int64))
+     log = SeedLog(seed=seed)
+     for user in order.tolist():
+-        env.reset(user)
+-        policy.begin_session(user)
++        obs = env.reset(user)
++        policy.begin_session(user, obs["excluded"])
+         total, n, result = 0.0, 0, None
+         while result is None or not result.done:
+             video = policy.act()
+@@ -92,7 +100,6 @@ def run_seed(env: KuaiEnv, factory: PolicyFactory, users: list[int], seed: int)
+             log.rec_user.append(user)
+             log.rec_video.append(int(video))
+             log.rec_reward.append(result.reward)
+-            log.rec_observed.append(result.observed)
+             total += result.reward
+             n += 1
+         log.sess_user.append(user)
+@@ -103,18 +110,15 @@ def run_seed(env: KuaiEnv, factory: PolicyFactory, users: list[int], seed: int)
+ 
+ 
+ def seed_metrics(log: SeedLog, env: KuaiEnv) -> dict[str, float]:
+-    reward = np.asarray(log.rec_reward)
+-    observed = np.asarray(log.rec_observed)
+     cat_counts = Counter(c for v in log.rec_video for c in env.categories[v])
+     n_rec = len(log.rec_video)
+     reasons = Counter(log.sess_reason)
+     return {
+-        "mean_watch_ratio": float(reward[observed].mean()) if observed.any() else float("nan"),
++        "mean_reward": float(np.mean(log.rec_reward)),
+         "cum_reward": float(np.mean(log.sess_reward)),
+         "session_length": float(np.mean(log.sess_len)),
+         "top_category_share": max(cat_counts.values()) / n_rec,
+         "catalog_coverage": len(set(log.rec_video)) / len(env.catalog),
+-        "missing_pair_rate": float(1.0 - observed.mean()),
+         "boredom_quit_rate": reasons["boredom"] / len(log.sess_len),
+         "max_turn_rate": reasons["max_turn"] / len(log.sess_len),
+     }
+@@ -129,31 +133,34 @@ def t_interval(values: np.ndarray, confidence: float) -> tuple[float, float, flo
+     return mean, mean - half, mean + half
+ 
+ 
+-def user_bootstrap(logs: list[SeedLog], confidence: float, resamples: int) -> dict[str, tuple[float, float]]:
+-    """Percentile CI from resampling users; each user's value is averaged over seeds."""
+-    users = sorted(set(logs[0].sess_user))
++def per_user_values(logs: list[SeedLog]) -> dict[str, np.ndarray]:
++    """Per-user values, each the mean over runs; mean_reward pools a user's recommendations over runs."""
++    users = np.array(sorted(set(logs[0].sess_user)))
+     index = {u: i for i, u in enumerate(users)}
+-    n_u, n_s = len(users), len(logs)
+-    sess_r, sess_l = np.zeros((n_s, n_u)), np.zeros((n_s, n_u))
+-    wr_sum, wr_cnt = np.zeros((n_s, n_u)), np.zeros((n_s, n_u))
+-    for s, log in enumerate(logs):
+-        for u, length, r in zip(log.sess_user, log.sess_len, log.sess_reward):
+-            sess_r[s, index[u]], sess_l[s, index[u]] = r, length
+-        for u, r, ok in zip(log.rec_user, log.rec_reward, log.rec_observed):
+-            if ok:
+-                wr_sum[s, index[u]] += r
+-                wr_cnt[s, index[u]] += 1
+-    per_user = {"cum_reward": sess_r.mean(0), "session_length": sess_l.mean(0)}
+-    wr_sum_u, wr_cnt_u = wr_sum.sum(0), wr_cnt.sum(0)
++    n = len(users)
++    cum, length, rsum, rn = np.zeros(n), np.zeros(n), np.zeros(n), np.zeros(n)
++    for log in logs:
++        for u, ln, r in zip(log.sess_user, log.sess_len, log.sess_reward):
++            cum[index[u]] += r
++            length[index[u]] += ln
++        for u, r in zip(log.rec_user, log.rec_reward):
++            rsum[index[u]] += r
++            rn[index[u]] += 1
++    return {"users": users, "cum_reward": cum / len(logs), "session_length": length / len(logs),
++            "mean_reward": rsum / rn, "reward_sum": rsum, "reward_n": rn}
++
++
++def user_bootstrap(per_user: dict[str, np.ndarray], confidence: float, resamples: int) -> dict[str, tuple[float, float]]:
+     rng = np.random.default_rng(0)
+-    draws = rng.integers(0, n_u, size=(resamples, n_u))
++    n = len(per_user["users"])
++    draws = rng.integers(0, n, size=(resamples, n))
+     lo_q, hi_q = 50 * (1 - confidence), 50 * (1 + confidence)
+     out = {}
+-    for name, vals in per_user.items():
+-        boot = vals[draws].mean(1)
++    for name in ("cum_reward", "session_length"):
++        boot = per_user[name][draws].mean(1)
+         out[name] = (float(np.percentile(boot, lo_q)), float(np.percentile(boot, hi_q)))
+-    boot = wr_sum_u[draws].sum(1) / wr_cnt_u[draws].sum(1)
+-    out["mean_watch_ratio"] = (float(np.percentile(boot, lo_q)), float(np.percentile(boot, hi_q)))
++    boot = per_user["reward_sum"][draws].sum(1) / per_user["reward_n"][draws].sum(1)
++    out["mean_reward"] = (float(np.percentile(boot, lo_q)), float(np.percentile(boot, hi_q)))
+     return out
+ 
+ 
+@@ -161,27 +168,67 @@ def run(factory: PolicyFactory, partition: str, seeds: list[int] | None = None,
+         env: KuaiEnv | None = None, policy_name: str = "") -> dict:
+     digest = _integrity.verify()
+     cfg = harness_config()
++    env = env or KuaiEnv()
++    if env.config.window_mode != "intended":
++        raise ValueError("harness.run evaluates only window_mode='intended'; the EasyRL4Rec slice is for "
++                         "scripts/differential.py")
+     seeds = list(cfg["seeds"] if seeds is None else seeds)
+     users = partitions.load(partition)
+-    env = env or KuaiEnv()
++    ctx = context_for(env)
++    first = factory(ctx, seeds[0])
++    if not isinstance(getattr(first, "stochastic", None), bool):
++        raise TypeError("policies must declare a boolean `stochastic` attribute")
++    stochastic = first.stochastic
++    check_seed = None
++    if not stochastic:
++        seeds, check_seed = seeds[:1], (seeds[1] if len(seeds) > 1 else None)
+     started = time.time()
+-    logs = [run_seed(env, factory, users, s) for s in seeds]
++    logs = [run_seed(env, first if i == 0 else factory(ctx, s), users, s) for i, s in enumerate(seeds)]
+     per_seed = [seed_metrics(log, env) for log in logs]
++    pu = per_user_values(logs)
++    if check_seed is not None:
++        check = per_user_values([run_seed(env, factory(ctx, check_seed), users, check_seed)])
++        if any(not np.array_equal(pu[k], check[k]) for k in ("cum_reward", "session_length", "reward_sum")):
++            raise ValueError(f"policy {policy_name!r} declares stochastic=False but its per-user results differ "
++                             f"between seeds {seeds[0]} and {check_seed}; declare stochastic=True")
+     summary = {}
+     for m in METRICS:
+         mean, lo, hi = t_interval(np.array([p[m] for p in per_seed]), cfg["confidence"])
+-        summary[m] = {"mean": mean, "ci_seeds": [lo, hi]}
+-    for m, ci in user_bootstrap(logs, cfg["confidence"], cfg["user_bootstrap_resamples"]).items():
++        summary[m] = {"mean": mean, "ci_seeds": [lo, hi] if stochastic else None}
++    for m, ci in user_bootstrap(pu, cfg["confidence"], cfg["user_bootstrap_resamples"]).items():
+         summary[m]["ci_users"] = list(ci)
+     return {
+         "policy": policy_name,
++        "stochastic": stochastic,
+         "partition": partition,
+         "n_users": len(users),
+         "seeds": seeds,
++        "determinism_check_seed": check_seed,
+         "confidence": cfg["confidence"],
+-        "env_config": env.config.__dict__,
++        "env_config": dataclasses.asdict(env.config),
+         "manifest_digest": digest,
+         "summary": summary,
+         "per_seed": per_seed,
++        "per_user": {k: pu[k].tolist() for k in ("users",) + PER_USER},
+         "wall_seconds": round(time.time() - started, 2),
+     }
++
++
++def compare(a: dict, b: dict, metric: str = "cum_reward") -> dict:
++    """Paired bootstrap over users of mean_u[a(u) - b(u)] for a per-user metric."""
++    if metric not in PER_USER:
++        raise KeyError(f"metric must be one of {PER_USER}")
++    if a["per_user"]["users"] != b["per_user"]["users"]:
++        raise ValueError("paired comparison needs the same users")
++    cfg = harness_config()
++    d = np.asarray(a["per_user"][metric]) - np.asarray(b["per_user"][metric])
++    rng = np.random.default_rng(cfg["paired_bootstrap_seed"])
++    resamples = cfg["paired_bootstrap_resamples"]
++    boot = np.empty(resamples)
++    for start in range(0, resamples, 1000):
++        stop = min(start + 1000, resamples)
++        boot[start:stop] = d[rng.integers(0, len(d), size=(stop - start, len(d)))].mean(axis=1)
++    conf = cfg["confidence"]
++    lo, hi = np.percentile(boot, [50 * (1 - conf), 50 * (1 + conf)])
++    return {"a": a["policy"], "b": b["policy"], "metric": metric, "mean": float(d.mean()),
++            "ci": [float(lo), float(hi)], "n_users": int(len(d)), "resamples": resamples}
+diff --git a/kuairec_eval/rewards.py b/kuairec_eval/rewards.py
+index 1c9e60e..4217f2f 100644
+--- a/kuairec_eval/rewards.py
++++ b/kuairec_eval/rewards.py
+@@ -1,30 +1,25 @@
+-"""Reward candidates behind one config switch (config/rewards.toml [reward] active).
++"""Reward candidates behind one config switch: config/evaluator.toml [env] reward.
+ 
+ EVALUATOR-SIDE: builds (user x video) reward matrices from the small matrix, so policies
+ must not import it (tests/test_policy_isolation.py; data.load_small_matrix also refuses
+ policy callers). The public half of the duration-adjusted reward lives in labels.py.
+ 
+-  raw           recorded watch_ratio (what the frozen v0 environment returns)
++  raw           recorded watch_ratio
+   capped5       min(watch_ratio, cap), cap = 5 as in EasyRL4Rec's KuaiData.load_mat
+   duration_pct  labels.DurationBuckets.percentile(video, play_duration of the small row),
+                 buckets and reference sets from the big matrix only (ADR-0016)
+-
+-Not in the v0 manifest: the frozen v0 environment still returns raw watch_ratio. The
+-audit applies these through audit/reward_env.py; evaluator v1 would move the switch into
+-the environment (docs/proposals/evaluator-v1.patch).
+ """
+ from __future__ import annotations
+ 
+-import tomllib
+ from dataclasses import dataclass
+ 
+ import numpy as np
++import pandas as pd
+ 
+ from kuairec_eval import labels
+-from kuairec_eval.data import REPO_ROOT, load_small_matrix
++from kuairec_eval.data import load_small_matrix
+ 
+ REWARDS = ("raw", "capped5", "duration_pct")
+-CONFIG_PATH = REPO_ROOT / "config" / "rewards.toml"
+ 
+ 
+ @dataclass(frozen=True)
+@@ -37,14 +32,6 @@ class RewardConfig:
+         if self.active not in REWARDS:
+             raise ValueError(f"reward must be one of {REWARDS}, got {self.active!r}")
+ 
+-    @classmethod
+-    def from_toml(cls, path=CONFIG_PATH, active: str | None = None) -> "RewardConfig":
+-        with open(path, "rb") as f:
+-            cfg = tomllib.load(f)["reward"]
+-        if active is not None:
+-            cfg = {**cfg, "active": active}
+-        return cls(**cfg)
+-
+ 
+ def row_rewards(cfg: RewardConfig, video_ids, watch_ratio, play_duration) -> np.ndarray:
+     """Reward for interaction rows under cfg.active."""
+@@ -55,9 +42,9 @@ def row_rewards(cfg: RewardConfig, video_ids, watch_ratio, play_duration) -> np.
+     return labels.duration_buckets(cfg.duration_buckets).percentile(video_ids, play_duration)
+ 
+ 
+-def reward_matrix(cfg: RewardConfig, users, videos) -> np.ndarray:
++def reward_matrix(cfg: RewardConfig, users, videos, small: pd.DataFrame | None = None) -> np.ndarray:
+     """Dense (len(users) x len(videos)) float64 matrix; NaN where the pair is unrecorded."""
+-    small = load_small_matrix()
++    small = load_small_matrix() if small is None else small
+     users = np.asarray(users)
+     videos = np.asarray(videos)
+     ui = np.searchsorted(users, small["user_id"].to_numpy())
+diff --git a/policies/baselines.py b/policies/baselines.py
+index 2bfbb14..21db6a7 100644
+--- a/policies/baselines.py
++++ b/policies/baselines.py
+@@ -1,4 +1,5 @@
+-"""Phase 0 baselines. Policies see only PolicyContext and the StepResults they receive.
++"""Phase 0 baselines. Policies see only PolicyContext, the per-session excluded set and the
++StepResults they receive (v1 protocol: `stochastic`, begin_session(user, excluded)).
+ 
+ They must never import the small matrix; tests/test_policy_isolation.py enforces this
+ statically (AST) and kuairec_eval.data enforces it at runtime.
+@@ -13,16 +14,36 @@ import pandas as pd
+ from kuairec_eval.data import load_big_matrix
+ 
+ 
++class RankedPolicy:
++    """Shows `self.ranking` in order, skipping videos outside the user's action set."""
++    stochastic = False
++    ranking: tuple[int, ...] = ()
++
++    def begin_session(self, user: int, excluded: frozenset[int]) -> None:
++        self._excluded, self._pos = excluded, 0
++
++    def act(self) -> int:
++        while self.ranking[self._pos] in self._excluded:
++            self._pos += 1
++        video = self.ranking[self._pos]
++        self._pos += 1
++        return video
++
++    def observe(self, video, result) -> None:
++        pass
++
++
+ class UniformRandom:
+-    """Uniform over catalog videos not yet shown in this session (sampling without replacement)."""
++    """Uniform over the user's action set, without replacement within a session."""
++    stochastic = True
+ 
+     def __init__(self, context, seed: int):
+         self._catalog = np.asarray(context.catalog, dtype=np.int64)
+         self._rng = np.random.default_rng(seed)
+         self._queue: list[int] = []
+ 
+-    def begin_session(self, user: int) -> None:
+-        self._queue = self._rng.permutation(self._catalog).tolist()
++    def begin_session(self, user: int, excluded: frozenset[int]) -> None:
++        self._queue = [v for v in self._rng.permutation(self._catalog).tolist() if v not in excluded]
+ 
+     def act(self) -> int:
+         return self._queue.pop()
+@@ -38,29 +59,16 @@ def big_matrix_popularity() -> pd.Series:
+     return big.drop_duplicates(["user_id", "video_id"]).groupby("video_id").size().rename("n_users")
+ 
+ 
+-class GlobalPopularity:
+-    """Most popular unseen catalog video, popularity from the big matrix only.
++class GlobalPopularity(RankedPolicy):
++    """Most popular available unseen video, popularity from the big matrix only.
+ 
+-    Ties broken by ascending video_id; catalog videos absent from the big matrix score 0.
+-    Identical ranking for every user, so it is deterministic and ignores `seed`.
++    Ties broken by ascending video_id; identical ranking for every user, so it is
++    deterministic and ignores `seed`.
+     """
+ 
+     def __init__(self, context, seed: int):
+         pop = big_matrix_popularity().reindex(list(context.catalog), fill_value=0)
+-        ranked = sorted(context.catalog, key=lambda v: (-int(pop[v]), v))
+-        self.ranking: tuple[int, ...] = tuple(ranked)
+-        self._pos = 0
+-
+-    def begin_session(self, user: int) -> None:
+-        self._pos = 0
+-
+-    def act(self) -> int:
+-        video = self.ranking[self._pos]
+-        self._pos += 1
+-        return video
+-
+-    def observe(self, video, result) -> None:
+-        pass
++        self.ranking = tuple(sorted(context.catalog, key=lambda v: (-int(pop[v]), v)))
+ 
+ 
+ REGISTRY = {"random": UniformRandom, "popularity": GlobalPopularity}
+diff --git a/policies/reference.py b/policies/reference.py
+index 0bf5c78..4b5d960 100644
+--- a/policies/reference.py
++++ b/policies/reference.py
+@@ -18,31 +18,19 @@ from __future__ import annotations
+ import numpy as np
+ 
+ from kuairec_eval.labels import big_matrix_video_stats, canonical_durations
++from policies.baselines import RankedPolicy
+ 
+ MIN_BIG_ROWS = 100
+ 
+ 
+-class ShortestFirst:
++class ShortestFirst(RankedPolicy):
+     """(a) Deterministic: same ranking for every user, ties broken by video_id."""
+-    stochastic = False
+     longest = False
+ 
+     def __init__(self, context, seed: int):
+         dur = canonical_durations()
+         sign = -1.0 if self.longest else 1.0
+-        self.ranking: tuple[int, ...] = tuple(sorted(context.catalog, key=lambda v: (sign * float(dur[v]), v)))
+-        self._pos = 0
+-
+-    def begin_session(self, user: int) -> None:
+-        self._pos = 0
+-
+-    def act(self) -> int:
+-        v = self.ranking[self._pos]
+-        self._pos += 1
+-        return v
+-
+-    def observe(self, video, result) -> None:
+-        pass
++        self.ranking = tuple(sorted(context.catalog, key=lambda v: (sign * float(dur[v]), v)))
+ 
+ 
+ class LongestFirst(ShortestFirst):
+@@ -75,13 +63,13 @@ class CategoryRotation:
+         self._pos = 0
+         self._shown: set[int] = set()
+ 
+-    def begin_session(self, user: int) -> None:
++    def begin_session(self, user: int, excluded: frozenset[int]) -> None:
+         if self.pick == "random":
+             self._order = [int(c) for c in self._rng.permutation(self.rotation_categories)]
+         else:
+             self._order = list(self._fixed_order)
+         self._pos = 0
+-        self._shown = set()
++        self._shown = set(excluded)  # never shown, never eligible
+ 
+     def act(self) -> int:
+         k = len(self._order)
+@@ -99,24 +87,11 @@ class CategoryRotation:
+         pass
+ 
+ 
+-class BigMeanLabel:
++class BigMeanLabel(RankedPolicy):
+     """(d) label="raw": rank catalog videos by big-matrix mean watch_ratio, among videos with
+     at least MIN_BIG_ROWS big-matrix rows (14 of 3,327 fall below). (e) any other label."""
+-    stochastic = False
+ 
+     def __init__(self, context, seed: int, label: str = "raw", n_buckets: int | None = None):
+         st = big_matrix_video_stats(label, n_buckets).reindex(list(context.catalog))
+         eligible = st[st["size"] >= MIN_BIG_ROWS]
+-        self.ranking: tuple[int, ...] = tuple(sorted(eligible.index, key=lambda v: (-float(eligible.at[v, "mean"]), v)))
+-        self._pos = 0
+-
+-    def begin_session(self, user: int) -> None:
+-        self._pos = 0
+-
+-    def act(self) -> int:
+-        v = self.ranking[self._pos]
+-        self._pos += 1
+-        return v
+-
+-    def observe(self, video, result) -> None:
+-        pass
++        self.ranking = tuple(sorted(eligible.index, key=lambda v: (-float(eligible.at[v, "mean"]), v)))
+diff --git a/scripts/audit_data_checks.py b/scripts/audit_data_checks.py
+index 997a4da..fe52ceb 100644
+--- a/scripts/audit_data_checks.py
++++ b/scripts/audit_data_checks.py
+@@ -106,8 +106,8 @@ def main():
+     print("\n== does the unrecorded-pair mask carry reward information? (search users; ADR-0020)")
+     from scipy import stats
+     from kuairec_eval import labels as L
+-    from kuairec_eval.rewards import RewardConfig
+-    k = RewardConfig.from_toml().duration_buckets
++    from kuairec_eval.env import EnvConfig
++    k = EnvConfig.from_toml().duration_buckets
+     pct = L.duration_buckets(k).percentile(small_s.video_id.to_numpy(), small_s.play_duration.to_numpy())
+     rec = small_s.assign(pct=pct)
+     v_missing = (len(per_user) - rec.groupby("video_id").user_id.nunique()).reindex(catalog, fill_value=len(per_user))
+diff --git a/scripts/audit_duration_correlation.py b/scripts/audit_duration_correlation.py
+index cff0e27..fd0dc3e 100644
+--- a/scripts/audit_duration_correlation.py
++++ b/scripts/audit_duration_correlation.py
+@@ -26,7 +26,8 @@ from scipy import stats  # noqa: E402
+ 
+ from kuairec_eval import labels, partitions  # noqa: E402
+ from kuairec_eval.data import load_small_matrix  # noqa: E402
+-from kuairec_eval.rewards import REWARDS, RewardConfig, row_rewards  # noqa: E402
++from kuairec_eval.env import EnvConfig  # noqa: E402
++from kuairec_eval.rewards import REWARDS, row_rewards  # noqa: E402
+ 
+ BUCKETS_FOR_BUCKET_VERSION = 20
+ 
+@@ -60,7 +61,7 @@ def main():
+ 
+     series = {}
+     for name in REWARDS:
+-        cfg = RewardConfig.from_toml(active=name)
++        cfg = EnvConfig.from_toml(reward=name).reward_config()
+         series[name] = row_rewards(cfg, s.video_id.to_numpy(), s.watch_ratio.to_numpy(), s.play_duration.to_numpy())
+     series["play_duration_ms (extra, not a candidate)"] = s.play_duration.to_numpy().astype(float)
+ 
+@@ -82,7 +83,7 @@ def main():
+                                   "per_interaction": float(r_int), "buckets_spearman": float(r_bs),
+                                   "buckets_pearson": float(r_bp), "n_videos": int(len(mean_v)),
+                                   "n_interactions": int(len(y)), "n_buckets": int(len(bmean))}
+-    # Diagnostic only (K stays as config/rewards.toml says; the rule in audit_bucket_choice.py
++    # Diagnostic only (K stays as config/evaluator.toml [reward] says; the rule in audit_bucket_choice.py
+     # fixed it on big-matrix data): does the duration_pct correlation on search users depend on K?
+     print("\nduration_pct sensitivity to K (diagnostic; not used to choose K):")
+     print(f"  {'K':>4s} {'per-video mean (search, small rows)':>36s} {'per-interaction':>16s} {'per-video mean (big rows)':>26s}")
+diff --git a/scripts/audit_rewards.py b/scripts/audit_rewards.py
+index cf19345..aff69b5 100644
+--- a/scripts/audit_rewards.py
++++ b/scripts/audit_rewards.py
+@@ -1,19 +1,18 @@
+-"""Items 2, 3, 6 and 7 of the evaluator audit, on the SEARCH partition only.
++"""Reward-candidate audit under the v1 evaluator, on the SEARCH partition only.
+ 
+ For each reward candidate (raw, capped5, duration_pct):
+-  * run random, popularity, reference policies (a)-(d), the extra (e) and two probes
+-    through the frozen v0 harness pieces (audit/runner.py) on RewardEnv (audit/reward_env.py);
+-    stochastic policies use the harness seeds 0-9, deterministic ones seed 0;
+-  * run both oracle ceilings (kuairec_eval/diagnostics/oracles.py) and the quit-free top-30 bounds;
++  * run random, popularity, reference policies (a)-(d), the extra (e) and two probes with
++    harness.run (stochastic policies on the harness seeds, deterministic ones on seeds[0]);
++  * run both oracle ceilings (kuairec_eval/diagnostics/oracles.py) and their quit-free versions;
+   * per-video rank correlation of mean reward with canonical duration (search users);
+-  * paired bootstrap over users (10,000 resamples, seed 0) for the acceptance tests:
++  * acceptance tests with harness.compare (paired bootstrap over users):
+       T1 shortest-first must not score above random:  pass iff the 95% interval of
+          mean_u[(a)(u) - random(u)] cumulative reward does NOT lie entirely above 0
+       T2 personalized oracle must beat non-personalized: pass iff the 95% interval of
+          mean_u[P(u) - NP(u)] cumulative reward lies entirely above 0
+ 
+ Usage: .venv/bin/python scripts/audit_rewards.py [--rewards raw capped5 duration_pct]
+-Writes runs/audit/rewards_<reward>.{json,md}, runs/audit/per_user_<reward>.csv, runs/audit/acceptance.json
++Writes runs/audit_v1/rewards_<reward>.{json,md} and runs/audit_v1/acceptance.json
+ """
+ import argparse
+ import json
+@@ -25,39 +24,35 @@ from pathlib import Path
+ ROOT = Path(__file__).resolve().parent.parent
+ sys.path.insert(0, str(ROOT))
+ import numpy as np  # noqa: E402
+-import pandas as pd  # noqa: E402
+ from scipy import stats  # noqa: E402
+ 
+-from audit.reward_env import RewardEnv  # noqa: E402
+-from audit.runner import compare, run_policy  # noqa: E402
+ from kuairec_eval import harness, labels, partitions  # noqa: E402
+ from kuairec_eval.diagnostics import oracles  # noqa: E402
+-from kuairec_eval.env import KuaiEnv  # noqa: E402
+-from kuairec_eval.rewards import REWARDS, RewardConfig, reward_matrix  # noqa: E402
++from kuairec_eval.env import EnvConfig, KuaiEnv  # noqa: E402
++from kuairec_eval.rewards import REWARDS, reward_matrix  # noqa: E402
+ from policies.baselines import GlobalPopularity, UniformRandom  # noqa: E402
+ from policies.reference import BigMeanLabel, CategoryRotation, LongestFirst, ShortestFirst  # noqa: E402
+ 
+-OUT = ROOT / "runs" / "audit"
+-RESAMPLES, BOOT_SEED = 10_000, 0
++OUT = ROOT / "runs" / "audit_v1"
+ 
+ 
+-def policy_specs(cfg: RewardConfig):
+-    """(key, label, factory, stochastic, requested)"""
++def policy_specs(cfg: EnvConfig):
++    """(key, label, factory)"""
+     specs = [
+-        ("random", "random", UniformRandom, True, True),
+-        ("popularity", "popularity (big-matrix distinct users)", GlobalPopularity, False, True),
+-        ("a_shortest_first", "(a) shortest first", ShortestFirst, False, True),
+-        ("b_rotation_random", "(b) category rotation, random pick", lambda c, s: CategoryRotation(c, s, "random"), True, True),
+-        ("c_rotation_shortest", "(c) category rotation, shortest pick", lambda c, s: CategoryRotation(c, s, "shortest"), False, True),
+-        ("d_big_mean_watch_ratio", "(d) big-matrix mean watch_ratio, >=100 rows", BigMeanLabel, False, True),
++        ("random", "random", UniformRandom),
++        ("popularity", "popularity (big-matrix distinct users)", GlobalPopularity),
++        ("a_shortest_first", "(a) shortest first", ShortestFirst),
++        ("b_rotation_random", "(b) category rotation, random pick", lambda c, s: CategoryRotation(c, s, "random")),
++        ("c_rotation_shortest", "(c) category rotation, shortest pick", lambda c, s: CategoryRotation(c, s, "shortest")),
++        ("d_big_mean_watch_ratio", "(d) big-matrix mean watch_ratio, >=100 rows", BigMeanLabel),
+     ]
+-    if cfg.active != "raw":
+-        specs.append(("e_big_mean_label", f"(e) big-matrix mean {cfg.active} label, >=100 rows [extra]",
+-                      lambda c, s: BigMeanLabel(c, s, cfg.active, cfg.duration_buckets), False, False))
++    if cfg.reward != "raw":
++        specs.append(("e_big_mean_label", f"(e) big-matrix mean {cfg.reward} label, >=100 rows [extra]",
++                      lambda c, s: BigMeanLabel(c, s, cfg.reward, cfg.duration_buckets)))
+     specs += [
+-        ("probe_longest_first", "probe: longest first [extra]", LongestFirst, False, False),
++        ("probe_longest_first", "probe: longest first [extra]", LongestFirst),
+         ("probe_rotation_longest", "probe: category rotation, longest pick [extra]",
+-         lambda c, s: CategoryRotation(c, s, "longest"), False, False),
++         lambda c, s: CategoryRotation(c, s, "longest")),
+     ]
+     return specs
+ 
+@@ -66,35 +61,29 @@ def fmt(x, d=3):
+     return "n/a" if x is None or (isinstance(x, float) and np.isnan(x)) else f"{x:.{d}f}"
+ 
+ 
+-def run_candidate(base: KuaiEnv, name: str, search: list[int], seeds: list[int]) -> dict:
+-    cfg = RewardConfig.from_toml(active=name)
+-    users, videos = np.asarray(base.users), np.asarray(base.catalog)
+-    mat = reward_matrix(cfg, users, videos)
+-    env = RewardEnv(base, cfg, matrix=mat)
+-    runs, labels_of, timing = {}, {}, {}
+-    for key, label, factory, stochastic, requested in policy_specs(cfg):
+-        t0 = time.time()
+-        runs[key] = run_policy(env, factory, "search", seeds if stochastic else [seeds[0]], key, stochastic)
+-        runs[key].extra["requested"] = requested
+-        labels_of[key], timing[key] = label, round(time.time() - t0, 1)
+-    t0 = time.time()
+-    np_fac = oracles.nonpersonalized_factory(mat, users, videos, base.config, search, base.categories)
+-    runs["oracle_nonpersonalized"] = run_policy(env, np_fac, "search", [seeds[0]], "oracle_nonpersonalized", False)
+-    runs["oracle_personalized"] = run_policy(env, oracles.personalized_factory(mat, users, videos, base.config),
+-                                             "search", [seeds[0]], "oracle_personalized", False)
+-    for k in ("oracle_nonpersonalized", "oracle_personalized"):
+-        runs[k].extra["requested"] = True
+-    labels_of["oracle_nonpersonalized"] = "oracle: non-personalized fixed sequence (greedy, search-user means)"
++def run_candidate(name: str, search: list[int]) -> dict:
++    env = KuaiEnv(EnvConfig.from_toml(reward=name))
++    cfg = env.config
++    users, videos = np.asarray(env.users), np.asarray(env.catalog)
++    mat = reward_matrix(cfg.reward_config(), users, videos)
++    runs, labels_of = {}, {}
++    for key, label, factory in policy_specs(cfg):
++        runs[key] = harness.run(factory, "search", env=env, policy_name=key)
++        labels_of[key] = label
++    np_fac = oracles.nonpersonalized_factory(mat, users, videos, cfg, search)
++    runs["oracle_nonpersonalized"] = harness.run(np_fac, "search", env=env, policy_name="oracle_nonpersonalized")
++    runs["oracle_personalized"] = harness.run(oracles.personalized_factory(mat, users, videos, cfg), "search",
++                                              env=env, policy_name="oracle_personalized")
++    labels_of["oracle_nonpersonalized"] = "oracle: non-personalized (common values, greedy)"
+     labels_of["oracle_personalized"] = "oracle: personalized greedy"
+-    timing["oracles"] = round(time.time() - t0, 1)
+-    bound = oracles.top_k_bound(mat, users, search, base.config.max_turn, base.config.missing_pair_reward)
++    quit_free = oracles.top_k(mat, users, search, cfg.max_turn, np_fac.common_values)
+ 
+     rows = np.searchsorted(users, np.asarray(sorted(search)))
+     per_video = np.nanmean(mat[rows], axis=0)
+     dur = labels.canonical_durations().reindex(videos).to_numpy()
+     rho = float(stats.spearmanr(dur, per_video).statistic)
+ 
+-    c = lambda a, b, m: compare(runs[a], runs[b], m, resamples=RESAMPLES, seed=BOOT_SEED)  # noqa: E731
++    c = lambda a, b, m: harness.compare(runs[a], runs[b], m)  # noqa: E731
+     t1 = c("a_shortest_first", "random", "cum_reward")
+     t2 = c("oracle_personalized", "oracle_nonpersonalized", "cum_reward")
+     acceptance = {
+@@ -113,41 +102,34 @@ def run_candidate(base: KuaiEnv, name: str, search: list[int], seeds: list[int])
+         c("probe_rotation_longest", "b_rotation_random", "mean_reward"),
+         c("b_rotation_random", "random", "cum_reward"),
+     ]
+-    if "e_big_mean_label" in runs:
+-        supplementary.append(c("e_big_mean_label", "random", "cum_reward"))
+-    supplementary.append(c("d_big_mean_watch_ratio", "random", "cum_reward"))
+-
+-    pd.DataFrame({"user_id": runs["random"].users,
+-                  **{k: r.cum_reward for k, r in runs.items()}}).to_csv(OUT / f"per_user_{name}.csv", index=False)
+-    return {"reward": name, "reward_config": cfg.__dict__, "rho_per_video_mean_reward_vs_duration": rho,
+-            "bounds_top30": {"personalized": bound["personalized"], "nonpersonalized": bound["nonpersonalized"]},
+-            "np_oracle_sequence": list(np_fac.sequence),
+-            "policies": {k: {"label": labels_of[k], "stochastic": r.stochastic, "requested": r.extra["requested"],
+-                             "seeds": r.seeds, "summary": r.summary} for k, r in runs.items()},
+-            "acceptance": acceptance, "supplementary": supplementary, "timing_seconds": timing}
++    return {"reward": name, "env_config": runs["random"]["env_config"], "manifest_digest": runs["random"]["manifest_digest"],
++            "rho_per_video_mean_reward_vs_duration": rho, "quit_free": quit_free,
++            "policies": {k: {"label": labels_of[k], "stochastic": r["stochastic"], "seeds": r["seeds"],
++                             "summary": r["summary"]} for k, r in runs.items()},
++            "acceptance": acceptance, "supplementary": supplementary}
+ 
+ 
+ def markdown(res: dict, command: str) -> str:
+-    lines = [f"### Reward: `{res['reward']}`", "", f"Command: `{command}`  ",
++    lines = [f"### Reward: `{res['reward']}` (evaluator v1)", "", f"Command: `{command}`  ",
+              f"Per-video Spearman(mean reward over search users, canonical duration) = "
+              f"{res['rho_per_video_mean_reward_vs_duration']:+.4f}", "",
+              "Cum reward: mean per session over 847 search users {95% user bootstrap}"
+              " [95% seed t-interval, stochastic policies only].", "",
+-             "| Policy | Cum reward / session | Mean reward / rec | Session length | Top-category share | Coverage | Boredom-quit rate | Unrecorded-pair rate |",
+-             "|---|---|---|---|---|---|---|---|"]
++             "| Policy | Cum reward / session | Mean reward / rec | Session length | Top-category share | Coverage | Boredom-quit rate |",
++             "|---|---|---|---|---|---|---|"]
+     for key, p in res["policies"].items():
+         s = p["summary"]
+         cr = s["cum_reward"]
+         cell = f"{fmt(cr['mean'])} {{{fmt(cr['ci_users'][0])}, {fmt(cr['ci_users'][1])}}}"
+-        if p["stochastic"]:
++        if cr["ci_seeds"] is not None:
+             cell += f" [{fmt(cr['ci_seeds'][0])}, {fmt(cr['ci_seeds'][1])}]"
+-        lines.append(f"| {p['label']} | {cell} | {fmt(s['mean_watch_ratio']['mean'], 4)} | "
+-                     f"{fmt(s['session_length']['mean'], 2)} | {fmt(s['top_category_share']['mean'], 3)} | "
+-                     f"{fmt(s['catalog_coverage']['mean'], 4)} | {fmt(s['boredom_quit_rate']['mean'], 3)} | "
+-                     f"{fmt(s['missing_pair_rate']['mean'], 4)} |")
+-    b = res["bounds_top30"]
+-    lines += ["", f"Quit-free top-30 bounds: personalized {fmt(b['personalized'])}, non-personalized {fmt(b['nonpersonalized'])}.", "",
+-              "| Paired comparison (A - B), per-user, 10,000 resamples | Metric | Mean | 95% interval |", "|---|---|---|---|"]
++        lines.append(f"| {p['label']} | {cell} | {fmt(s['mean_reward']['mean'], 4)} | {fmt(s['session_length']['mean'], 2)} | "
++                     f"{fmt(s['top_category_share']['mean'], 3)} | {fmt(s['catalog_coverage']['mean'], 4)} | "
++                     f"{fmt(s['boredom_quit_rate']['mean'], 3)} |")
++    q = res["quit_free"]
++    lines += ["", f"Quit-free versions: personalized bound {fmt(q['personalized_bound'])}, "
++              f"non-personalized {fmt(q['nonpersonalized_quit_free'])}.", "",
++              "| Paired comparison (A - B), per-user | Metric | Mean | 95% interval |", "|---|---|---|---|"]
+     a = res["acceptance"]
+     for key in ("T1_shortest_not_above_random", "T2_personalized_beats_nonpersonalized"):
+         t = a[key]
+@@ -164,13 +146,11 @@ def main():
+     args = ap.parse_args()
+     command = ".venv/bin/python scripts/audit_rewards.py " + shlex.join(sys.argv[1:])
+     OUT.mkdir(parents=True, exist_ok=True)
+-    base = KuaiEnv()
+     search = partitions.load("search")
+-    seeds = list(harness.harness_config()["seeds"])
+     acceptance = {}
+     for name in args.rewards:
+         t0 = time.time()
+-        res = run_candidate(base, name, search, seeds)
++        res = run_candidate(name, search)
+         res["command"], res["wall_seconds"] = command, round(time.time() - t0, 1)
+         (OUT / f"rewards_{name}.json").write_text(json.dumps(res, indent=2))
+         md = markdown(res, command)
+diff --git a/scripts/audit_survival.py b/scripts/audit_survival.py
+index 9cf9e5c..dfba7ef 100644
+--- a/scripts/audit_survival.py
++++ b/scripts/audit_survival.py
+@@ -86,7 +86,8 @@ def main():
+     seeds = list(harness.harness_config()["seeds"])
+     from kuairec_eval import partitions
+     users = partitions.load("search")
+-    sess = np.concatenate([harness.run_seed(env, UniformRandom, users, s).sess_len for s in seeds])
++    ctx = harness.context_for(env)
++    sess = np.concatenate([harness.run_seed(env, UniformRandom(ctx, s), users, s).sess_len for s in seeds])
+     out = {"harness_primary": {"n_sessions": int(len(sess)), "mean": float(sess.mean()),
+                                "median": float(np.median(sess)), "survival": survival(sess),
+                                "reach_max_turn": float((sess == MAX_TURN).mean())}}
+diff --git a/scripts/differential.py b/scripts/differential.py
+index 3cfff3f..68dc049 100644
+--- a/scripts/differential.py
++++ b/scripts/differential.py
+@@ -117,7 +117,9 @@ def run_ref(ref, uidx: int, seq_idx: list[int]):
+ 
+ 
+ def build_sequences(users, catalog, cats, small_lookup, cfg, rng):
+-    pop = list(GlobalPopularity(types.SimpleNamespace(catalog=catalog), 0).ranking[: cfg.max_turn])
++    """Every sequence stays inside the user's action set: since evaluator v1 our environment
++    rejects unrecorded pairs (ADR-0020), while EasyRL4Rec would answer them with 0."""
++    pop_all = list(GlobalPopularity(types.SimpleNamespace(catalog=catalog), 0).ranking)
+     by_cat: dict[int, list[int]] = {}
+     for v in catalog:
+         for c in cats[v]:
+@@ -125,11 +127,12 @@ def build_sequences(users, catalog, cats, small_lookup, cfg, rng):
+     big_cats = [c for c, vs in by_cat.items() if len(vs) >= cfg.max_turn]
+     arr = np.asarray(catalog)
+     for u in users:
++        ok = lambda vs: [v for v in vs if (u, v) in small_lookup]  # noqa: E731
+         for k in range(3):
+-            yield "random", u, rng.permutation(arr)[: cfg.max_turn].tolist()
+-        yield "popularity", u, pop
++            yield "random", u, ok(rng.permutation(arr).tolist())[: cfg.max_turn]
++        yield "popularity", u, ok(pop_all)[: cfg.max_turn]
+         seq, banned_hist = [], []
+-        for v in rng.permutation(arr).tolist():
++        for v in ok(rng.permutation(arr).tolist()):
+             recent = set().union(*banned_hist[-cfg.quit_window:]) if banned_hist else set()
+             if not recent & set(cats[v]):
+                 seq.append(v)
+@@ -138,9 +141,10 @@ def build_sequences(users, catalog, cats, small_lookup, cfg, rng):
+                 break
+         yield "diverse", u, seq
+         c = big_cats[int(rng.integers(len(big_cats)))]
+-        yield "stress", u, rng.permutation(np.asarray(by_cat[c]))[: cfg.max_turn].tolist()
++        yield "stress", u, ok(rng.permutation(np.asarray(by_cat[c])).tolist())[: cfg.max_turn]
+         high = [v for v in catalog if small_lookup.get((u, v), 0) > 5]
+-        rest = [v for v in rng.permutation(arr).tolist() if v not in set(high)]
++        high_set = set(high)
++        rest = [v for v in ok(rng.permutation(arr).tolist()) if v not in high_set]
+         yield "capped", u, (high + rest)[: cfg.max_turn]
+ 
+ 
+@@ -152,7 +156,7 @@ def main():
+     args = ap.parse_args()
+     command = ".venv/bin/python scripts/differential.py " + shlex.join(sys.argv[1:])
+ 
+-    base = EnvConfig.from_toml()
++    base = EnvConfig.from_toml(reward="raw")  # EasyRL4Rec returns (capped) watch_ratio
+     ours = {m: KuaiEnv(EnvConfig(**{**base.__dict__, "window_mode": m})) for m in ("intended", "easyrl4rec_slice")}
+     ref, lbe_user, lbe_item = load_reference(base)
+     env0 = ours["intended"]
+diff --git a/scripts/run_baselines.py b/scripts/run_baselines.py
+index dd9f0b2..bcd578f 100644
+--- a/scripts/run_baselines.py
++++ b/scripts/run_baselines.py
+@@ -15,12 +15,11 @@ from kuairec_eval import harness  # noqa: E402
+ from kuairec_eval.env import KuaiEnv  # noqa: E402
+ from policies.baselines import REGISTRY  # noqa: E402
+ 
+-ROWS = [("mean_watch_ratio", "Mean watch_ratio of recommended videos", 4),
++ROWS = [("mean_reward", "Mean reward per recommendation", 4),
+         ("cum_reward", "Cumulative reward per session", 3),
+         ("session_length", "Session length", 3),
+         ("top_category_share", "Share in most-recommended category", 4),
+         ("catalog_coverage", "Catalog coverage", 4),
+-        ("missing_pair_rate", "(diag) unrecorded-pair rate", 5),
+         ("boredom_quit_rate", "(diag) sessions ended by boredom", 4),
+         ("max_turn_rate", "(diag) sessions ended by max_turn", 4)]
+ 
+@@ -47,14 +46,17 @@ def main():
+     lines = [f"Command: `{command}`  ",
+              f"Partition: {args.partition} ({r0['n_users']} users), seeds {r0['seeds']}, "
+              f"manifest digest `{r0['manifest_digest'][:16]}`, env {r0['env_config']}", "",
+-             "Each cell: mean over seeds, [95% t-interval over seeds], {95% user-bootstrap interval where defined}.", "",
++             "Each cell: mean over runs, [95% t-interval over seeds, stochastic policies only], "
++             "{95% user-bootstrap interval where defined}. Compare policies with harness.compare (paired bootstrap).", "",
+              "| Metric | " + " | ".join(r["policy"] for r in results) + " |",
+              "|---|" + "---|" * len(results)]
+     for key, label, d in ROWS:
+         cells = []
+         for r in results:
+             s = r["summary"][key]
+-            cell = f"{fmt(s['mean'], d)} [{fmt(s['ci_seeds'][0], d)}, {fmt(s['ci_seeds'][1], d)}]"
++            cell = fmt(s["mean"], d)
++            if s["ci_seeds"] is not None:
++                cell += f" [{fmt(s['ci_seeds'][0], d)}, {fmt(s['ci_seeds'][1], d)}]"
+             if "ci_users" in s:
+                 cell += f" {{{fmt(s['ci_users'][0], d)}, {fmt(s['ci_users'][1], d)}}}"
+             cells.append(cell)
+diff --git a/tests/test_audit.py b/tests/test_audit.py
+deleted file mode 100644
+index ebb5e08..0000000
+--- a/tests/test_audit.py
++++ /dev/null
+@@ -1,146 +0,0 @@
+-"""Audit components: runner == frozen harness, reward overlay, labels, reference policies, oracles."""
+-import numpy as np
+-import pandas as pd
+-import pytest
+-
+-from audit.reward_env import RewardEnv
+-from audit.runner import compare, paired_bootstrap, run_policy
+-from kuairec_eval import harness, labels, partitions
+-from kuairec_eval.data import load_small_matrix
+-from kuairec_eval.diagnostics import oracles
+-from kuairec_eval.rewards import RewardConfig, reward_matrix
+-from policies.baselines import UniformRandom
+-from policies.reference import BigMeanLabel, CategoryRotation, ShortestFirst
+-
+-K = RewardConfig.from_toml().duration_buckets
+-
+-
+-@pytest.fixture(scope="module")
+-def small():
+-    return load_small_matrix()
+-
+-
+-@pytest.fixture(scope="module")
+-def envs(env):
+-    return {name: RewardEnv(env, RewardConfig.from_toml(active=name)) for name in ("raw", "capped5", "duration_pct")}
+-
+-
+-def test_runner_summary_equals_frozen_harness(env, envs):
+-    ref = harness.run(UniformRandom, "search", seeds=[0, 1], env=env)
+-    for e in (env, envs["raw"]):
+-        run = run_policy(e, UniformRandom, "search", [0, 1], "random", True)
+-        assert run.summary == ref["summary"] and run.per_seed == ref["per_seed"]
+-
+-
+-def test_runner_per_user_values_add_up(env):
+-    run = run_policy(env, UniformRandom, "search", [0, 1], "random", True)
+-    assert np.isclose(run.cum_reward.mean(), run.summary["cum_reward"]["mean"])
+-    assert np.isclose(run.session_length.mean(), run.summary["session_length"]["mean"])
+-
+-
+-def test_reward_candidates_match_their_definitions(envs, small):
+-    rows = small.sample(300, random_state=1)
+-    pct = labels.duration_buckets(K).percentile(rows.video_id.to_numpy(), rows.play_duration.to_numpy())
+-    for (u, v, wr), p in zip(zip(rows.user_id, rows.video_id, rows.watch_ratio), pct):
+-        got = {}
+-        for name, e in envs.items():
+-            e.reset(int(u))
+-            got[name] = e.step(int(v)).reward
+-        assert got["raw"] == wr
+-        assert got["capped5"] == min(wr, 5.0)
+-        assert got["duration_pct"] == p and 0.0 <= p <= 1.0
+-
+-
+-def test_unrecorded_pairs_keep_v0_semantics(envs, small):
+-    seen = set(zip(small.user_id.tolist(), small.video_id.tolist()))
+-    e = envs["duration_pct"]
+-    user = e.users[0]
+-    missing = next(v for v in e.catalog if (user, v) not in seen)
+-    e.reset(user)
+-    r = e.step(missing)
+-    assert not r.observed and r.reward == 0.0
+-
+-
+-def test_reward_env_holds_no_arrays(envs):
+-    for e in envs.values():
+-        for value in vars(e).values():
+-            assert not isinstance(value, (np.ndarray, pd.DataFrame, pd.Series))
+-
+-
+-def test_duration_percentile_is_midrank_and_centred():
+-    b = labels.duration_buckets(K)
+-    for ref in b.reference:
+-        sample = ref[:: max(1, len(ref) // 5000)]
+-        lo = np.searchsorted(ref, sample, side="left")
+-        hi = np.searchsorted(ref, sample, side="right")
+-        mid = (lo + hi) / (2 * len(ref))
+-        assert mid.min() >= 0 and mid.max() <= 1
+-    # mean mid-rank percentile over a full reference set is exactly 0.5
+-    ref = b.reference[0]
+-    lo = np.searchsorted(ref, ref, side="left")
+-    hi = np.searchsorted(ref, ref, side="right")
+-    assert abs(((lo + hi) / (2 * len(ref))).mean() - 0.5) < 1e-9
+-
+-
+-@pytest.mark.parametrize("pick", ["random", "shortest"])
+-def test_rotation_never_triggers_the_quit_rule(env, pick):
+-    run = run_policy(env, lambda c, s: CategoryRotation(c, s, pick), "search", [0], pick, pick == "random")
+-    assert run.summary["boredom_quit_rate"]["mean"] == 0.0
+-    assert run.summary["session_length"]["mean"] == env.config.max_turn
+-
+-
+-def test_rotation_reads_no_quit_parameters():
+-    import inspect
+-    from policies import reference
+-    src = inspect.getsource(reference)
+-    for name in ("quit_window", "quit_threshold", "max_turn", "evaluator.toml"):
+-        assert name not in src
+-
+-
+-def test_reference_policies_are_deterministic_where_declared(env):
+-    # Compare per-user values: pooled per-seed means differ in the last float bit because the
+-    # harness visits users in a seed-dependent order and float summation is order-dependent.
+-    for factory in (ShortestFirst, lambda c, s: CategoryRotation(c, s, "shortest"), BigMeanLabel):
+-        a = run_policy(env, factory, "search", [0], "x", False)
+-        b = run_policy(env, factory, "search", [5], "x", False)
+-        assert np.array_equal(a.cum_reward, b.cum_reward)
+-        assert np.array_equal(a.reward_sum, b.reward_sum) and np.array_equal(a.reward_n, b.reward_n)
+-
+-
+-def test_oracles_never_trigger_and_personalized_first_pick_is_argmax(envs):
+-    e = envs["capped5"]
+-    cfg = RewardConfig.from_toml(active="capped5")
+-    mat = reward_matrix(cfg, e.users, e.catalog)
+-    users, videos = np.asarray(e.users), np.asarray(e.catalog)
+-    search = partitions.load("search")
+-    p_fac = oracles.personalized_factory(mat, users, videos, e.config)
+-    np_fac = oracles.nonpersonalized_factory(mat, users, videos, e.config, search, e.categories)
+-    for fac in (p_fac, np_fac):
+-        run = run_policy(e, fac, "search", [0], "oracle", False)
+-        assert run.summary["boredom_quit_rate"]["mean"] == 0.0
+-        assert run.summary["session_length"]["mean"] == e.config.max_turn
+-    ctx = harness.PolicyContext(catalog=e.catalog, categories=e.categories)
+-    user = search[0]
+-    o = p_fac(ctx, 0)
+-    o.begin_session(user)
+-    row = np.where(np.isnan(mat[list(users).index(user)]), 0.0, mat[list(users).index(user)])
+-    assert row[list(videos).index(o.act())] == row.max()
+-
+-
+-def test_paired_bootstrap_basics():
+-    a = np.arange(100, dtype=float)
+-    same = paired_bootstrap(a, a)
+-    assert same["mean"] == 0 and same["ci"] == [0.0, 0.0]
+-    shifted = paired_bootstrap(a + 1, a)
+-    assert shifted["mean"] == 1 and shifted["ci"] == [1.0, 1.0]
+-    rng = np.random.default_rng(0)
+-    x, y = rng.normal(size=500), rng.normal(size=500)
+-    r1, r2 = paired_bootstrap(x, y), paired_bootstrap(x, y)
+-    assert r1 == r2 and r1["ci"][0] < r1["mean"] < r1["ci"][1]
+-
+-
+-def test_compare_requires_same_users(env):
+-    a = run_policy(env, UniformRandom, "search", [0], "a", True)
+-    b = run_policy(env, UniformRandom, "shadow", [0], "b", True)
+-    with pytest.raises(ValueError):
+-        compare(a, b, "cum_reward")
+diff --git a/tests/test_env.py b/tests/test_env.py
+index 5a7fd85..9cd734b 100644
+--- a/tests/test_env.py
++++ b/tests/test_env.py
+@@ -1,106 +1,133 @@
+-"""Quit rule, repeat ban, session lifecycle and reward fidelity."""
++"""Quit rule, quit profiles, action set, repeat ban, session lifecycle and reward fidelity (v1)."""
+ import numpy as np
+ import pytest
+ 
+ from kuairec_eval.data import load_small_matrix
+-from kuairec_eval.env import (EnvConfig, RepeatRecommendationError, SessionClosedError,
+-                              boredom_quit)
++from kuairec_eval.env import (EnvConfig, KuaiEnv, RepeatRecommendationError, SessionClosedError,
++                              UnavailableActionError, boredom_quit)
+ 
+ CATS = {1: (0,), 2: (0,), 3: (1,), 4: (1, 2), 5: (2,), 6: (3,), 7: (0, 3), 8: (4,), 9: (5,)}
+ 
+ 
++@pytest.fixture(scope="module")
++def raw_env():
++    return KuaiEnv(EnvConfig.from_toml(reward="raw"))
++
++
++@pytest.fixture(scope="module")
++def small():
++    return load_small_matrix()
++
++
+ def test_no_quit_at_t0():
+     assert not boredom_quit([], 1, CATS, 5, 0, "intended")
+ 
+ 
+ def test_quit_needs_more_than_threshold_items_sharing_a_category():
+-    # category 0 appears in one window item -> count 1, not > 1
+     assert not boredom_quit([1], 2, CATS, 5, 1, "intended")
+-    # two window items carry category 0 -> count 2 > 1
+     assert boredom_quit([1, 7], 2, CATS, 5, 1, "intended")
+-    # threshold 0: any shared category quits
+     assert boredom_quit([1], 2, CATS, 5, 0, "intended")
+ 
+ 
+ def test_window_only_looks_back_N_items():
+-    seq = [1, 7, 3, 5, 6]          # category 0 in items at t=0,1
++    seq = [1, 7, 3, 5, 6]
+     assert boredom_quit(seq, 2, CATS, 5, 1, "intended")
+-    assert not boredom_quit(seq, 2, CATS, 3, 1, "intended")  # window = [3,5,6]
++    assert not boredom_quit(seq, 2, CATS, 3, 1, "intended")
+ 
+ 
+ def test_easyrl4rec_slice_drops_early_items_for_t_between_N_over_2_and_N():
+-    # N=5, t=4: seq[-1:4] = [seq[3]] in EasyRL4Rec, versus seq[0:4] intended
+     seq = [1, 7, 3, 6]
+     assert boredom_quit(seq, 2, CATS, 5, 1, "intended")
+     assert not boredom_quit(seq, 2, CATS, 5, 1, "easyrl4rec_slice")
+-    # t = N: both windows are seq[0:N]
+     seq5 = [1, 7, 3, 6, 8]
+     assert boredom_quit(seq5, 2, CATS, 5, 1, "intended") == boredom_quit(seq5, 2, CATS, 5, 1, "easyrl4rec_slice")
+ 
+ 
+-def test_config_is_read_from_toml():
++def test_config_and_quit_profiles():
+     c = EnvConfig.from_toml()
+-    assert (c.quit_window, c.quit_threshold, c.max_turn, c.window_mode) == (9, 1, 30, "intended")
+-
+-
+-def test_repeat_is_forbidden_and_closed_session_rejects_steps(env):
+-    user = env.users[0]
+-    env.reset(user)
+-    v = env.catalog[0]
+-    env.step(v)
++    assert (c.quit_profile, c.quit_window, c.quit_threshold, c.max_turn, c.window_mode, c.reward) == \
++        ("primary", 9, 1, 30, "intended", "duration_pct")
++    assert (EnvConfig.from_toml(quit_profile="looser").quit_threshold,
++            EnvConfig.from_toml(quit_profile="tighter").quit_threshold) == (2, 0)
++    with pytest.raises(ValueError):
++        EnvConfig.from_toml(reward="watch_time")
++
++
++def test_reset_reports_exactly_the_unrecorded_pairs(raw_env, small):
++    recorded = small.groupby("user_id").video_id.apply(set)
++    for user in raw_env.users[:50]:
++        excluded = raw_env.reset(user)["excluded"]
++        assert excluded == frozenset(raw_env.catalog) - recorded[user]
++
++
++def test_unrecorded_pair_is_rejected_without_ending_the_session(raw_env):
++    user = next(u for u in raw_env.users if raw_env.reset(u)["excluded"])
++    excluded = raw_env.reset(user)["excluded"]
++    with pytest.raises(UnavailableActionError):
++        raw_env.step(next(iter(excluded)))
++    ok = next(v for v in raw_env.catalog if v not in excluded)
++    assert raw_env.step(ok).t == 0          # the rejected call did not consume a step
++
++
++def test_repeat_is_forbidden_and_closed_session_rejects_steps(raw_env):
++    user = raw_env.users[0]
++    excluded = raw_env.reset(user)["excluded"]
++    avail = [v for v in raw_env.catalog if v not in excluded]
++    raw_env.step(avail[0])
+     with pytest.raises(RepeatRecommendationError):
+-        env.step(v)
+-    env.reset(user)
+-    env.step(v)                     # a new session may show it again
+-    for w in env.catalog[1:]:
+-        if env.step(w).done:
++        raw_env.step(avail[0])
++    raw_env.reset(user)
++    raw_env.step(avail[0])
++    for w in avail[1:]:
++        if raw_env.step(w).done:
+             break
+     with pytest.raises(SessionClosedError):
+-        env.step(env.catalog[-1])
++        raw_env.step(avail[-1])
+ 
+ 
+-def test_rewards_equal_recorded_watch_ratio_and_quit_step_is_paid(env):
+-    small = load_small_matrix()
++def test_raw_rewards_equal_recorded_watch_ratio_and_quit_step_is_paid(raw_env, small):
+     rows = small.sample(200, random_state=0)
+     for u, v, wr in zip(rows.user_id, rows.video_id, rows.watch_ratio):
+-        env.reset(int(u))
+-        r = env.step(int(v))
+-        assert r.reward == wr and r.observed
+-    # find a session that quits by boredom and check its last reward is still the recorded value
++        raw_env.reset(int(u))
++        assert raw_env.step(int(v)).reward == wr
+     lookup = dict(zip(zip(small.user_id, small.video_id), small.watch_ratio))
+-    user = env.users[0]
+-    env.reset(user)
+-    for v in env.catalog:
+-        r = env.step(v)
++    user = raw_env.users[0]
++    excluded = raw_env.reset(user)["excluded"]
++    for v in raw_env.catalog:
++        if v in excluded:
++            continue
++        r = raw_env.step(v)
+         if r.done:
+-            assert r.quit_reason == "boredom"
+-            assert r.reward == lookup.get((user, v), 0.0)
++            assert r.quit_reason == "boredom" and r.reward == lookup[(user, v)]
+             break
+ 
+ 
+-def test_unrecorded_pair_returns_configured_reward(env):
+-    small = load_small_matrix()
+-    seen = set(zip(small.user_id.tolist(), small.video_id.tolist()))
+-    user = env.users[0]
+-    missing = next(v for v in env.catalog if (user, v) not in seen)
+-    env.reset(user)
+-    r = env.step(missing)
+-    assert not r.observed and r.reward == env.config.missing_pair_reward
++def test_reward_switch(small):
++    from kuairec_eval import labels
++    rows = small.sample(100, random_state=3)
++    envs = {name: KuaiEnv(EnvConfig.from_toml(reward=name)) for name in ("capped5", "duration_pct")}
++    k = EnvConfig.from_toml().duration_buckets
++    pct = labels.duration_buckets(k).percentile(rows.video_id.to_numpy(), rows.play_duration.to_numpy())
++    for (u, v, wr), p in zip(zip(rows.user_id, rows.video_id, rows.watch_ratio), pct):
++        for name, e in envs.items():
++            e.reset(int(u))
++            got = e.step(int(v)).reward
++            assert got == (min(wr, 5.0) if name == "capped5" else p)
+ 
+ 
+-def test_session_never_exceeds_max_turn(env):
+-    cats = env.categories
+-    user = env.users[1]
+-    env.reset(user)
++def test_session_never_exceeds_max_turn(raw_env):
++    cats = raw_env.categories
++    user = raw_env.users[1]
++    excluded = raw_env.reset(user)["excluded"]
+     hist, n = [], 0
+     rng = np.random.default_rng(0)
+-    for v in rng.permutation(np.asarray(env.catalog)).tolist():
+-        recent = set().union(*hist[-env.config.quit_window:]) if hist else set()
+-        if recent & set(cats[v]):
++    for v in rng.permutation(np.asarray(raw_env.catalog)).tolist():
++        recent = set().union(*hist[-raw_env.config.quit_window:]) if hist else set()
++        if v in excluded or recent & set(cats[v]):
+             continue
+-        r = env.step(v)
++        r = raw_env.step(v)
+         hist.append(set(cats[v]))
+         n += 1
+         if r.done:
+             break
+-    assert n == env.config.max_turn and r.quit_reason == "max_turn"
++    assert n == raw_env.config.max_turn and r.quit_reason == "max_turn"
+diff --git a/tests/test_frozen.py b/tests/test_frozen.py
+index e7806b7..b2ed310 100644
+--- a/tests/test_frozen.py
++++ b/tests/test_frozen.py
+@@ -31,8 +31,24 @@ def test_changed_data_fails(tmp_path):
+     fake_data = tmp_path / "data"
+     fake_data.mkdir()
+     for rel in _integrity.FROZEN_DATA:
+-        shutil.copy2(data_dir() / rel, fake_data / rel)
++        if rel == "item_categories.csv":
++            shutil.copy2(data_dir() / rel, fake_data / rel)
++        else:
++            (fake_data / rel).symlink_to(data_dir() / rel)
+     with open(fake_data / "item_categories.csv", "a") as f:
+         f.write("99999,[1]\n")
+     with pytest.raises(_integrity.FrozenEvaluatorError, match="item_categories.csv"):
+         _integrity.verify(REPO_ROOT, fake_data, _integrity.MANIFEST_PATH)
++
++
++def test_unlisted_module_inside_package_fails(tmp_path):
++    for rel in _integrity.FROZEN_CODE:
++        dst = tmp_path / rel
++        dst.parent.mkdir(parents=True, exist_ok=True)
++        shutil.copy2(REPO_ROOT / rel, dst)
++    manifest = tmp_path / "manifest.json"
++    manifest.write_text(_integrity.MANIFEST_PATH.read_text())
++    _integrity.verify(tmp_path, data_dir(), manifest)
++    (tmp_path / "kuairec_eval" / "sneaky.py").write_text("REWARD_SCALE = 2\n")
++    with pytest.raises(_integrity.FrozenEvaluatorError, match="sneaky.py"):
++        _integrity.verify(tmp_path, data_dir(), manifest)
+diff --git a/tests/test_harness_v1.py b/tests/test_harness_v1.py
+new file mode 100644
+index 0000000..8c991eb
+--- /dev/null
++++ b/tests/test_harness_v1.py
+@@ -0,0 +1,121 @@
++"""v1 harness protocol, paired comparisons, reference policies and oracle ceilings."""
++import numpy as np
++import pytest
++
++from kuairec_eval import harness, labels, partitions
++from kuairec_eval.diagnostics import oracles
++from kuairec_eval.env import EnvConfig, KuaiEnv
++from kuairec_eval.rewards import reward_matrix
++from policies.baselines import GlobalPopularity, UniformRandom
++from policies.reference import BigMeanLabel, CategoryRotation, ShortestFirst
++
++
++def test_harness_refuses_the_easyrl4rec_slice():
++    slice_env = KuaiEnv(EnvConfig.from_toml(window_mode="easyrl4rec_slice"))
++    with pytest.raises(ValueError, match="intended"):
++        harness.run(UniformRandom, "search", seeds=[0], env=slice_env)
++
++
++def test_policies_must_declare_stochastic(env):
++    class Undeclared(UniformRandom):
++        stochastic = None
++    with pytest.raises(TypeError):
++        harness.run(Undeclared, "search", seeds=[0], env=env)
++
++
++def test_deterministic_declaration_is_checked(env):
++    class LearnsAcrossUsers:
++        """No internal randomness, but carries state across users, so user order matters."""
++        stochastic = False
++
++        def __init__(self, context, seed):
++            self._catalog, self._offset = list(context.catalog), 0
++
++        def begin_session(self, user, excluded):
++            self._queue = [v for v in self._catalog[self._offset:] + self._catalog[:self._offset] if v not in excluded]
++            self._offset = (self._offset + 7) % len(self._catalog)
++
++        def act(self):
++            return self._queue.pop(0)
++
++        def observe(self, video, result):
++            pass
++    with pytest.raises(ValueError, match="declare stochastic=True"):
++        harness.run(LearnsAcrossUsers, "search", env=env)
++
++
++def test_seed_intervals_only_for_stochastic_policies(env):
++    r = harness.run(UniformRandom, "search", seeds=[0, 1], env=env)
++    p = harness.run(GlobalPopularity, "search", seeds=[0, 1], env=env)
++    assert r["stochastic"] and r["seeds"] == [0, 1] and r["summary"]["cum_reward"]["ci_seeds"] is not None
++    assert not p["stochastic"] and p["seeds"] == [0] and p["summary"]["cum_reward"]["ci_seeds"] is None
++    assert p["determinism_check_seed"] == 1
++
++
++def test_deterministic_policies_give_identical_per_user_values_for_any_seed(env):
++    for factory in (GlobalPopularity, ShortestFirst, BigMeanLabel, lambda c, s: CategoryRotation(c, s, "shortest")):
++        a = harness.run(factory, "search", seeds=[0], env=env)
++        b = harness.run(factory, "search", seeds=[7], env=env)
++        assert a["per_user"] == b["per_user"]
++
++
++def test_per_user_values_reconcile_with_summary(env):
++    r = harness.run(UniformRandom, "search", seeds=[0, 1], env=env)
++    assert np.isclose(np.mean(r["per_user"]["cum_reward"]), r["summary"]["cum_reward"]["mean"])
++
++
++def test_compare_is_paired_and_deterministic(env):
++    a = harness.run(UniformRandom, "search", seeds=[0, 1], env=env)
++    same = harness.compare(a, a)
++    assert same["mean"] == 0 and same["ci"] == [0.0, 0.0]
++    b = harness.run(GlobalPopularity, "search", env=env)
++    assert harness.compare(a, b) == harness.compare(a, b)
++    shadow = harness.run(UniformRandom, "shadow", seeds=[0], env=env)
++    with pytest.raises(ValueError):
++        harness.compare(a, shadow)
++
++
++@pytest.mark.parametrize("pick", ["random", "shortest", "longest"])
++def test_rotation_never_triggers_under_any_profile(pick):
++    for profile in ("primary", "looser", "tighter"):
++        e = KuaiEnv(EnvConfig.from_toml(quit_profile=profile))
++        r = harness.run(lambda c, s: CategoryRotation(c, s, pick), "search", seeds=[0], env=e)
++        assert r["summary"]["boredom_quit_rate"]["mean"] == 0.0
++        assert r["summary"]["session_length"]["mean"] == e.config.max_turn
++
++
++def test_policies_stay_inside_the_action_set(env):
++    # UnavailableActionError would propagate out of harness.run
++    for factory in (UniformRandom, GlobalPopularity, ShortestFirst, BigMeanLabel,
++                    lambda c, s: CategoryRotation(c, s, "random")):
++        harness.run(factory, "search", seeds=[0], env=env)
++
++
++def test_oracles_never_trigger_and_stay_inside_the_action_set(env):
++    users, videos = np.asarray(env.users), np.asarray(env.catalog)
++    mat = reward_matrix(env.config.reward_config(), users, videos)
++    search = partitions.load("search")
++    for fac in (oracles.personalized_factory(mat, users, videos, env.config),
++                oracles.nonpersonalized_factory(mat, users, videos, env.config, search)):
++        r = harness.run(fac, "search", env=env)
++        assert r["summary"]["boredom_quit_rate"]["mean"] == 0.0
++        assert r["summary"]["session_length"]["mean"] == env.config.max_turn
++
++
++def test_personalized_first_pick_is_the_users_best_available_video(env):
++    users, videos = np.asarray(env.users), np.asarray(env.catalog)
++    mat = reward_matrix(env.config.reward_config(), users, videos)
++    ctx = harness.context_for(env)
++    o = oracles.personalized_factory(mat, users, videos, env.config)(ctx, 0)
++    user = partitions.load("search")[0]
++    row = mat[list(users).index(user)]
++    o.begin_session(user, env.reset(user)["excluded"])
++    assert row[list(videos).index(o.act())] == np.nanmax(row)
++
++
++def test_duration_percentile_is_a_centred_midrank():
++    b = labels.duration_buckets(EnvConfig.from_toml().duration_buckets)
++    ref = b.reference[0]
++    lo, hi = np.searchsorted(ref, ref, side="left"), np.searchsorted(ref, ref, side="right")
++    mid = (lo + hi) / (2 * len(ref))
++    assert mid.min() >= 0 and mid.max() <= 1 and abs(mid.mean() - 0.5) < 1e-9
+diff --git a/tests/test_leakage.py b/tests/test_leakage.py
+index f9b90ef..62d1bf6 100644
+--- a/tests/test_leakage.py
++++ b/tests/test_leakage.py
+@@ -25,9 +25,11 @@ def _walk(obj, seen, depth=0):
+ 
+ 
+ def test_env_attributes_hold_no_reward_data(env):
+-    for o in _walk(vars(env), set()):
++    config_floats = {v for v in vars(env.config).values() if isinstance(v, float)}
++    for o in _walk({k: v for k, v in vars(env).items() if k != "config"}, set()):
+         assert not isinstance(o, (np.ndarray, pd.DataFrame, pd.Series)), type(o)
+-        assert not isinstance(o, float) or o == env.config.missing_pair_reward
++        assert not isinstance(o, float), o
++    assert config_floats == {env.config.reward_cap}
+ 
+ 
+ def test_public_surface_has_no_reward_accessor(env):
+@@ -38,10 +40,11 @@ def test_public_surface_has_no_reward_accessor(env):
+ 
+ def test_reset_and_step_reveal_only_the_requested_pair(env):
+     obs = env.reset(env.users[0])
+-    assert obs == {"user": env.users[0], "t": 0}
+-    r = env.step(env.catalog[0])
++    assert set(obs) == {"user", "t", "excluded"} and obs["user"] == env.users[0] and obs["t"] == 0
++    assert all(isinstance(v, int) for v in obs["excluded"])
++    r = env.step(next(v for v in env.catalog if v not in obs["excluded"]))
+     assert isinstance(r, StepResult)
+-    assert set(vars(r)) == {"reward", "done", "observed", "quit_reason", "t"}
++    assert set(vars(r)) == {"reward", "done", "quit_reason", "t"}
+     assert isinstance(r.reward, float)
+ 
+ 

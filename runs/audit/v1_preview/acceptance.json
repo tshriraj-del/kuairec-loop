@@ -1,0 +1,89 @@
+{
+  "raw": {
+    "T1_shortest_not_above_random": {
+      "a": "a_shortest_first",
+      "b": "random",
+      "metric": "cum_reward",
+      "mean": 12.814102617998351,
+      "ci": [
+        12.391633998848281,
+        13.252283447951594
+      ],
+      "n_users": 847,
+      "resamples": 10000,
+      "pass": false
+    },
+    "T2_personalized_beats_nonpersonalized": {
+      "a": "oracle_personalized",
+      "b": "oracle_nonpersonalized",
+      "metric": "cum_reward",
+      "mean": 132.84006992504155,
+      "ci": [
+        122.60187721846344,
+        143.3911238814515
+      ],
+      "n_users": 847,
+      "resamples": 10000,
+      "pass": true
+    },
+    "both_pass": false
+  },
+  "capped5": {
+    "T1_shortest_not_above_random": {
+      "a": "a_shortest_first",
+      "b": "random",
+      "metric": "cum_reward",
+      "mean": 11.989054318254967,
+      "ci": [
+        11.74626730327245,
+        12.237460053639731
+      ],
+      "n_users": 847,
+      "resamples": 10000,
+      "pass": false
+    },
+    "T2_personalized_beats_nonpersonalized": {
+      "a": "oracle_personalized",
+      "b": "oracle_nonpersonalized",
+      "metric": "cum_reward",
+      "mean": 46.44048148789191,
+      "ci": [
+        44.69044291563897,
+        48.16670348158877
+      ],
+      "n_users": 847,
+      "resamples": 10000,
+      "pass": true
+    },
+    "both_pass": false
+  },
+  "duration_pct": {
+    "T1_shortest_not_above_random": {
+      "a": "a_shortest_first",
+      "b": "random",
+      "metric": "cum_reward",
+      "mean": -0.21784672531915356,
+      "ci": [
+        -0.2814081211485143,
+        -0.1523639344559254
+      ],
+      "n_users": 847,
+      "resamples": 10000,
+      "pass": true
+    },
+    "T2_personalized_beats_nonpersonalized": {
+      "a": "oracle_personalized",
+      "b": "oracle_nonpersonalized",
+      "metric": "cum_reward",
+      "mean": 11.345811058905937,
+      "ci": [
+        11.146159692815536,
+        11.545264237688873
+      ],
+      "n_users": 847,
+      "resamples": 10000,
+      "pass": true
+    },
+    "both_pass": true
+  }
+}
