@@ -7,6 +7,10 @@ dependencies = ["numpy>=2.0", "pandas>=2.2", "scipy>=1.13"]
 
 [dependency-groups]
 dev = ["pytest>=8"]
+models = [
+    "lightgbm==4.7.0",
+    "sentence-transformers==6.1.0",
+]
 # Only needed by the differential test, which imports EasyRL4Rec's KuaiEnv unmodified.
 reference = ["scikit-learn>=1.5", "gymnasium>=0.29", "tqdm", "logzero"]
 

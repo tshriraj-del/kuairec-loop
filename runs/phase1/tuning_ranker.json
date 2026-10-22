@@ -1,0 +1,256 @@
+{
+  "video_stats_cutoff_date": 20200809,
+  "train_rows": 1265410,
+  "train_groups": 5680,
+  "val_rows": 1089266,
+  "val_groups": 5464,
+  "constant_floor_ndcg_at_10": 0.5417810765481444,
+  "variants": {
+    "no_duration": {
+      "n_features": 92,
+      "selected_num_leaves": 63,
+      "trials": [
+        {
+          "num_leaves": 31,
+          "best_iteration": 169,
+          "lgb_val_ndcg_at_10": 0.42928190055938087,
+          "ndcg_at_10": 0.5750243229819318,
+          "seconds": 17.6
+        },
+        {
+          "num_leaves": 63,
+          "best_iteration": 90,
+          "lgb_val_ndcg_at_10": 0.43161790510524445,
+          "ndcg_at_10": 0.5771511788769292,
+          "seconds": 15.1
+        }
+      ],
+      "top_gain_share": [
+        [
+          "aff_support_share",
+          0.12373812824703753
+        ],
+        [
+          "video_prior_mean",
+          0.10374022726875402
+        ],
+        [
+          "cat_prior",
+          0.08785927591728296
+        ],
+        [
+          "ease_rank",
+          0.05677543698238138
+        ],
+        [
+          "hist_mean_label",
+          0.0538544912253024
+        ],
+        [
+          "cat_first_level",
+          0.04642674616655493
+        ],
+        [
+          "aff_mean",
+          0.04404933979544287
+        ],
+        [
+          "u_onehot_feat8",
+          0.036455640947954525
+        ],
+        [
+          "u_onehot_feat3",
+          0.03148827877775442
+        ],
+        [
+          "u_follow_user_num",
+          0.029902553460033645
+        ],
+        [
+          "aff_max",
+          0.028220801467346797
+        ],
+        [
+          "knn_rank",
+          0.02712248180926437
+        ],
+        [
+          "u_register_days",
+          0.026395297544036397
+        ],
+        [
+          "video_prior_n_rank",
+          0.017466572798794093
+        ],
+        [
+          "u_onehot_feat7",
+          0.016033867531390047
+        ]
+      ]
+    },
+    "duration": {
+      "n_features": 100,
+      "selected_num_leaves": 63,
+      "trials": [
+        {
+          "num_leaves": 31,
+          "best_iteration": 107,
+          "lgb_val_ndcg_at_10": 0.4432580541183836,
+          "ndcg_at_10": 0.5829263281843409,
+          "seconds": 14.9
+        },
+        {
+          "num_leaves": 63,
+          "best_iteration": 165,
+          "lgb_val_ndcg_at_10": 0.44557928998802465,
+          "ndcg_at_10": 0.5858281267149279,
+          "seconds": 20.5
+        }
+      ],
+      "top_gain_share": [
+        [
+          "log_duration",
+          0.11835787069784734
+        ],
+        [
+          "aff_support_share",
+          0.06431282930253675
+        ],
+        [
+          "hist_mean_label",
+          0.05935456547901165
+        ],
+        [
+          "duration_bucket",
+          0.050855074955747995
+        ],
+        [
+          "ease_rank",
+          0.04916859664669043
+        ],
+        [
+          "video_prior_mean",
+          0.04148161011034763
+        ],
+        [
+          "u_follow_user_num",
+          0.039243734404244876
+        ],
+        [
+          "u_onehot_feat8",
+          0.03742170070379771
+        ],
+        [
+          "u_onehot_feat3",
+          0.033133021771038176
+        ],
+        [
+          "cat_first_level",
+          0.032203982917818355
+        ],
+        [
+          "u_register_days",
+          0.03094547113376311
+        ],
+        [
+          "knn_rank",
+          0.029655105586070388
+        ],
+        [
+          "cat_prior",
+          0.029439985110417115
+        ],
+        [
+          "aff_mean",
+          0.028038857843658484
+        ],
+        [
+          "perplay_short_time_play_cnt",
+          0.025819264580671925
+        ]
+      ]
+    },
+    "text": {
+      "n_features": 119,
+      "selected_num_leaves": 31,
+      "trials": [
+        {
+          "num_leaves": 31,
+          "best_iteration": 86,
+          "lgb_val_ndcg_at_10": 0.44432045014677746,
+          "ndcg_at_10": 0.5838953107762473,
+          "seconds": 15.8
+        },
+        {
+          "num_leaves": 63,
+          "best_iteration": 97,
+          "lgb_val_ndcg_at_10": 0.44163339573746535,
+          "ndcg_at_10": 0.5810668753801147,
+          "seconds": 18.7
+        }
+      ],
+      "top_gain_share": [
+        [
+          "log_duration",
+          0.10325610810704448
+        ],
+        [
+          "aff_support_share",
+          0.09224700387080331
+        ],
+        [
+          "duration_bucket",
+          0.08306153293048416
+        ],
+        [
+          "hist_mean_label",
+          0.044701675402289386
+        ],
+        [
+          "ease_rank",
+          0.043371583888078144
+        ],
+        [
+          "text_pc5",
+          0.03907684634700699
+        ],
+        [
+          "perplay_valid_play_cnt",
+          0.03682020171211016
+        ],
+        [
+          "text_pc13",
+          0.03606226628662375
+        ],
+        [
+          "cos_mean",
+          0.03063316588628959
+        ],
+        [
+          "perplay_complete_play_cnt",
+          0.02826772802462463
+        ],
+        [
+          "perplay_long_time_play_cnt",
+          0.028191657725276775
+        ],
+        [
+          "perplay_short_time_play_cnt",
+          0.02709037509661014
+        ],
+        [
+          "video_prior_mean",
+          0.026223164838620812
+        ],
+        [
+          "u_follow_user_num",
+          0.02341687511493876
+        ],
+        [
+          "cos_taste",
+          0.01875797970086269
+        ]
+      ]
+    }
+  }
+}

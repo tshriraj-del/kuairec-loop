@@ -1,0 +1,178 @@
+{
+  "declared_at": "2026-10-22T16:12:24.930509+00:00",
+  "manifest_digest16": "dbd9cc3dc5d4cc33",
+  "rules": {
+    "stronger_duration_probe": "the higher search cumulative reward among shortest_first, longest_first, rotation_shortest, rotation_longest",
+    "best_scorer": "the highest search cumulative reward among the six scorers",
+    "shadow": "each shadow row runs once; exactly one scorer runs on shadow",
+    "seeds": "harness rule: stochastic rows seeds 0-9, deterministic rows seed 0 plus the check on seed 1"
+  },
+  "runs": [
+    {
+      "name": "random",
+      "partition": "search",
+      "config_hash": "56e2a377ee932c8c"
+    },
+    {
+      "name": "rotation_random",
+      "partition": "search",
+      "config_hash": "432cd1ed12c6dbeb"
+    },
+    {
+      "name": "shortest_first",
+      "partition": "search",
+      "config_hash": "3e94d8fdc50b15ae"
+    },
+    {
+      "name": "longest_first",
+      "partition": "search",
+      "config_hash": "71b14d5ad2e03f8a"
+    },
+    {
+      "name": "rotation_shortest",
+      "partition": "search",
+      "config_hash": "fb8d550dccece143"
+    },
+    {
+      "name": "rotation_longest",
+      "partition": "search",
+      "config_hash": "06513d1a3b842872"
+    },
+    {
+      "name": "oracle_affinity_strict",
+      "partition": "search",
+      "config_hash": "540ad269dce6d294"
+    },
+    {
+      "name": "oracle_affinity_free",
+      "partition": "search",
+      "config_hash": "3e7fd20387432797"
+    },
+    {
+      "name": "oracle_nonpersonalized",
+      "partition": "search",
+      "config_hash": "b94992a711819ff4"
+    },
+    {
+      "name": "oracle_personalized",
+      "partition": "search",
+      "config_hash": "22d688aa60764657"
+    },
+    {
+      "name": "random",
+      "partition": "shadow",
+      "config_hash": "56e2a377ee932c8c"
+    },
+    {
+      "name": "rotation_random",
+      "partition": "shadow",
+      "config_hash": "432cd1ed12c6dbeb"
+    },
+    {
+      "name": "shortest_first",
+      "partition": "shadow",
+      "config_hash": "3e94d8fdc50b15ae"
+    },
+    {
+      "name": "longest_first",
+      "partition": "shadow",
+      "config_hash": "71b14d5ad2e03f8a"
+    },
+    {
+      "name": "rotation_shortest",
+      "partition": "shadow",
+      "config_hash": "fb8d550dccece143"
+    },
+    {
+      "name": "rotation_longest",
+      "partition": "shadow",
+      "config_hash": "06513d1a3b842872"
+    },
+    {
+      "name": "oracle_affinity_strict",
+      "partition": "shadow",
+      "config_hash": "540ad269dce6d294"
+    },
+    {
+      "name": "oracle_affinity_free",
+      "partition": "shadow",
+      "config_hash": "3e7fd20387432797"
+    },
+    {
+      "name": "oracle_nonpersonalized",
+      "partition": "shadow",
+      "config_hash": "b94992a711819ff4"
+    },
+    {
+      "name": "oracle_personalized",
+      "partition": "shadow",
+      "config_hash": "22d688aa60764657"
+    },
+    {
+      "name": "affinity",
+      "partition": "search",
+      "config_hash": "f2ee2609fb117a9a"
+    },
+    {
+      "name": "affinity",
+      "partition": "shadow",
+      "config_hash": "f2ee2609fb117a9a",
+      "condition": "only if it is the best scorer on search; one scorer on shadow in total"
+    },
+    {
+      "name": "item_knn",
+      "partition": "search",
+      "config_hash": "40dac080e47db278"
+    },
+    {
+      "name": "item_knn",
+      "partition": "shadow",
+      "config_hash": "40dac080e47db278",
+      "condition": "only if it is the best scorer on search; one scorer on shadow in total"
+    },
+    {
+      "name": "ease",
+      "partition": "search",
+      "config_hash": "a1768df4229a2883"
+    },
+    {
+      "name": "ease",
+      "partition": "shadow",
+      "config_hash": "a1768df4229a2883",
+      "condition": "only if it is the best scorer on search; one scorer on shadow in total"
+    },
+    {
+      "name": "ranker_no_duration",
+      "partition": "search",
+      "config_hash": "1866db1527d7cb89"
+    },
+    {
+      "name": "ranker_no_duration",
+      "partition": "shadow",
+      "config_hash": "1866db1527d7cb89",
+      "condition": "only if it is the best scorer on search; one scorer on shadow in total"
+    },
+    {
+      "name": "ranker_duration",
+      "partition": "search",
+      "config_hash": "111e61c441b7d2d5"
+    },
+    {
+      "name": "ranker_duration",
+      "partition": "shadow",
+      "config_hash": "111e61c441b7d2d5",
+      "condition": "only if it is the best scorer on search; one scorer on shadow in total"
+    },
+    {
+      "name": "ranker_text",
+      "partition": "search",
+      "config_hash": "aa53047178a3e1c6"
+    },
+    {
+      "name": "ranker_text",
+      "partition": "shadow",
+      "config_hash": "aa53047178a3e1c6",
+      "condition": "only if it is the best scorer on search; one scorer on shadow in total"
+    }
+  ]
+}

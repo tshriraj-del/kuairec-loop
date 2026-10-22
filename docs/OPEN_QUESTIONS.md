@@ -1,5 +1,17 @@
 # Open questions
 
+## P. Phase 1, the base recommender (2026-10-22): open
+
+Figures from `docs/PHASE1.md` (generated) and the ADRs cited.
+
+- **P1. Two selections sit on the edge of the declared grid.** item-kNN chose k = 400 and EASE chose λ = 10,000, the largest values tried, and both validation curves were still rising (ADR-0032, ADR-0033). Widening the grid needs a newly declared environment grid. Is that worth doing, given P2?
+- **P2. The big-matrix validation ranked the models backwards.** On the brief's time-split validation the three ranker variants (NDCG@10 0.577 to 0.586) beat EASE (0.554). In the environment, EASE beats the best ranker by 0.393 [0.260, 0.531] per session. The full-catalog offline check on search (item 7) agreed with the environment: EASE 0.598, best ranker 0.586. Ranking a user's own exposures does not predict choosing from the whole catalog. Should later tuning use the full-catalog check on search, which is development data, instead of the big-matrix split?
+- **P3. Duration features hurt.** Allowing duration moves the ranker to short videos (mean catalog duration percentile 0.179, median 5.7 s, against the catalog's 0.500 and 9.6 s) and costs 0.387 [0.265, 0.510] per session. Big-matrix exposures reward short videos relative to their bucket. The forced-exposure reward does not, and even leans long (ADR-0016). Should Phase 2 drop duration from the ranker's inputs?
+- **P4. Caption text adds nothing detectable** on top of duration: +0.063 [-0.042, +0.167] per session. Keep it or drop it?
+- **P5. The non-personalized oracle is in-sample on each partition.** EASE beats it on search (+0.214 [0.064, 0.369]) but not on shadow (-0.094 [-0.345, +0.158]). An out-of-sample reference, common values chosen on search and applied to shadow, would separate the oracle's in-sample advantage from personalization. Shadow has now been used, so this would need a new partition plan.
+- **P6. Gap captured is about zero.** The best public-data scorer captures -0.9% [-3.2%, +1.4%] of the personalization gap on shadow. Public data gets to the non-personalized ceiling and no further. The remaining 11 points of reward per session are preferences that a user's big-matrix history on non-catalog videos does not reveal. The obvious next source is in-session feedback (Phase 2). Is that the intended Phase 2 scope?
+- **P7. Category affinity does not transfer.** Scorer (a) gets -5.1% [-11.8%, +1.5%] of the category-affinity oracle's lift and ties rotation-random. The oracle knows each user's category means under forced exposure. Big-matrix category means from non-catalog videos do not predict them. Worth a direct measurement in Phase 2: the rank correlation of the two affinity vectors per user.
+
 ## D. For Phase 2
 
 - **D1. What does a policy tuned to the primary setting lose under the tighter setting?** **Measured with the oracle (2026-10-06).** The free category-affinity oracle built for primary, run under tighter, loses 15.477 [15.327, 15.627] per session against the same oracle built for tighter. That is 140.0% of the tighter personalization gap. It ends every session by boredom, after 2.89 steps on average, and scores 14.013 below the full-cycle baseline (ADR-0028; `docs/AUDIT.md` section 3.1; `scripts/audit_diversity_level.py`). Phase 2 should repeat the measurement with learned policies.

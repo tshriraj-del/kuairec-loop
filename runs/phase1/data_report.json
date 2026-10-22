@@ -1,0 +1,56 @@
+{
+  "big_rows": 12530806,
+  "rows_label_finite": 12530806,
+  "rows_without_timestamp": 0,
+  "rows_dropped_unusable": 0,
+  "pairs": 10300969,
+  "repeat_view_rows_dropped": 2229837,
+  "label_coverage_of_usable_rows": 1.0,
+  "time": {
+    "first_view_min": "2020-06-23 00:34 UTC",
+    "fit_end": "2020-08-09 07:24 UTC",
+    "rank_end": "2020-08-29 13:41 UTC",
+    "first_view_max": "2020-09-09 23:32 UTC"
+  },
+  "windows": {
+    "T_fit": {
+      "pairs": 7210678,
+      "catalog_pairs": 5966554
+    },
+    "T_rank": {
+      "pairs": 1545145,
+      "catalog_pairs": 1265446
+    },
+    "T_val": {
+      "pairs": 1545146,
+      "catalog_pairs": 1089501
+    }
+  },
+  "label": {
+    "mean_all_pairs": 0.5038971304893494,
+    "mean_catalog_pairs": 0.505573570728302
+  },
+  "users": {
+    "all": 7176,
+    "with_any_catalog_pair": 5765,
+    "catalog_cold (no catalog pair at all)": 1411,
+    "validation_users (>= min_val_pairs catalog pairs in T_val)": 5464,
+    "validation_targets (their T_val catalog pairs)": 1089266
+  },
+  "history_sizes_non_catalog": {
+    "validation_users_before_T_val": {
+      "n": 5464,
+      "zero": 0,
+      "p25": 159.0,
+      "median": 193.0,
+      "p75": 230.0
+    },
+    "catalog_cold_users_all_time": {
+      "n": 1411,
+      "zero": 0,
+      "p25": 300.0,
+      "median": 348.0,
+      "p75": 399.5
+    }
+  }
+}

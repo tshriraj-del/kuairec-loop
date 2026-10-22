@@ -1,0 +1,44 @@
+constant (no skill): NDCG@10 0.5418 over 5464 users
+affinity  {"shrinkage": 1}                              NDCG@10 0.5421  (2.3s)
+affinity  {"shrinkage": 5}                              NDCG@10 0.5422  (3.3s)
+affinity  {"shrinkage": 20}                             NDCG@10 0.5429  (2.6s)
+affinity  {"shrinkage": 50}                             NDCG@10 0.5419  (2.5s)
+affinity  {"shrinkage": 200}                            NDCG@10 0.5377  (2.6s)
+item_knn  {"value": "binary", "k": 20, "shrink": 10.0}  NDCG@10 0.5445  (49.9s)
+item_knn  {"value": "binary", "k": 100, "shrink": 10.0} NDCG@10 0.5460  (62.9s)
+item_knn  {"value": "binary", "k": 400, "shrink": 10.0} NDCG@10 0.5462  (23.6s)
+item_knn  {"value": "centered", "k": 20, "shrink": 10.0} NDCG@10 0.5522  (51.0s)
+item_knn  {"value": "centered", "k": 100, "shrink": 10.0} NDCG@10 0.5520  (63.1s)
+item_knn  {"value": "centered", "k": 400, "shrink": 10.0} NDCG@10 0.5529  (25.2s)
+ease      {"value": "binary", "l2": 100.0}              NDCG@10 0.5407  (49.2s)
+ease      {"value": "binary", "l2": 500.0}              NDCG@10 0.5417  (49.6s)
+ease      {"value": "binary", "l2": 2000.0}             NDCG@10 0.5431  (48.0s)
+ease      {"value": "binary", "l2": 10000.0}            NDCG@10 0.5460  (50.4s)
+ease      {"value": "centered", "l2": 100.0}            NDCG@10 0.5447  (48.1s)
+ease      {"value": "centered", "l2": 500.0}            NDCG@10 0.5465  (61.3s)
+ease      {"value": "centered", "l2": 2000.0}           NDCG@10 0.5487  (44.2s)
+ease      {"value": "centered", "l2": 10000.0}          NDCG@10 0.5543  (44.5s)
+{
+  "affinity": {
+    "params": {
+      "shrinkage": 20
+    },
+    "ndcg_at_10": 0.5428554941538565
+  },
+  "item_knn": {
+    "params": {
+      "value": "centered",
+      "k": 400,
+      "shrink": 10.0
+    },
+    "ndcg_at_10": 0.5528887560431095
+  },
+  "ease": {
+    "params": {
+      "value": "centered",
+      "l2": 10000.0
+    },
+    "ndcg_at_10": 0.5542973218273133
+  }
+}
+exit=0

@@ -1,0 +1,244 @@
+{
+  "validation_users": 5464,
+  "rows": [
+    {
+      "scorer": "constant",
+      "params": {},
+      "ndcg_at_10": 0.5417810765481444,
+      "users": 5464
+    },
+    {
+      "scorer": "affinity",
+      "params": {
+        "shrinkage": 1
+      },
+      "config_hash": "acc5cc2ea7584be1",
+      "ndcg_at_10": 0.5420839805114019,
+      "users": 5464,
+      "seconds": 2.3
+    },
+    {
+      "scorer": "affinity",
+      "params": {
+        "shrinkage": 5
+      },
+      "config_hash": "ae8c6918b73d5fad",
+      "ndcg_at_10": 0.5422259131259832,
+      "users": 5464,
+      "seconds": 3.3
+    },
+    {
+      "scorer": "affinity",
+      "params": {
+        "shrinkage": 20
+      },
+      "config_hash": "6faa577d41f54040",
+      "ndcg_at_10": 0.5428554941538565,
+      "users": 5464,
+      "seconds": 2.6
+    },
+    {
+      "scorer": "affinity",
+      "params": {
+        "shrinkage": 50
+      },
+      "config_hash": "08b21c428db82cf8",
+      "ndcg_at_10": 0.5418534239475828,
+      "users": 5464,
+      "seconds": 2.5
+    },
+    {
+      "scorer": "affinity",
+      "params": {
+        "shrinkage": 200
+      },
+      "config_hash": "71ea9ab0f3158de5",
+      "ndcg_at_10": 0.5377358871335645,
+      "users": 5464,
+      "seconds": 2.6
+    },
+    {
+      "scorer": "item_knn",
+      "params": {
+        "value": "binary",
+        "k": 20,
+        "shrink": 10.0
+      },
+      "config_hash": "7a90577804692142",
+      "ndcg_at_10": 0.5444932413127938,
+      "users": 5464,
+      "seconds": 49.9
+    },
+    {
+      "scorer": "item_knn",
+      "params": {
+        "value": "binary",
+        "k": 100,
+        "shrink": 10.0
+      },
+      "config_hash": "696eefaef1fc2902",
+      "ndcg_at_10": 0.5460077792448234,
+      "users": 5464,
+      "seconds": 62.9
+    },
+    {
+      "scorer": "item_knn",
+      "params": {
+        "value": "binary",
+        "k": 400,
+        "shrink": 10.0
+      },
+      "config_hash": "143881268de6b8ed",
+      "ndcg_at_10": 0.5462471240879214,
+      "users": 5464,
+      "seconds": 23.6
+    },
+    {
+      "scorer": "item_knn",
+      "params": {
+        "value": "centered",
+        "k": 20,
+        "shrink": 10.0
+      },
+      "config_hash": "cff4bec3cd37fd89",
+      "ndcg_at_10": 0.5521542932130823,
+      "users": 5464,
+      "seconds": 51.0
+    },
+    {
+      "scorer": "item_knn",
+      "params": {
+        "value": "centered",
+        "k": 100,
+        "shrink": 10.0
+      },
+      "config_hash": "8bb71ef5cfdd86d2",
+      "ndcg_at_10": 0.5520455789187143,
+      "users": 5464,
+      "seconds": 63.1
+    },
+    {
+      "scorer": "item_knn",
+      "params": {
+        "value": "centered",
+        "k": 400,
+        "shrink": 10.0
+      },
+      "config_hash": "f252c803cdd5792f",
+      "ndcg_at_10": 0.5528887560431095,
+      "users": 5464,
+      "seconds": 25.2
+    },
+    {
+      "scorer": "ease",
+      "params": {
+        "value": "binary",
+        "l2": 100.0
+      },
+      "config_hash": "bc31abd1bacfd46a",
+      "ndcg_at_10": 0.5407434961961431,
+      "users": 5464,
+      "seconds": 49.2
+    },
+    {
+      "scorer": "ease",
+      "params": {
+        "value": "binary",
+        "l2": 500.0
+      },
+      "config_hash": "fb43486f7cac6d4f",
+      "ndcg_at_10": 0.5417137038094999,
+      "users": 5464,
+      "seconds": 49.6
+    },
+    {
+      "scorer": "ease",
+      "params": {
+        "value": "binary",
+        "l2": 2000.0
+      },
+      "config_hash": "2a4a558753e1a3b9",
+      "ndcg_at_10": 0.5431451859255474,
+      "users": 5464,
+      "seconds": 48.0
+    },
+    {
+      "scorer": "ease",
+      "params": {
+        "value": "binary",
+        "l2": 10000.0
+      },
+      "config_hash": "614a8e4486fe9d44",
+      "ndcg_at_10": 0.5459628490508913,
+      "users": 5464,
+      "seconds": 50.4
+    },
+    {
+      "scorer": "ease",
+      "params": {
+        "value": "centered",
+        "l2": 100.0
+      },
+      "config_hash": "7acfde6e3d431320",
+      "ndcg_at_10": 0.5446584214536991,
+      "users": 5464,
+      "seconds": 48.1
+    },
+    {
+      "scorer": "ease",
+      "params": {
+        "value": "centered",
+        "l2": 500.0
+      },
+      "config_hash": "97b2fb2ac45ec6d7",
+      "ndcg_at_10": 0.546455429232496,
+      "users": 5464,
+      "seconds": 61.3
+    },
+    {
+      "scorer": "ease",
+      "params": {
+        "value": "centered",
+        "l2": 2000.0
+      },
+      "config_hash": "398ddab50202639c",
+      "ndcg_at_10": 0.5487334525791178,
+      "users": 5464,
+      "seconds": 44.2
+    },
+    {
+      "scorer": "ease",
+      "params": {
+        "value": "centered",
+        "l2": 10000.0
+      },
+      "config_hash": "f12bc5de2b161fd6",
+      "ndcg_at_10": 0.5542973218273133,
+      "users": 5464,
+      "seconds": 44.5
+    }
+  ],
+  "selected": {
+    "affinity": {
+      "params": {
+        "shrinkage": 20
+      },
+      "ndcg_at_10": 0.5428554941538565
+    },
+    "item_knn": {
+      "params": {
+        "value": "centered",
+        "k": 400,
+        "shrink": 10.0
+      },
+      "ndcg_at_10": 0.5528887560431095
+    },
+    "ease": {
+      "params": {
+        "value": "centered",
+        "l2": 10000.0
+      },
+      "ndcg_at_10": 0.5542973218273133
+    }
+  }
+}

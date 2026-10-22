@@ -1,0 +1,1003 @@
+{
+  "files_scanned": [
+    "policies/phase1/__init__.py",
+    "policies/phase1/config.py",
+    "policies/phase1/features.py",
+    "policies/phase1/pairs.py",
+    "policies/phase1/ranker.py",
+    "policies/phase1/scorers.py",
+    "policies/phase1/serving.py",
+    "policies/phase1/slate.py",
+    "policies/phase1/validate.py",
+    "scripts/phase1_common.py",
+    "scripts/phase1_data.py",
+    "scripts/phase1_declare.py",
+    "scripts/phase1_embed.py",
+    "scripts/phase1_env.py",
+    "scripts/phase1_external.py",
+    "scripts/phase1_fit.py",
+    "scripts/phase1_offline.py",
+    "scripts/phase1_rank.py",
+    "scripts/phase1_report.py",
+    "scripts/phase1_tune.py"
+  ],
+  "packages": {
+    "argparse": {
+      "version": "Python 3.12.13 stdlib",
+      "licence": "PSF-2.0 (Python standard library)",
+      "calls": {
+        "argparse.ArgumentParser": [
+          "scripts/phase1_env.py"
+        ]
+      }
+    },
+    "ast": {
+      "version": "Python 3.12.13 stdlib",
+      "licence": "PSF-2.0 (Python standard library)",
+      "calls": {
+        "ast.literal_eval": [
+          "scripts/phase1_embed.py"
+        ],
+        "ast.parse": [
+          "scripts/phase1_external.py"
+        ],
+        "ast.walk": [
+          "scripts/phase1_external.py"
+        ]
+      }
+    },
+    "collections": {
+      "version": "Python 3.12.13 stdlib",
+      "licence": "PSF-2.0 (Python standard library)",
+      "calls": {
+        "collections.Counter": [
+          "policies/phase1/slate.py",
+          "scripts/phase1_report.py"
+        ],
+        "collections.defaultdict": [
+          "scripts/phase1_external.py"
+        ]
+      }
+    },
+    "datetime": {
+      "version": "Python 3.12.13 stdlib",
+      "licence": "PSF-2.0 (Python standard library)",
+      "calls": {
+        "datetime.datetime.fromtimestamp": [
+          "scripts/phase1_data.py",
+          "scripts/phase1_rank.py"
+        ],
+        "datetime.datetime.now": [
+          "scripts/phase1_common.py",
+          "scripts/phase1_declare.py",
+          "scripts/phase1_fit.py"
+        ]
+      }
+    },
+    "functools": {
+      "version": "Python 3.12.13 stdlib",
+      "licence": "PSF-2.0 (Python standard library)",
+      "calls": {
+        "functools.lru_cache": [
+          "policies/phase1/serving.py"
+        ]
+      }
+    },
+    "gc": {
+      "version": "Python 3.12.13 stdlib",
+      "licence": "PSF-2.0 (Python standard library)",
+      "calls": {
+        "gc.collect": [
+          "scripts/phase1_fit.py",
+          "scripts/phase1_rank.py",
+          "scripts/phase1_tune.py"
+        ]
+      }
+    },
+    "hashlib": {
+      "version": "Python 3.12.13 stdlib",
+      "licence": "PSF-2.0 (Python standard library)",
+      "calls": {
+        "hashlib.sha256": [
+          "policies/phase1/config.py"
+        ]
+      }
+    },
+    "importlib": {
+      "version": "Python 3.12.13 stdlib",
+      "licence": "PSF-2.0 (Python standard library)",
+      "calls": {
+        "importlib.metadata.version": [
+          "scripts/phase1_external.py"
+        ]
+      }
+    },
+    "itertools": {
+      "version": "Python 3.12.13 stdlib",
+      "licence": "PSF-2.0 (Python standard library)",
+      "calls": {
+        "itertools.chain.from_iterable": [
+          "policies/phase1/slate.py"
+        ],
+        "itertools.product": [
+          "scripts/phase1_tune.py"
+        ]
+      }
+    },
+    "json": {
+      "version": "Python 3.12.13 stdlib",
+      "licence": "PSF-2.0 (Python standard library)",
+      "calls": {
+        "json.dumps": [
+          "policies/phase1/config.py",
+          "scripts/phase1_common.py",
+          "scripts/phase1_data.py",
+          "scripts/phase1_declare.py",
+          "scripts/phase1_embed.py",
+          "scripts/phase1_env.py",
+          "scripts/phase1_external.py",
+          "scripts/phase1_fit.py",
+          "scripts/phase1_offline.py",
+          "scripts/phase1_rank.py",
+          "scripts/phase1_report.py",
+          "scripts/phase1_tune.py"
+        ],
+        "json.loads": [
+          "policies/phase1/serving.py",
+          "scripts/phase1_common.py",
+          "scripts/phase1_env.py",
+          "scripts/phase1_fit.py",
+          "scripts/phase1_rank.py",
+          "scripts/phase1_report.py"
+        ]
+      }
+    },
+    "lightgbm": {
+      "version": "4.7.0",
+      "licence": "MIT",
+      "calls": {
+        "lightgbm.Dataset": [
+          "policies/phase1/ranker.py"
+        ],
+        "lightgbm.early_stopping": [
+          "policies/phase1/ranker.py"
+        ],
+        "lightgbm.record_evaluation": [
+          "policies/phase1/ranker.py"
+        ],
+        "lightgbm.train": [
+          "policies/phase1/ranker.py"
+        ]
+      }
+    },
+    "numpy": {
+      "version": "2.5.3",
+      "licence": "BSD-3-Clause",
+      "calls": {
+        "numpy.abs": [
+          "policies/phase1/features.py",
+          "policies/phase1/scorers.py"
+        ],
+        "numpy.arange": [
+          "policies/phase1/features.py",
+          "policies/phase1/scorers.py",
+          "policies/phase1/validate.py"
+        ],
+        "numpy.argpartition": [
+          "policies/phase1/scorers.py"
+        ],
+        "numpy.array": [
+          "scripts/phase1_common.py",
+          "scripts/phase1_embed.py"
+        ],
+        "numpy.array_equal": [
+          "policies/phase1/serving.py"
+        ],
+        "numpy.asarray": [
+          "policies/phase1/features.py",
+          "policies/phase1/ranker.py",
+          "policies/phase1/scorers.py",
+          "policies/phase1/serving.py",
+          "policies/phase1/slate.py",
+          "policies/phase1/validate.py",
+          "scripts/phase1_common.py",
+          "scripts/phase1_data.py",
+          "scripts/phase1_env.py",
+          "scripts/phase1_fit.py",
+          "scripts/phase1_offline.py",
+          "scripts/phase1_rank.py",
+          "scripts/phase1_tune.py"
+        ],
+        "numpy.bincount": [
+          "policies/phase1/validate.py",
+          "scripts/phase1_data.py",
+          "scripts/phase1_rank.py"
+        ],
+        "numpy.broadcast_to": [
+          "policies/phase1/scorers.py"
+        ],
+        "numpy.concatenate": [
+          "scripts/phase1_common.py",
+          "scripts/phase1_rank.py"
+        ],
+        "numpy.diag": [
+          "policies/phase1/scorers.py"
+        ],
+        "numpy.diag_indices_from": [
+          "policies/phase1/scorers.py"
+        ],
+        "numpy.empty": [
+          "policies/phase1/pairs.py"
+        ],
+        "numpy.errstate": [
+          "policies/phase1/scorers.py"
+        ],
+        "numpy.flatnonzero": [
+          "policies/phase1/validate.py",
+          "scripts/phase1_data.py",
+          "scripts/phase1_embed.py",
+          "scripts/phase1_rank.py"
+        ],
+        "numpy.floor": [
+          "policies/phase1/ranker.py"
+        ],
+        "numpy.full": [
+          "policies/phase1/features.py",
+          "policies/phase1/validate.py"
+        ],
+        "numpy.isfinite": [
+          "policies/phase1/pairs.py"
+        ],
+        "numpy.isin": [
+          "policies/phase1/serving.py",
+          "policies/phase1/validate.py",
+          "scripts/phase1_data.py",
+          "scripts/phase1_rank.py"
+        ],
+        "numpy.isnan": [
+          "scripts/phase1_offline.py"
+        ],
+        "numpy.lexsort": [
+          "policies/phase1/pairs.py",
+          "policies/phase1/scorers.py",
+          "policies/phase1/slate.py",
+          "scripts/phase1_offline.py"
+        ],
+        "numpy.linalg.inv": [
+          "policies/phase1/scorers.py"
+        ],
+        "numpy.linalg.norm": [
+          "policies/phase1/features.py"
+        ],
+        "numpy.linalg.svd": [
+          "policies/phase1/features.py"
+        ],
+        "numpy.load": [
+          "policies/phase1/features.py",
+          "policies/phase1/pairs.py"
+        ],
+        "numpy.log": [
+          "policies/phase1/features.py"
+        ],
+        "numpy.log2": [
+          "policies/phase1/scorers.py"
+        ],
+        "numpy.maximum": [
+          "policies/phase1/scorers.py"
+        ],
+        "numpy.mean": [
+          "policies/phase1/features.py",
+          "policies/phase1/ranker.py",
+          "scripts/phase1_offline.py"
+        ],
+        "numpy.median": [
+          "scripts/phase1_common.py",
+          "scripts/phase1_data.py",
+          "scripts/phase1_embed.py"
+        ],
+        "numpy.minimum": [
+          "policies/phase1/ranker.py"
+        ],
+        "numpy.nan_to_num": [
+          "policies/phase1/scorers.py",
+          "scripts/phase1_offline.py"
+        ],
+        "numpy.nanmean": [
+          "scripts/phase1_offline.py"
+        ],
+        "numpy.ones": [
+          "policies/phase1/scorers.py"
+        ],
+        "numpy.outer": [
+          "policies/phase1/scorers.py"
+        ],
+        "numpy.percentile": [
+          "scripts/phase1_common.py",
+          "scripts/phase1_data.py"
+        ],
+        "numpy.quantile": [
+          "policies/phase1/pairs.py"
+        ],
+        "numpy.random.default_rng": [
+          "scripts/phase1_common.py",
+          "scripts/phase1_offline.py"
+        ],
+        "numpy.repeat": [
+          "policies/phase1/features.py"
+        ],
+        "numpy.savez": [
+          "policies/phase1/features.py",
+          "policies/phase1/pairs.py",
+          "scripts/phase1_embed.py"
+        ],
+        "numpy.searchsorted": [
+          "scripts/phase1_offline.py"
+        ],
+        "numpy.setdiff1d": [
+          "scripts/phase1_data.py"
+        ],
+        "numpy.sort": [
+          "policies/phase1/scorers.py"
+        ],
+        "numpy.sqrt": [
+          "policies/phase1/scorers.py"
+        ],
+        "numpy.take_along_axis": [
+          "policies/phase1/scorers.py"
+        ],
+        "numpy.unique": [
+          "policies/phase1/pairs.py",
+          "scripts/phase1_data.py"
+        ],
+        "numpy.vstack": [
+          "scripts/phase1_rank.py"
+        ],
+        "numpy.where": [
+          "policies/phase1/features.py"
+        ],
+        "numpy.zeros": [
+          "policies/phase1/features.py",
+          "policies/phase1/scorers.py",
+          "scripts/phase1_embed.py",
+          "scripts/phase1_rank.py",
+          "scripts/phase1_tune.py"
+        ]
+      }
+    },
+    "os": {
+      "version": "Python 3.12.13 stdlib",
+      "licence": "PSF-2.0 (Python standard library)",
+      "calls": {
+        "os.environ.setdefault": [
+          "scripts/phase1_embed.py"
+        ]
+      }
+    },
+    "pandas": {
+      "version": "3.0.6",
+      "licence": "BSD-3-Clause",
+      "calls": {
+        "pandas.Categorical": [
+          "policies/phase1/features.py"
+        ],
+        "pandas.DataFrame": [
+          "policies/phase1/features.py"
+        ],
+        "pandas.RangeIndex": [
+          "policies/phase1/features.py"
+        ],
+        "pandas.Series": [
+          "policies/phase1/features.py"
+        ],
+        "pandas.Timedelta": [
+          "policies/phase1/features.py"
+        ],
+        "pandas.Timestamp": [
+          "policies/phase1/features.py"
+        ],
+        "pandas.concat": [
+          "policies/phase1/features.py"
+        ],
+        "pandas.read_csv": [
+          "policies/phase1/pairs.py"
+        ],
+        "pandas.to_datetime": [
+          "policies/phase1/features.py"
+        ]
+      }
+    },
+    "pathlib": {
+      "version": "Python 3.12.13 stdlib",
+      "licence": "PSF-2.0 (Python standard library)",
+      "calls": {
+        "pathlib.Path": [
+          "policies/phase1/config.py",
+          "scripts/phase1_common.py",
+          "scripts/phase1_data.py",
+          "scripts/phase1_declare.py",
+          "scripts/phase1_embed.py",
+          "scripts/phase1_env.py",
+          "scripts/phase1_external.py",
+          "scripts/phase1_fit.py",
+          "scripts/phase1_offline.py",
+          "scripts/phase1_rank.py",
+          "scripts/phase1_report.py",
+          "scripts/phase1_tune.py"
+        ]
+      }
+    },
+    "pickle": {
+      "version": "Python 3.12.13 stdlib",
+      "licence": "PSF-2.0 (Python standard library)",
+      "calls": {
+        "pickle.dump": [
+          "scripts/phase1_fit.py",
+          "scripts/phase1_rank.py"
+        ],
+        "pickle.load": [
+          "policies/phase1/serving.py"
+        ]
+      }
+    },
+    "scipy": {
+      "version": "1.18.1",
+      "licence": "BSD-3-Clause",
+      "calls": {
+        "scipy.sparse.csr_matrix": [
+          "policies/phase1/scorers.py"
+        ],
+        "scipy.stats.rankdata": [
+          "policies/phase1/features.py",
+          "scripts/phase1_common.py"
+        ]
+      }
+    },
+    "sentence_transformers": {
+      "version": "6.1.0",
+      "licence": "Apache-2.0",
+      "calls": {
+        "sentence_transformers.SentenceTransformer": [
+          "scripts/phase1_embed.py"
+        ]
+      }
+    },
+    "shlex": {
+      "version": "Python 3.12.13 stdlib",
+      "licence": "PSF-2.0 (Python standard library)",
+      "calls": {
+        "shlex.quote": [
+          "scripts/phase1_common.py"
+        ]
+      }
+    },
+    "subprocess": {
+      "version": "Python 3.12.13 stdlib",
+      "licence": "PSF-2.0 (Python standard library)",
+      "calls": {
+        "subprocess.run": [
+          "scripts/phase1_common.py"
+        ]
+      }
+    },
+    "sys": {
+      "version": "Python 3.12.13 stdlib",
+      "licence": "PSF-2.0 (Python standard library)",
+      "calls": {
+        "sys.exit": [
+          "scripts/phase1_declare.py"
+        ],
+        "sys.path.insert": [
+          "scripts/phase1_common.py",
+          "scripts/phase1_data.py",
+          "scripts/phase1_declare.py",
+          "scripts/phase1_embed.py",
+          "scripts/phase1_env.py",
+          "scripts/phase1_fit.py",
+          "scripts/phase1_offline.py",
+          "scripts/phase1_rank.py",
+          "scripts/phase1_tune.py"
+        ],
+        "sys.version.split": [
+          "scripts/phase1_external.py"
+        ]
+      }
+    },
+    "time": {
+      "version": "Python 3.12.13 stdlib",
+      "licence": "PSF-2.0 (Python standard library)",
+      "calls": {
+        "time.time": [
+          "scripts/phase1_embed.py",
+          "scripts/phase1_rank.py",
+          "scripts/phase1_tune.py"
+        ]
+      }
+    },
+    "tomllib": {
+      "version": "Python 3.12.13 stdlib",
+      "licence": "PSF-2.0 (Python standard library)",
+      "calls": {
+        "tomllib.load": [
+          "policies/phase1/config.py"
+        ]
+      }
+    }
+  },
+  "unresolved_method_calls": {
+    "act": [
+      "scripts/phase1_common.py:43"
+    ],
+    "add": [
+      "scripts/phase1_external.py:75",
+      "scripts/phase1_external.py:77"
+    ],
+    "add_argument": [
+      "scripts/phase1_env.py:86",
+      "scripts/phase1_env.py:87"
+    ],
+    "any": [
+      "policies/phase1/features.py:137",
+      "scripts/phase1_offline.py:37"
+    ],
+    "append": [
+      "policies/phase1/ranker.py:40",
+      "policies/phase1/slate.py:45",
+      "policies/phase1/slate.py:48",
+      "policies/phase1/validate.py:47",
+      "scripts/phase1_common.py:123",
+      "scripts/phase1_common.py:146",
+      "scripts/phase1_common.py:149",
+      "scripts/phase1_common.py:152",
+      "scripts/phase1_common.py:44",
+      "scripts/phase1_common.py:83",
+      "scripts/phase1_declare.py:33",
+      "scripts/phase1_declare.py:34",
+      "scripts/phase1_embed.py:33",
+      "scripts/phase1_embed.py:35",
+      "scripts/phase1_external.py:104",
+      "scripts/phase1_external.py:49",
+      "scripts/phase1_external.py:99",
+      "scripts/phase1_offline.py:62",
+      "scripts/phase1_offline.py:65",
+      "scripts/phase1_rank.py:44",
+      "scripts/phase1_rank.py:45",
+      "scripts/phase1_rank.py:46",
+      "scripts/phase1_rank.py:47",
+      "scripts/phase1_rank.py:94",
+      "scripts/phase1_tune.py:72"
+    ],
+    "as_posix": [
+      "scripts/phase1_external.py:69",
+      "scripts/phase1_external.py:82"
+    ],
+    "assign": [
+      "policies/phase1/pairs.py:46"
+    ],
+    "astype": [
+      "policies/phase1/features.py:111",
+      "policies/phase1/features.py:112",
+      "policies/phase1/features.py:131",
+      "policies/phase1/features.py:148",
+      "policies/phase1/features.py:221",
+      "policies/phase1/features.py:226",
+      "policies/phase1/features.py:52",
+      "policies/phase1/features.py:79",
+      "policies/phase1/features.py:83",
+      "policies/phase1/features.py:88",
+      "policies/phase1/pairs.py:46",
+      "policies/phase1/pairs.py:49",
+      "policies/phase1/ranker.py:18",
+      "policies/phase1/ranker.py:40",
+      "policies/phase1/scorers.py:111",
+      "policies/phase1/scorers.py:117",
+      "policies/phase1/scorers.py:125",
+      "policies/phase1/scorers.py:28",
+      "policies/phase1/scorers.py:43",
+      "policies/phase1/scorers.py:57",
+      "policies/phase1/scorers.py:76",
+      "policies/phase1/scorers.py:78",
+      "policies/phase1/scorers.py:96",
+      "policies/phase1/scorers.py:97",
+      "policies/phase1/validate.py:47",
+      "scripts/phase1_embed.py:55"
+    ],
+    "begin_session": [
+      "scripts/phase1_common.py:40"
+    ],
+    "bucket_of": [
+      "policies/phase1/features.py:100"
+    ],
+    "duplicated": [
+      "policies/phase1/pairs.py:48"
+    ],
+    "encode": [
+      "policies/phase1/config.py:21",
+      "scripts/phase1_embed.py:55"
+    ],
+    "exists": [
+      "policies/phase1/features.py:95",
+      "scripts/phase1_common.py:56",
+      "scripts/phase1_report.py:19"
+    ],
+    "extend": [
+      "scripts/phase1_embed.py:40"
+    ],
+    "feature_importance": [
+      "scripts/phase1_rank.py:99"
+    ],
+    "fillna": [
+      "policies/phase1/features.py:52"
+    ],
+    "fit": [
+      "scripts/phase1_fit.py:42",
+      "scripts/phase1_rank.py:67",
+      "scripts/phase1_tune.py:68"
+    ],
+    "get": [
+      "policies/phase1/pairs.py:86",
+      "policies/phase1/serving.py:47",
+      "policies/phase1/serving.py:55",
+      "policies/phase1/validate.py:44",
+      "policies/phase1/validate.py:46",
+      "scripts/phase1_common.py:75",
+      "scripts/phase1_common.py:76",
+      "scripts/phase1_common.py:82",
+      "scripts/phase1_env.py:37",
+      "scripts/phase1_external.py:73",
+      "scripts/phase1_external.py:84",
+      "scripts/phase1_external.py:86",
+      "scripts/phase1_rank.py:42",
+      "scripts/phase1_rank.py:43",
+      "scripts/phase1_report.py:130",
+      "scripts/phase1_report.py:157"
+    ],
+    "get_sentence_embedding_dimension": [
+      "scripts/phase1_embed.py:53"
+    ],
+    "glob": [
+      "scripts/phase1_external.py:19",
+      "scripts/phase1_fit.py:52"
+    ],
+    "groupby": [
+      "policies/phase1/features.py:216",
+      "policies/phase1/features.py:60",
+      "policies/phase1/features.py:70",
+      "policies/phase1/pairs.py:49"
+    ],
+    "hexdigest": [
+      "policies/phase1/config.py:21",
+      "policies/phase1/config.py:29"
+    ],
+    "index": [
+      "policies/phase1/serving.py:51",
+      "scripts/phase1_rank.py:87"
+    ],
+    "integers": [
+      "scripts/phase1_common.py:122"
+    ],
+    "isna": [
+      "policies/phase1/pairs.py:45"
+    ],
+    "isoformat": [
+      "scripts/phase1_common.py:87",
+      "scripts/phase1_declare.py:36",
+      "scripts/phase1_fit.py:51"
+    ],
+    "items": [
+      "policies/phase1/scorers.py:22",
+      "scripts/phase1_env.py:68",
+      "scripts/phase1_env.py:95",
+      "scripts/phase1_external.py:101",
+      "scripts/phase1_external.py:109",
+      "scripts/phase1_external.py:79",
+      "scripts/phase1_external.py:83",
+      "scripts/phase1_external.py:87",
+      "scripts/phase1_external.py:88",
+      "scripts/phase1_external.py:98",
+      "scripts/phase1_fit.py:41",
+      "scripts/phase1_fit.py:54",
+      "scripts/phase1_offline.py:59",
+      "scripts/phase1_offline.py:60",
+      "scripts/phase1_offline.py:69",
+      "scripts/phase1_rank.py:105",
+      "scripts/phase1_rank.py:109",
+      "scripts/phase1_report.py:108",
+      "scripts/phase1_report.py:122",
+      "scripts/phase1_report.py:129",
+      "scripts/phase1_report.py:141",
+      "scripts/phase1_report.py:156",
+      "scripts/phase1_report.py:172",
+      "scripts/phase1_tune.py:80"
+    ],
+    "itertuples": [
+      "scripts/phase1_embed.py:49"
+    ],
+    "join": [
+      "policies/phase1/features.py:176",
+      "policies/phase1/features.py:178",
+      "scripts/phase1_common.py:90",
+      "scripts/phase1_embed.py:41",
+      "scripts/phase1_external.py:104",
+      "scripts/phase1_external.py:106",
+      "scripts/phase1_external.py:108",
+      "scripts/phase1_external.py:52",
+      "scripts/phase1_external.py:99",
+      "scripts/phase1_report.py:110",
+      "scripts/phase1_report.py:172",
+      "scripts/phase1_report.py:182"
+    ],
+    "last": [
+      "policies/phase1/features.py:70"
+    ],
+    "max": [
+      "policies/phase1/features.py:196",
+      "policies/phase1/features.py:75",
+      "policies/phase1/scorers.py:110",
+      "policies/phase1/scorers.py:74",
+      "policies/phase1/validate.py:32",
+      "policies/phase1/validate.py:40",
+      "scripts/phase1_data.py:49",
+      "scripts/phase1_data.py:56",
+      "scripts/phase1_data.py:58",
+      "scripts/phase1_data.py:59",
+      "scripts/phase1_rank.py:63"
+    ],
+    "mean": [
+      "policies/phase1/features.py:123",
+      "policies/phase1/features.py:143",
+      "policies/phase1/features.py:218",
+      "policies/phase1/features.py:87",
+      "policies/phase1/pairs.py:54",
+      "policies/phase1/validate.py:49",
+      "scripts/phase1_common.py:104",
+      "scripts/phase1_common.py:105",
+      "scripts/phase1_common.py:123",
+      "scripts/phase1_common.py:126",
+      "scripts/phase1_data.py:52"
+    ],
+    "min": [
+      "scripts/phase1_data.py:48"
+    ],
+    "mkdir": [
+      "scripts/phase1_data.py:38",
+      "scripts/phase1_external.py:107",
+      "scripts/phase1_fit.py:36",
+      "scripts/phase1_rank.py:84",
+      "scripts/phase1_tune.py:56"
+    ],
+    "notna": [
+      "policies/phase1/pairs.py:43"
+    ],
+    "observe": [
+      "scripts/phase1_common.py:48"
+    ],
+    "parse_args": [
+      "scripts/phase1_env.py:88"
+    ],
+    "percentile": [
+      "policies/phase1/pairs.py:42"
+    ],
+    "pop": [
+      "policies/phase1/slate.py:47"
+    ],
+    "predict": [
+      "policies/phase1/serving.py:57",
+      "scripts/phase1_rank.py:92"
+    ],
+    "random": [
+      "scripts/phase1_offline.py:58"
+    ],
+    "ravel": [
+      "policies/phase1/scorers.py:75"
+    ],
+    "read": [
+      "policies/phase1/config.py:27"
+    ],
+    "read_text": [
+      "policies/phase1/serving.py:23",
+      "scripts/phase1_common.py:170",
+      "scripts/phase1_common.py:58",
+      "scripts/phase1_common.py:62",
+      "scripts/phase1_common.py:76",
+      "scripts/phase1_env.py:107",
+      "scripts/phase1_env.py:117",
+      "scripts/phase1_env.py:90",
+      "scripts/phase1_external.py:60",
+      "scripts/phase1_fit.py:39",
+      "scripts/phase1_rank.py:55",
+      "scripts/phase1_report.py:19",
+      "scripts/phase1_report.py:54"
+    ],
+    "reindex": [
+      "policies/phase1/features.py:206",
+      "policies/phase1/features.py:208",
+      "policies/phase1/features.py:219",
+      "policies/phase1/features.py:98"
+    ],
+    "relative_to": [
+      "scripts/phase1_external.py:69",
+      "scripts/phase1_external.py:82"
+    ],
+    "removeprefix": [
+      "policies/phase1/serving.py:48"
+    ],
+    "replace": [
+      "policies/phase1/features.py:66",
+      "policies/phase1/features.py:69",
+      "policies/phase1/features.py:84"
+    ],
+    "resolve": [
+      "policies/phase1/config.py:9",
+      "scripts/phase1_common.py:22",
+      "scripts/phase1_data.py:15",
+      "scripts/phase1_declare.py:17",
+      "scripts/phase1_embed.py:21",
+      "scripts/phase1_env.py:21",
+      "scripts/phase1_external.py:18",
+      "scripts/phase1_fit.py:18",
+      "scripts/phase1_offline.py:21",
+      "scripts/phase1_rank.py:22",
+      "scripts/phase1_report.py:10",
+      "scripts/phase1_tune.py:17"
+    ],
+    "reward_config": [
+      "scripts/phase1_env.py:45",
+      "scripts/phase1_offline.py:48"
+    ],
+    "score": [
+      "policies/phase1/features.py:199",
+      "policies/phase1/features.py:200",
+      "policies/phase1/serving.py:47",
+      "policies/phase1/validate.py:45"
+    ],
+    "score_fn": [
+      "policies/phase1/slate.py:36"
+    ],
+    "set_index": [
+      "policies/phase1/features.py:106",
+      "policies/phase1/features.py:77"
+    ],
+    "size": [
+      "policies/phase1/features.py:219",
+      "policies/phase1/features.py:62",
+      "policies/phase1/pairs.py:49"
+    ],
+    "sort_index": [
+      "policies/phase1/features.py:106"
+    ],
+    "sort_values": [
+      "policies/phase1/features.py:70",
+      "policies/phase1/pairs.py:47",
+      "scripts/phase1_embed.py:47"
+    ],
+    "split": [
+      "scripts/phase1_external.py:65",
+      "scripts/phase1_external.py:80"
+    ],
+    "splitlines": [
+      "scripts/phase1_common.py:58",
+      "scripts/phase1_report.py:54"
+    ],
+    "startswith": [
+      "scripts/phase1_external.py:74"
+    ],
+    "strftime": [
+      "scripts/phase1_data.py:28",
+      "scripts/phase1_rank.py:74"
+    ],
+    "strip": [
+      "scripts/phase1_common.py:58",
+      "scripts/phase1_common.py:84",
+      "scripts/phase1_embed.py:32",
+      "scripts/phase1_embed.py:33",
+      "scripts/phase1_embed.py:35",
+      "scripts/phase1_embed.py:40",
+      "scripts/phase1_report.py:54"
+    ],
+    "subset": [
+      "policies/phase1/serving.py:26",
+      "policies/phase1/validate.py:34",
+      "policies/phase1/validate.py:35",
+      "policies/phase1/validate.py:36",
+      "scripts/phase1_rank.py:66",
+      "scripts/phase1_rank.py:69",
+      "scripts/phase1_rank.py:70",
+      "scripts/phase1_rank.py:71"
+    ],
+    "sum": [
+      "policies/phase1/features.py:142",
+      "policies/phase1/features.py:192",
+      "policies/phase1/features.py:63",
+      "policies/phase1/pairs.py:44",
+      "policies/phase1/pairs.py:45",
+      "policies/phase1/pairs.py:53",
+      "policies/phase1/scorers.py:132",
+      "policies/phase1/scorers.py:134",
+      "policies/phase1/scorers.py:43",
+      "policies/phase1/scorers.py:46",
+      "policies/phase1/scorers.py:51",
+      "policies/phase1/scorers.py:75",
+      "policies/phase1/scorers.py:96",
+      "policies/phase1/scorers.py:97",
+      "scripts/phase1_data.py:33",
+      "scripts/phase1_data.py:50",
+      "scripts/phase1_data.py:65",
+      "scripts/phase1_embed.py:59",
+      "scripts/phase1_offline.py:40",
+      "scripts/phase1_offline.py:67",
+      "scripts/phase1_rank.py:100"
+    ],
+    "to_dict": [
+      "scripts/phase1_fit.py:38",
+      "scripts/phase1_rank.py:54",
+      "scripts/phase1_tune.py:59"
+    ],
+    "to_numpy": [
+      "policies/phase1/features.py:206",
+      "policies/phase1/features.py:210",
+      "policies/phase1/features.py:220",
+      "policies/phase1/features.py:98",
+      "policies/phase1/pairs.py:42",
+      "policies/phase1/pairs.py:43",
+      "policies/phase1/pairs.py:48",
+      "policies/phase1/pairs.py:49",
+      "policies/phase1/pairs.py:51",
+      "policies/phase1/pairs.py:52"
+    ],
+    "toarray": [
+      "policies/phase1/scorers.py:111",
+      "policies/phase1/scorers.py:76"
+    ],
+    "tolist": [
+      "policies/phase1/pairs.py:83",
+      "scripts/phase1_embed.py:48",
+      "scripts/phase1_fit.py:50",
+      "scripts/phase1_rank.py:100"
+    ],
+    "update": [
+      "policies/phase1/config.py:28",
+      "policies/phase1/pairs.py:53",
+      "scripts/phase1_common.py:175",
+      "scripts/phase1_common.py:177",
+      "scripts/phase1_offline.py:59"
+    ],
+    "user_affinity": [
+      "policies/phase1/features.py:190",
+      "policies/phase1/scorers.py:56"
+    ],
+    "user_cosines": [
+      "policies/phase1/features.py:204"
+    ],
+    "user_rows": [
+      "policies/phase1/serving.py:56",
+      "scripts/phase1_rank.py:44"
+    ],
+    "values": [
+      "policies/phase1/scorers.py:20",
+      "scripts/phase1_report.py:61"
+    ],
+    "video_block": [
+      "policies/phase1/features.py:164",
+      "policies/phase1/features.py:178"
+    ],
+    "write": [
+      "scripts/phase1_common.py:87"
+    ],
+    "write_text": [
+      "scripts/phase1_data.py:71",
+      "scripts/phase1_embed.py:62",
+      "scripts/phase1_env.py:104",
+      "scripts/phase1_env.py:115",
+      "scripts/phase1_env.py:132",
+      "scripts/phase1_env.py:94",
+      "scripts/phase1_external.py:108",
+      "scripts/phase1_external.py:90",
+      "scripts/phase1_fit.py:53",
+      "scripts/phase1_offline.py:70",
+      "scripts/phase1_rank.py:107",
+      "scripts/phase1_report.py:182",
+      "scripts/phase1_tune.py:81"
+    ]
+  },
+  "unattributed_methods": []
+}

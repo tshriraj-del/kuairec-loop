@@ -1,0 +1,57 @@
+# Phase 1 configuration (NOT frozen). Declared before any tuning or environment run.
+# Policy-side code reads this file; it never reads config/evaluator.toml.
+
+[label]
+# The public duration-adjusted label (kuairec_eval.labels, ADR-0016). Same K as the frozen
+# reward, because the label is designed so a policy can compute the reward's definition.
+duration_buckets = 5
+
+[split]
+# One row per (user, video): the FIRST big-matrix view of the pair (ADR-0030). Pairs are split
+# by first-view timestamp quantile:
+#   T_fit  = [0, fit_end)        base scorers that produce the ranker's input features
+#   T_rank = [fit_end, rank_end) ranker training rows
+#   T_val  = [rank_end, 1]       validation targets for every scorer
+fit_end = 0.70
+rank_end = 0.85
+# Validation users: >= min_val_pairs catalog pairs in T_val. Their scoring history is their
+# NON-catalog pairs before the validation window, which mirrors the search users, whose
+# big-matrix history contains no catalog video at all.
+min_val_pairs = 10
+
+[slate]
+# The Phase 1 wrapper is rule-aware ON PURPOSE (brief item 3): it knows the PRIMARY quit rule
+# so the comparison isolates scoring quality. Phase 2 removes this knowledge.
+quit_window = 9
+quit_threshold = 1
+
+[tune.affinity]
+shrinkage = [1, 5, 20, 50, 200]
+
+[tune.item_knn]
+value = ["binary", "centered"]
+k = [20, 100, 400]
+shrink = [10.0]
+
+[tune.ease]
+value = ["binary", "centered"]
+l2 = [100.0, 500.0, 2000.0, 10000.0]
+
+[tune.ranker]
+num_leaves = [31, 63]
+learning_rate = 0.05
+min_data_in_leaf = 200
+feature_fraction = 0.8
+max_rounds = 1000
+early_stopping_rounds = 50
+seed = 0
+
+[text]
+model = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+pca_dims = 16
+
+[eval]
+# Offline ranking check (brief item 7): graded gains = recorded reward; Recall@10 relevance.
+relevance_threshold = 0.75
+paired_bootstrap_resamples = 10000
+bootstrap_seed = 0

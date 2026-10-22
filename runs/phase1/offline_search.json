@@ -1,0 +1,52 @@
+{
+  "users": 847,
+  "relevance_threshold": 0.75,
+  "mean_relevant_per_user": 692.5832349468714,
+  "rows": {
+    "random": {
+      "ndcg_at_10": 0.53896913109624,
+      "recall_at_10": 0.21629279811097996,
+      "users_with_relevant": 847
+    },
+    "common_values": {
+      "ndcg_at_10": 0.5901066951758946,
+      "recall_at_10": 0.2650531286894923,
+      "users_with_relevant": 847
+    },
+    "true_rewards": {
+      "ndcg_at_10": 1.0,
+      "recall_at_10": 1.0,
+      "users_with_relevant": 847
+    },
+    "affinity": {
+      "ndcg_at_10": 0.5347790454950873,
+      "recall_at_10": 0.20696576151121607,
+      "users_with_relevant": 847
+    },
+    "item_knn": {
+      "ndcg_at_10": 0.5581089093480647,
+      "recall_at_10": 0.2500210828132906,
+      "users_with_relevant": 847
+    },
+    "ease": {
+      "ndcg_at_10": 0.59830963356417,
+      "recall_at_10": 0.3012987012987013,
+      "users_with_relevant": 847
+    },
+    "ranker_no_duration": {
+      "ndcg_at_10": 0.5863536021668644,
+      "recall_at_10": 0.2762691853600944,
+      "users_with_relevant": 847
+    },
+    "ranker_duration": {
+      "ndcg_at_10": 0.571803640116859,
+      "recall_at_10": 0.2710743801652893,
+      "users_with_relevant": 847
+    },
+    "ranker_text": {
+      "ndcg_at_10": 0.5796234991323505,
+      "recall_at_10": 0.2744096812278631,
+      "users_with_relevant": 847
+    }
+  }
+}

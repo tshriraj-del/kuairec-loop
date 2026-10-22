@@ -1,0 +1,98 @@
+{
+  "ranker_duration - ranker_no_duration": {
+    "a": "ranker_duration",
+    "b": "ranker_no_duration",
+    "metric": "cum_reward",
+    "mean": -0.3868867270034655,
+    "ci": [
+      -0.5098004451708376,
+      -0.26483727619758
+    ],
+    "n_users": 847,
+    "resamples": 10000,
+    "mean_reward": {
+      "a": "ranker_duration",
+      "b": "ranker_no_duration",
+      "metric": "mean_reward",
+      "mean": -0.012896224233448852,
+      "ci": [
+        -0.016993348172361252,
+        -0.008827909206585998
+      ],
+      "n_users": 847,
+      "resamples": 10000
+    }
+  },
+  "ranker_text - ranker_duration": {
+    "a": "ranker_text",
+    "b": "ranker_duration",
+    "metric": "cum_reward",
+    "mean": 0.06289000896216412,
+    "ci": [
+      -0.04201569426230354,
+      0.16729627056071533
+    ],
+    "n_users": 847,
+    "resamples": 10000,
+    "mean_reward": {
+      "a": "ranker_text",
+      "b": "ranker_duration",
+      "metric": "mean_reward",
+      "mean": 0.002096333632072137,
+      "ci": [
+        -0.0014005231420767847,
+        0.005576542352023846
+      ],
+      "n_users": 847,
+      "resamples": 10000
+    }
+  },
+  "ranker_text - ranker_no_duration": {
+    "a": "ranker_text",
+    "b": "ranker_no_duration",
+    "metric": "cum_reward",
+    "mean": -0.3239967180413015,
+    "ci": [
+      -0.44002639062708715,
+      -0.20662158314423398
+    ],
+    "n_users": 847,
+    "resamples": 10000,
+    "mean_reward": {
+      "a": "ranker_text",
+      "b": "ranker_no_duration",
+      "metric": "mean_reward",
+      "mean": -0.010799890601376715,
+      "ci": [
+        -0.014667546354236238,
+        -0.0068873861048077975
+      ],
+      "n_users": 847,
+      "resamples": 10000
+    }
+  },
+  "ranker_no_duration - ease": {
+    "a": "ranker_no_duration",
+    "b": "ease",
+    "metric": "cum_reward",
+    "mean": -0.3925543584553228,
+    "ci": [
+      -0.5306256757353078,
+      -0.2601968734416521
+    ],
+    "n_users": 847,
+    "resamples": 10000,
+    "mean_reward": {
+      "a": "ranker_no_duration",
+      "b": "ease",
+      "metric": "mean_reward",
+      "mean": -0.013085145281844091,
+      "ci": [
+        -0.017687522524510262,
+        -0.008673229114721737
+      ],
+      "n_users": 847,
+      "resamples": 10000
+    }
+  }
+}

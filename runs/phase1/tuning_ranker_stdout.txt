@@ -1,0 +1,23 @@
+rows: train 1,265,410 in 5,680 groups, validation 1,089,266 in 5,464 groups (69s)
+no_duration  num_leaves= 31 best_iter= 169 NDCG@10 0.5750 (17.6s)
+no_duration  num_leaves= 63 best_iter=  90 NDCG@10 0.5772 (15.1s)
+duration     num_leaves= 31 best_iter= 107 NDCG@10 0.5829 (14.9s)
+duration     num_leaves= 63 best_iter= 165 NDCG@10 0.5858 (20.5s)
+text         num_leaves= 31 best_iter=  86 NDCG@10 0.5839 (15.8s)
+text         num_leaves= 63 best_iter=  97 NDCG@10 0.5811 (18.7s)
+{
+  "no_duration": {
+    "num_leaves": 63,
+    "ndcg": 0.5771511788769292
+  },
+  "duration": {
+    "num_leaves": 63,
+    "ndcg": 0.5858281267149279
+  },
+  "text": {
+    "num_leaves": 31,
+    "ndcg": 0.5838953107762473
+  }
+} 
+constant floor 0.5418
+exit=0

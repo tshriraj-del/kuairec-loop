@@ -1,0 +1,8 @@
+{
+  "model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+  "videos": 10728,
+  "videos_with_text": 9738,
+  "dims": 384,
+  "seconds": 40.0,
+  "median_text_chars": 34.0
+}
